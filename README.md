@@ -1,16 +1,111 @@
-# React + Vite
+# 3D Docs - Login Page
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern, beautiful login page built with React and Tailwind CSS as an extension of the [3ddoc project](https://github.com/bie7u/3ddoc).
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- ✨ Beautiful login page with gradient design
+- 🎨 Styled with Tailwind CSS v4
+- 🔐 Client-side authentication (demo/prototype)
+- 🚀 React Router for navigation
+- 📱 Responsive design
+- 🎯 Protected routes
+- 🔄 Logout functionality
 
-## React Compiler
+## Demo Credentials
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Email:** `user@example.com`
+- **Password:** `password123`
 
-## Expanding the ESLint configuration
+## Getting Started
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### Prerequisites
+
+- Node.js (v16 or higher)
+- npm or yarn
+
+### Installation
+
+1. Clone the repository:
+```bash
+git clone https://github.com/bie7u/threeddocs.git
+cd threeddocs
+```
+
+2. Install dependencies:
+```bash
+npm install
+```
+
+3. Start the development server:
+```bash
+npm run dev
+```
+
+4. Open your browser and navigate to `http://localhost:5173`
+
+## Available Scripts
+
+- `npm run dev` - Start the development server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
+- `npm run lint` - Run ESLint
+
+## Project Structure
+
+```
+threeddocs/
+├── src/
+│   ├── pages/
+│   │   ├── Login.jsx       # Login page component
+│   │   └── Dashboard.jsx   # Dashboard component (empty placeholder)
+│   ├── App.jsx            # Main app with routing
+│   ├── main.jsx           # Entry point
+│   └── index.css          # Tailwind CSS imports
+├── public/
+├── index.html
+├── package.json
+└── vite.config.js
+```
+
+## Technologies Used
+
+- **React** - UI library
+- **Vite** - Build tool and dev server
+- **Tailwind CSS v4** - Utility-first CSS framework
+- **React Router** - Client-side routing
+
+## Future Enhancements
+
+- [ ] Server-side authentication with JWT
+- [ ] Password reset functionality
+- [ ] User registration
+- [ ] Dashboard features (Documents, Projects, Settings)
+- [ ] 3D visualization integration
+- [ ] API integration
+
+## Security Note
+
+⚠️ **Important:** This is a prototype with client-side mocked authentication. For production use:
+- Implement proper server-side authentication
+- Use secure tokens (JWT)
+- Add HTTPS
+- Implement CSRF protection
+- Use environment variables for configuration
+
+## Screenshots
+
+### Login Page
+![Login Page](https://github.com/user-attachments/assets/9cd32253-95d2-4fc8-9630-80382315d01a)
+
+### Dashboard
+![Dashboard](https://github.com/user-attachments/assets/cace4b56-871b-482a-a0d2-910e560e2794)
+
+## License
+
+MIT
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
