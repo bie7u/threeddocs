@@ -63,10 +63,11 @@ const Dashboard = () => {
             Your workspace is ready
           </p>
           
-          {/* Empty Dashboard Placeholder */}
+          {/* Dashboard Tiles */}
           <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-white p-6 rounded-xl shadow-lg border-2 border-dashed border-gray-300">
-              <div className="text-gray-400 mb-4">
+            {/* Moje modele (My models) */}
+            <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow cursor-pointer border border-gray-200 hover:border-blue-400">
+              <div className="text-blue-500 mb-4">
                 <svg
                   className="w-12 h-12 mx-auto"
                   fill="none"
@@ -77,16 +78,17 @@ const Dashboard = () => {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={2}
-                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
                   />
                 </svg>
               </div>
-              <h3 className="text-lg font-semibold text-gray-700 mb-2">Documents</h3>
-              <p className="text-sm text-gray-500">Coming soon...</p>
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">Moje modele</h3>
+              <p className="text-sm text-gray-600">Przeglądaj swoje modele 3D</p>
             </div>
 
-            <div className="bg-white p-6 rounded-xl shadow-lg border-2 border-dashed border-gray-300">
-              <div className="text-gray-400 mb-4">
+            {/* Dodaj nowy model (Add new model) */}
+            <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow cursor-pointer border border-gray-200 hover:border-purple-400">
+              <div className="text-purple-500 mb-4">
                 <svg
                   className="w-12 h-12 mx-auto"
                   fill="none"
@@ -97,16 +99,17 @@ const Dashboard = () => {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={2}
-                    d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
+                    d="M12 4v16m8-8H4"
                   />
                 </svg>
               </div>
-              <h3 className="text-lg font-semibold text-gray-700 mb-2">Projects</h3>
-              <p className="text-sm text-gray-500">Coming soon...</p>
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">Dodaj nowy model</h3>
+              <p className="text-sm text-gray-600">Wgraj nowy model 3D</p>
             </div>
 
-            <div className="bg-white p-6 rounded-xl shadow-lg border-2 border-dashed border-gray-300">
-              <div className="text-gray-400 mb-4">
+            {/* Ustawienia (Settings) */}
+            <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow cursor-pointer border border-gray-200 hover:border-green-400">
+              <div className="text-green-500 mb-4">
                 <svg
                   className="w-12 h-12 mx-auto"
                   fill="none"
@@ -127,8 +130,8 @@ const Dashboard = () => {
                   />
                 </svg>
               </div>
-              <h3 className="text-lg font-semibold text-gray-700 mb-2">Settings</h3>
-              <p className="text-sm text-gray-500">Coming soon...</p>
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">Ustawienia</h3>
+              <p className="text-sm text-gray-600">Konfiguruj swoje preferencje</p>
             </div>
           </div>
         </div>
