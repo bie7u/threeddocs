@@ -263,7 +263,7 @@ export const StepBuilder = () => {
     (connection: Connection) => {
       if (!connection.source || !connection.target) return;
       const newEdge: Edge<ConnectionData> = {
-        id: `e${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        id: `e${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
         source: connection.source,
         target: connection.target,
         sourceHandle: connection.sourceHandle,
