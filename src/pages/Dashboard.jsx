@@ -1,8 +1,15 @@
 import { useNavigate } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { MainLayout } from '../components/Layout/MainLayout';
+import { NewProjectDialog } from '../components/ProjectList/NewProjectDialog';
+import { useAppStore } from '../store';
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { createNewProject, setProject } = useAppStore();
+
+  const [showNewProjectDialog, setShowNewProjectDialog] = useState(false);
+  const [showEditor, setShowEditor] = useState(false);
 
   useEffect(() => {
     // Check if user is authenticated
@@ -16,6 +23,27 @@ const Dashboard = () => {
     localStorage.removeItem('isAuthenticated');
     navigate('/');
   };
+
+  const handleCreateProject = (name, type, modelUrl) => {
+    const project = createNewProject(name, type, modelUrl);
+    setProject(project);
+    setShowNewProjectDialog(false);
+    setShowEditor(true);
+  };
+
+  const handleBackToDashboard = () => {
+    setShowEditor(false);
+  };
+
+  // When editor is open, render the full-screen editor
+  if (showEditor) {
+    return (
+      <MainLayout
+        onBackToProjectList={handleBackToDashboard}
+        useSampleProjectFallback={false}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
@@ -87,8 +115,11 @@ const Dashboard = () => {
             </div>
 
             {/* Dodaj nowy model (Add new model) */}
-            <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow cursor-pointer border border-gray-200 hover:border-purple-400">
-              <div className="text-purple-500 mb-4">
+            <div
+              onClick={() => setShowNewProjectDialog(true)}
+              className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow cursor-pointer border border-gray-200 hover:border-purple-400 group"
+            >
+              <div className="text-purple-500 mb-4 group-hover:scale-110 transition-transform">
                 <svg
                   className="w-12 h-12 mx-auto"
                   fill="none"
@@ -136,6 +167,14 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
+
+      {/* New Project Dialog */}
+      {showNewProjectDialog && (
+        <NewProjectDialog
+          onClose={() => setShowNewProjectDialog(false)}
+          onCreateProject={handleCreateProject}
+        />
+      )}
     </div>
   );
 };
