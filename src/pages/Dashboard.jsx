@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { MainLayout } from '../components/Layout/MainLayout';
 import { NewProjectDialog } from '../components/ProjectList/NewProjectDialog';
+import { MyModels } from '../components/MyModels/MyModels';
 import { useAppStore } from '../store';
 
 const Dashboard = () => {
@@ -10,6 +11,7 @@ const Dashboard = () => {
 
   const [showNewProjectDialog, setShowNewProjectDialog] = useState(false);
   const [showEditor, setShowEditor] = useState(false);
+  const [showMyModels, setShowMyModels] = useState(false);
 
   useEffect(() => {
     // Check if user is authenticated
@@ -41,6 +43,19 @@ const Dashboard = () => {
       <MainLayout
         onBackToProjectList={handleBackToDashboard}
         useSampleProjectFallback={false}
+      />
+    );
+  }
+
+  // When My Models view is open
+  if (showMyModels) {
+    return (
+      <MyModels
+        onOpenEditor={() => {
+          setShowMyModels(false);
+          setShowEditor(true);
+        }}
+        onClose={() => setShowMyModels(false)}
       />
     );
   }
@@ -94,8 +109,11 @@ const Dashboard = () => {
           {/* Dashboard Tiles */}
           <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Moje modele (My models) */}
-            <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow cursor-pointer border border-gray-200 hover:border-blue-400">
-              <div className="text-blue-500 mb-4">
+            <div
+              onClick={() => setShowMyModels(true)}
+              className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow cursor-pointer border border-gray-200 hover:border-blue-400 group"
+            >
+              <div className="text-blue-500 mb-4 group-hover:scale-110 transition-transform">
                 <svg
                   className="w-12 h-12 mx-auto"
                   fill="none"
