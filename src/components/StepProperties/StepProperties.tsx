@@ -65,7 +65,7 @@ export const StepProperties = () => {
 
   const handleAddNewStep = () => {
     const newStep: InstructionStep = {
-      id: `step-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      id: `step-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
       title: 'New Step',
       description: 'Add description here',
       modelPath: 'box',

@@ -247,8 +247,17 @@ export const useAppStore = create<AppStore>((set, get) => ({
   },
 
   createNewProject: (projectName: string) => {
+    // Use crypto.randomUUID() with fallback for older browsers
+    const generateId = () => {
+      if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+        return crypto.randomUUID();
+      }
+      // Fallback for older browsers
+      return `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
+    };
+    
     const newProject: ProjectData = {
-      id: `project-${crypto.randomUUID()}`,
+      id: `project-${generateId()}`,
       name: projectName,
       steps: [],
       connections: [],
