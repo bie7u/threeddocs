@@ -17,6 +17,10 @@ const Dashboard = () => {
     navigate('/');
   };
 
+  const handleAddNewModel = () => {
+    navigate('/model-editor');
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       {/* Navigation Bar */}
@@ -87,7 +91,10 @@ const Dashboard = () => {
             </div>
 
             {/* Dodaj nowy model (Add new model) */}
-            <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow cursor-pointer border border-gray-200 hover:border-purple-400">
+            <div 
+              onClick={handleAddNewModel}
+              className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow cursor-pointer border border-gray-200 hover:border-purple-400"
+            >
               <div className="text-purple-500 mb-4">
                 <svg
                   className="w-12 h-12 mx-auto"
