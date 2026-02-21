@@ -4,25 +4,31 @@ import { MainLayout } from '../components/Layout/MainLayout';
 import { NewProjectDialog } from '../components/ProjectList/NewProjectDialog';
 import { MyModels } from '../components/MyModels/MyModels';
 import { useAppStore } from '../store';
+import { getMe } from '../services/auth';
+import { logout } from '../services/auth';
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { createNewProject, setProject } = useAppStore();
+  const { createNewProject, setProject, loadProjects } = useAppStore();
 
   const [showNewProjectDialog, setShowNewProjectDialog] = useState(false);
   const [showEditor, setShowEditor] = useState(false);
   const [showMyModels, setShowMyModels] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
 
   useEffect(() => {
-    // Check if user is authenticated
-    const isAuthenticated = localStorage.getItem('isAuthenticated');
-    if (!isAuthenticated) {
-      navigate('/');
-    }
-  }, [navigate]);
+    getMe()
+      .then(() => {
+        setAuthChecked(true);
+        return loadProjects();
+      })
+      .catch(() => {
+        navigate('/');
+      });
+  }, [navigate, loadProjects]);
 
-  const handleLogout = () => {
-    localStorage.removeItem('isAuthenticated');
+  const handleLogout = async () => {
+    await logout().catch(() => {});
     navigate('/');
   };
 
@@ -38,6 +44,14 @@ const Dashboard = () => {
   };
 
   // When editor is open, render the full-screen editor
+  if (!authChecked) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50">
+        <div className="w-10 h-10 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
   if (showEditor) {
     return (
       <MainLayout

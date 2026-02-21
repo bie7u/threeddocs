@@ -1,6 +1,12 @@
 import { create } from 'zustand';
 import type { Edge } from 'reactflow';
 import type { InstructionStep, ProjectData, ConnectionData, GuideStep } from '../types';
+import {
+  fetchProjects,
+  createProject,
+  updateProject,
+  deleteProjectRequest,
+} from '../services/projects';
 
 export interface SavedProject {
   project: ProjectData;
@@ -11,7 +17,10 @@ export interface SavedProject {
 interface AppStore {
   // Project data
   project: ProjectData | null;
-  
+
+  // Cached list of all user projects (loaded from API)
+  projects: SavedProject[];
+
   // Selected step
   selectedStepId: string | null;
   
@@ -47,18 +56,18 @@ interface AppStore {
   addGuideStep: (stepId: string) => void;
   removeGuideStep: (guideStepId: string) => void;
   reorderGuideSteps: (steps: GuideStep[]) => void;
-  saveToLocalStorage: () => void;
-  loadFromLocalStorage: () => void;
+  /** Fire-and-forget: persists the current project to the server. */
+  saveToApi: () => void;
+  /** Fetches all user projects from the server and updates the local cache. */
+  loadProjects: () => Promise<void>;
   getAllProjects: () => SavedProject[];
-  deleteProject: (projectId: string) => void;
+  deleteProject: (projectId: string) => Promise<void>;
   createNewProject: (projectName: string, projectType?: 'builder' | 'upload', projectModelUrl?: string) => ProjectData;
 }
 
-const STORAGE_KEY = '3ddoc-project';
-const PROJECTS_KEY = '3ddoc-projects';
-
 export const useAppStore = create<AppStore>((set, get) => ({
   project: null,
+  projects: [],
   selectedStepId: null,
   isPreviewMode: false,
   currentPreviewStepIndex: 0,
@@ -72,7 +81,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
       project,
       nodePositions: nodePositions ?? get().nodePositions
     });
-    get().saveToLocalStorage();
+    get().saveToApi();
   },
 
   addStep: (step, position) => {
@@ -90,7 +99,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
       : nodePositions;
     
     set({ project: updatedProject, nodePositions: updatedPositions });
-    get().saveToLocalStorage();
+    get().saveToApi();
   },
 
   updateStep: (id, updates) => {
@@ -105,7 +114,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
     };
     
     set({ project: updatedProject });
-    get().saveToLocalStorage();
+    get().saveToApi();
   },
 
   deleteStep: (id) => {
@@ -130,7 +139,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
       nodePositions: updatedPositions,
       selectedStepId: get().selectedStepId === id ? null : get().selectedStepId
     });
-    get().saveToLocalStorage();
+    get().saveToApi();
   },
 
   setSelectedStepId: (id) => set({ selectedStepId: id }),
@@ -145,7 +154,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
     };
     
     set({ project: updatedProject });
-    get().saveToLocalStorage();
+    get().saveToApi();
   },
 
   updateNodePosition: (id, position) => {
@@ -153,7 +162,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
     set({ 
       nodePositions: { ...nodePositions, [id]: position }
     });
-    get().saveToLocalStorage();
+    get().saveToApi();
   },
 
   setPreviewMode: (isPreview) => {
@@ -183,7 +192,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
       guide: [...(project.guide ?? []), newGuideStep],
     };
     set({ project: updatedProject });
-    get().saveToLocalStorage();
+    get().saveToApi();
   },
 
   removeGuideStep: (guideStepId) => {
@@ -194,7 +203,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
       guide: (project.guide ?? []).filter((gs) => gs.id !== guideStepId),
     };
     set({ project: updatedProject });
-    get().saveToLocalStorage();
+    get().saveToApi();
   },
 
   reorderGuideSteps: (steps) => {
@@ -202,92 +211,63 @@ export const useAppStore = create<AppStore>((set, get) => ({
     if (!project) return;
     const updatedProject = { ...project, guide: steps };
     set({ project: updatedProject });
-    get().saveToLocalStorage();
+    get().saveToApi();
   },
 
-  saveToLocalStorage: () => {
+  saveToApi: () => {
     const { project, nodePositions } = get();
-    if (project) {
-      const dataToSave = { project, nodePositions };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
-      
-      // Also save to the projects list
-      const projects = get().getAllProjects();
-      const existingIndex = projects.findIndex(p => p.project.id === project.id);
-      const savedProject: SavedProject = {
-        project,
-        nodePositions,
-        lastModified: Date.now(),
-      };
-      
-      if (existingIndex >= 0) {
-        projects[existingIndex] = savedProject;
-      } else {
-        projects.push(savedProject);
-      }
-      
-      localStorage.setItem(PROJECTS_KEY, JSON.stringify(projects));
-    }
-  },
+    if (!project) return;
 
-  loadFromLocalStorage: () => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
+    const savedProject: SavedProject = {
+      project,
+      nodePositions,
+      lastModified: Date.now(),
+    };
+
+    const persist = async () => {
       try {
-        const data = JSON.parse(stored);
-        // Handle both old and new format
-        if (data.project) {
-          // Clean up invalid blob URLs from steps (but keep data URLs which persist)
-          const cleanedProject = {
-            ...data.project,
-            steps: data.project.steps.map((step: InstructionStep & { customModelUrl?: string; shapeType?: string }) => {
-              // If step has a blob URL that's no longer valid, clear it
-              // Data URLs (starting with "data:") are valid and should be kept
-              if (step.customModelUrl && step.customModelUrl.startsWith('blob:')) {
-                console.warn('Removed invalid blob URL from step:', step.id);
-                return {
-                  ...step,
-                  customModelUrl: undefined,
-                  shapeType: 'cube' // Reset to cube if model URL was invalid
-                };
-              }
-              return step;
-            })
-          };
-          set({ project: cleanedProject, nodePositions: data.nodePositions || {} });
+        const existsInCache = get().projects.some(p => p.project.id === project.id);
+        let updated: SavedProject;
+        if (existsInCache) {
+          updated = await updateProject(project.id, savedProject);
         } else {
-          // Old format - just the project
-          set({ project: data, nodePositions: {} });
+          updated = await createProject(savedProject);
         }
+        set(state => ({
+          projects: existsInCache
+            ? state.projects.map(p => p.project.id === project.id ? updated : p)
+            : [...state.projects, updated],
+        }));
       } catch (error) {
-        console.error('Failed to load project from localStorage', error);
+        console.error('Failed to save project to server', error);
       }
+    };
+
+    persist();
+  },
+
+  loadProjects: async () => {
+    try {
+      const projects = await fetchProjects();
+      set({ projects });
+    } catch (error) {
+      console.error('Failed to load projects from server', error);
     }
   },
 
-  getAllProjects: () => {
-    const stored = localStorage.getItem(PROJECTS_KEY);
-    if (stored) {
-      try {
-        return JSON.parse(stored);
-      } catch (error) {
-        console.error('Failed to load projects list', error);
-        return [];
-      }
-    }
-    return [];
-  },
+  getAllProjects: () => get().projects,
 
-  deleteProject: (projectId: string) => {
-    const projects = get().getAllProjects();
-    const filtered = projects.filter(p => p.project.id !== projectId);
-    localStorage.setItem(PROJECTS_KEY, JSON.stringify(filtered));
-    
-    // If the current project was deleted, clear it
-    const currentProject = get().project;
-    if (currentProject && currentProject.id === projectId) {
-      set({ project: null, nodePositions: {}, selectedStepId: null });
-      localStorage.removeItem(STORAGE_KEY);
+  deleteProject: async (projectId: string) => {
+    try {
+      await deleteProjectRequest(projectId);
+      set(state => ({
+        projects: state.projects.filter(p => p.project.id !== projectId),
+        project: state.project?.id === projectId ? null : state.project,
+        nodePositions: state.project?.id === projectId ? {} : state.nodePositions,
+        selectedStepId: state.project?.id === projectId ? null : state.selectedStepId,
+      }));
+    } catch (error) {
+      console.error('Failed to delete project', error);
     }
   },
 
@@ -302,7 +282,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
       guide: [],
     };
     set({ project: newProject, nodePositions: {}, selectedStepId: null });
-    get().saveToLocalStorage();
+    get().saveToApi();
     return newProject;
   },
 }));
