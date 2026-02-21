@@ -589,7 +589,7 @@ interface Viewer3DProps {
   showStepOverlay?: boolean;
 }
 
-export const Viewer3D = ({ project, currentStepId, nodePositions = {}, cameraMode = 'auto', showStepOverlay = true }: Viewer3DProps) => {
+export const Viewer3D = ({ project, currentStepId, nodePositions = {}, cameraMode = 'free', showStepOverlay = true }: Viewer3DProps) => {
   const currentStep = project?.steps.find(s => s.id === currentStepId);
   const [selectedConnectionDesc, setSelectedConnectionDesc] = useState<string | null>(null);
   
@@ -600,7 +600,7 @@ export const Viewer3D = ({ project, currentStepId, nodePositions = {}, cameraMod
   return (
     <div className="w-full h-full bg-gray-900">
       <Canvas shadows>
-        <PerspectiveCamera makeDefault position={[0, 20, 35]} />
+        <PerspectiveCamera makeDefault position={[0, 40, 70]} />
         {project && (
           <CameraController 
             project={project}
