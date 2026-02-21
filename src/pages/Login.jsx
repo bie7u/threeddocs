@@ -1,27 +1,26 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { login } from '../services/auth';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  // Mocked credentials
-  const MOCK_EMAIL = 'user@example.com';
-  const MOCK_PASSWORD = 'password123';
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setIsLoading(true);
 
-    if (email === MOCK_EMAIL && password === MOCK_PASSWORD) {
-      // Store authentication status
-      localStorage.setItem('isAuthenticated', 'true');
-      // Navigate to dashboard
+    try {
+      await login(email, password);
       navigate('/dashboard');
-    } else {
-      setError('Invalid email or password');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Invalid email or password');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -118,15 +117,11 @@ const Login = () => {
           <div>
             <button
               type="submit"
-              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 shadow-lg"
+              disabled={isLoading}
+              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 shadow-lg disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              Sign in
+              {isLoading ? 'Signing in…' : 'Sign in'}
             </button>
-          </div>
-
-          <div className="text-center text-sm text-gray-600">
-            <p>Demo credentials:</p>
-            <p className="font-mono mt-1">user@example.com / password123</p>
           </div>
         </form>
       </div>
