@@ -64,7 +64,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
   currentPreviewStepIndex: 0,
   viewMode: 'view',
   editorMode: 'model',
-  cameraMode: 'auto',
+  cameraMode: 'free',
   nodePositions: {},
 
   setProject: (project, nodePositions) => {
