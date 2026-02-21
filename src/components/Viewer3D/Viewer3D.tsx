@@ -672,7 +672,7 @@ export const Viewer3D = ({ project, currentStepId, nodePositions = {}, cameraMod
       )}
       
       {selectedConnectionDesc && (
-        <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 bg-blue-600 bg-opacity-90 text-white p-4 rounded-lg max-w-md shadow-xl">
+        <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 bg-blue-600 bg-opacity-90 text-white p-4 rounded-lg max-w-md shadow-xl z-20">
           <div className="flex items-start justify-between gap-4">
             <div>
               <h4 className="text-sm font-bold mb-1">Connection Info</h4>
