@@ -8,12 +8,6 @@ import {
   deleteProjectRequest,
 } from '../services/projects';
 
-// Tracks project IDs for which a CREATE (POST) has already been initiated but
-// whose server response has not yet come back.  Any saveToApi call that fires
-// while the initial POST is in-flight will therefore use PUT (update) instead
-// of POST (create), preventing duplicate records on the server.
-const pendingCreateIds = new Set<string>();
-
 export interface SavedProject {
   project: ProjectData;
   nodePositions: Record<string, { x: number; y: number }>;
@@ -68,7 +62,7 @@ interface AppStore {
   loadProjects: () => Promise<void>;
   getAllProjects: () => SavedProject[];
   deleteProject: (projectId: string) => Promise<void>;
-  createNewProject: (projectName: string, projectType?: 'builder' | 'upload', projectModelUrl?: string) => ProjectData;
+  createNewProject: (projectName: string, projectType?: 'builder' | 'upload', projectModelUrl?: string) => Promise<ProjectData>;
 }
 
 export const useAppStore = create<AppStore>((set, get) => ({
@@ -232,22 +226,12 @@ export const useAppStore = create<AppStore>((set, get) => ({
 
     const persist = async () => {
       try {
-        const existsInCache =
-          get().projects.some(p => p.project.id === project.id) ||
-          pendingCreateIds.has(project.id);
-
+        const existsInCache = get().projects.some(p => p.project.id === project.id);
         let updated: SavedProject;
         if (existsInCache) {
           updated = await updateProject(project.id, savedProject);
         } else {
-          // Mark as pending BEFORE the async call so that any concurrent
-          // saveToApi invocation sees the ID and calls PUT, not POST.
-          pendingCreateIds.add(project.id);
-          try {
-            updated = await createProject(savedProject);
-          } finally {
-            pendingCreateIds.delete(project.id);
-          }
+          updated = await createProject(savedProject);
         }
         set(state => ({
           projects: existsInCache
@@ -287,18 +271,25 @@ export const useAppStore = create<AppStore>((set, get) => ({
     }
   },
 
-  createNewProject: (projectName: string, projectType?: 'builder' | 'upload', projectModelUrl?: string) => {
-    const newProject: ProjectData = {
-      id: `project-${crypto.randomUUID()}`,
-      name: projectName,
-      projectType: projectType ?? 'builder',
-      projectModelUrl: projectModelUrl,
-      steps: [],
-      connections: [],
-      guide: [],
+  createNewProject: async (projectName: string, projectType?: 'builder' | 'upload', projectModelUrl?: string) => {
+    // Build a provisional project object (no id — server assigns it)
+    const provisional: SavedProject = {
+      project: {
+        id: '',
+        name: projectName,
+        projectType: projectType ?? 'builder',
+        projectModelUrl: projectModelUrl,
+        steps: [],
+        connections: [],
+        guide: [],
+      },
+      nodePositions: {},
+      lastModified: Date.now(),
     };
-    set({ project: newProject, nodePositions: {}, selectedStepId: null });
-    get().saveToApi();
-    return newProject;
+    // POST to server — get back the server-assigned integer id
+    const created = await createProject(provisional);
+    set({ project: created.project, nodePositions: created.nodePositions, selectedStepId: null });
+    set(state => ({ projects: [...state.projects, created] }));
+    return created.project;
   },
 }));

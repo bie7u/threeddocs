@@ -119,8 +119,39 @@ verify the session.
 
 ### Projects (3D Models)
 
-Projects are stored server-side as JSON documents.  
-All project endpoints require a valid session.
+Projects are stored server-side as JSON documents. All project endpoints (except `/public`) require a valid session.
+
+#### Project object
+
+All project endpoints send and receive the same **flat** JSON object:
+
+```json
+{
+  "id": 42,
+  "name": "Assembly Guide v1",
+  "projectType": "builder",
+  "projectModelUrl": null,
+  "steps": [],
+  "connections": [],
+  "guide": [{ "stepId": "step-abc" }],
+  "nodePositions": { "step-abc": { "x": 100, "y": 200 } },
+  "lastModified": 1700000000000
+}
+```
+
+| Field | Type | Access | Description |
+|-------|------|--------|-------------|
+| `id` | `integer` | **read-only** | Server-assigned primary key |
+| `name` | `string` | read/write | Human-readable project title |
+| `projectType` | `"builder" \| "upload"` | read/write | Editor mode |
+| `projectModelUrl` | `string \| null` | read/write | Remote URL or base64 data-URL of an uploaded GLB/GLTF |
+| `steps` | `InstructionStep[]` | read/write | Ordered instruction steps |
+| `connections` | `Edge[]` | read/write | ReactFlow edges between steps |
+| `guide` | `Array<{stepId}>` | read/write | Ordered guide entries |
+| `nodePositions` | `Record<string,{x,y}>` | read/write | Canvas positions per step id |
+| `lastModified` | `integer` | **read-only** | Unix timestamp in ms of last save |
+
+---
 
 #### `GET /api/projects`
 
@@ -132,15 +163,13 @@ Returns all projects owned by the authenticated user.
 ```json
 [
   {
-    "project": {
-      "id": "project-uuid",
-      "name": "My 3D Model",
-      "projectType": "builder",
-      "projectModelUrl": null,
-      "steps": [],
-      "connections": [],
-      "guide": []
-    },
+    "id": 42,
+    "name": "My 3D Model",
+    "projectType": "builder",
+    "projectModelUrl": null,
+    "steps": [],
+    "connections": [],
+    "guide": [],
     "nodePositions": {},
     "lastModified": 1700000000000
   }
@@ -151,32 +180,24 @@ Returns all projects owned by the authenticated user.
 
 #### `POST /api/projects`
 
-Creates a new project.  
-The client supplies the `id` (UUID generated client-side); the server must
-accept it or return a server-generated replacement in the response.
+Creates a new project. The server assigns `id` and `lastModified` — do **not** include them in the request body.
 
 **Auth:** required  
 
 **Request body**
 ```json
 {
-  "project": {
-    "id": "project-uuid",
-    "name": "My 3D Model",
-    "projectType": "builder",
-    "projectModelUrl": null,
-    "steps": [],
-    "connections": [],
-    "guide": []
-  },
-  "nodePositions": {},
-  "lastModified": 1700000000000
+  "name": "My 3D Model",
+  "projectType": "builder",
+  "projectModelUrl": null,
+  "steps": [],
+  "connections": [],
+  "guide": [],
+  "nodePositions": {}
 }
 ```
 
-**Response `201 Created`** – returns the saved document (same shape as above).
-
-**Response `409 Conflict`** – project with this `id` already exists.
+**Response `201 Created`** – returns the saved object with server-assigned `id`.
 
 ---
 
@@ -232,27 +253,26 @@ sharing (or always, depending on business requirements).
 
 ## Data Schemas
 
-### `SavedProject`
-
-```typescript
-interface SavedProject {
-  project: ProjectData;
-  nodePositions: Record<string, { x: number; y: number }>;
-  lastModified: number; // Unix timestamp in milliseconds
-}
-```
-
-### `ProjectData`
+### `ProjectData` (internal frontend type)
 
 ```typescript
 interface ProjectData {
-  id: string;
+  id: string;           // string representation of the server integer id, e.g. "42"
   name: string;
   projectType?: 'builder' | 'upload';
   projectModelUrl?: string;   // data URL or remote URL for uploaded GLB/GLTF
   steps: InstructionStep[];
   connections: Edge<ConnectionData>[];
-  guide?: GuideStep[];
+  guide?: GuideStep[];        // GuideStep.id is client-only (equals stepId)
+}
+```
+
+### `GuideStep` (internal)
+
+```typescript
+interface GuideStep {
+  id: string;     // client-only key, equals stepId; stripped before sending to server
+  stepId: string;
 }
 ```
 

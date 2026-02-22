@@ -9,12 +9,14 @@ import { logout } from '../services/auth';
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { createNewProject, setProject, loadProjects } = useAppStore();
+  const { createNewProject, loadProjects } = useAppStore();
 
   const [showNewProjectDialog, setShowNewProjectDialog] = useState(false);
   const [showEditor, setShowEditor] = useState(false);
   const [showMyModels, setShowMyModels] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const [createError, setCreateError] = useState('');
 
   useEffect(() => {
     getMe()
@@ -32,11 +34,18 @@ const Dashboard = () => {
     navigate('/');
   };
 
-  const handleCreateProject = (name, type, modelUrl) => {
-    const project = createNewProject(name, type, modelUrl);
-    setProject(project);
-    setShowNewProjectDialog(false);
-    setShowEditor(true);
+  const handleCreateProject = async (name, type, modelUrl) => {
+    setIsCreating(true);
+    setCreateError('');
+    try {
+      await createNewProject(name, type, modelUrl);
+      setShowNewProjectDialog(false);
+      setShowEditor(true);
+    } catch (err) {
+      setCreateError(err instanceof Error ? err.message : 'Nie udało się utworzyć projektu');
+    } finally {
+      setIsCreating(false);
+    }
   };
 
   const handleBackToDashboard = () => {
@@ -203,8 +212,10 @@ const Dashboard = () => {
       {/* New Project Dialog */}
       {showNewProjectDialog && (
         <NewProjectDialog
-          onClose={() => setShowNewProjectDialog(false)}
+          onClose={() => { setShowNewProjectDialog(false); setCreateError(''); }}
           onCreateProject={handleCreateProject}
+          isCreating={isCreating}
+          createError={createError}
         />
       )}
     </div>
