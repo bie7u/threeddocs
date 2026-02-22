@@ -33,7 +33,10 @@ export const apiRequest = async (
     ...options,
     credentials: 'include',
     headers: {
-      'Content-Type': 'application/json',
+      // Only set Content-Type when sending a body so that bodyless requests
+      // (GET, DELETE, etc.) do not include a non-simple header that would
+      // trigger a CORS preflight and potentially block the cookie from being sent.
+      ...(options.body !== undefined ? { 'Content-Type': 'application/json' } : {}),
       ...options.headers,
     },
   });
