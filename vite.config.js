@@ -7,12 +7,12 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:3000',
+        target: 'http://localhost:8000',
         changeOrigin: true,
         // Strip the Domain attribute from every Set-Cookie header in the
         // backend's response.  Without this, Django may set a cookie with
-        // Domain=localhost:3000; the browser then stores it scoped to port
-        // 3000 and never sends it on requests to the Vite dev server
+        // Domain=localhost:8000; the browser then stores it scoped to port
+        // 8000 and never sends it on requests to the Vite dev server
         // (localhost:5173), which makes all authenticated requests fail.
         // An empty string removes the Domain attribute entirely, so the
         // browser scopes the cookie to the current origin (localhost:5173)
