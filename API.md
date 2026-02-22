@@ -42,7 +42,7 @@ If the refresh also fails the user is redirected to `/` (login page).
 #### `POST /api/auth/login`
 
 Authenticate the user. On success the server **sets** `access_token` and
-`refresh_token` as httpOnly `Secure` `SameSite=Strict` cookies.
+`refresh_token` as httpOnly `SameSite=Lax` cookies.
 
 **Request body**
 ```json
@@ -307,5 +307,5 @@ must configure CORS to:
 |-------------|----------------------|-------------------------------------------------|
 | `HttpOnly`  | true                 | Prevents JavaScript access (XSS protection)    |
 | `Secure`    | true (in production) | Transmitted only over HTTPS                     |
-| `SameSite`  | `Strict` or `Lax`   | CSRF protection                                 |
+| `SameSite`  | `Lax`                | CSRF protection; `Strict` can break cookie delivery on first navigation |
 | `Path`      | `/`                  | Sent with all requests to the server            |
