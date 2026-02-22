@@ -3,11 +3,13 @@ import { useState, useRef } from 'react';
 interface NewProjectDialogProps {
   onClose: () => void;
   onCreateProject: (name: string, type: 'builder' | 'upload', modelUrl?: string) => void;
+  isCreating?: boolean;
+  createError?: string;
 }
 
 type ProjectType = 'builder' | 'upload';
 
-export const NewProjectDialog = ({ onClose, onCreateProject }: NewProjectDialogProps) => {
+export const NewProjectDialog = ({ onClose, onCreateProject, isCreating = false, createError = '' }: NewProjectDialogProps) => {
   const [step, setStep] = useState<'choose-type' | 'configure'>('choose-type');
   const [selectedType, setSelectedType] = useState<ProjectType | null>(null);
   const [projectName, setProjectName] = useState('');
@@ -242,16 +244,22 @@ export const NewProjectDialog = ({ onClose, onCreateProject }: NewProjectDialogP
                 </div>
               )}
 
+              {createError && (
+                <div className="px-4 py-3 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm">
+                  {createError}
+                </div>
+              )}
+
               <div className="flex gap-3 pt-2">
-                <button onClick={onClose} className="flex-1 px-4 py-2.5 border border-slate-300 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
+                <button onClick={onClose} disabled={isCreating} className="flex-1 px-4 py-2.5 border border-slate-300 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                   Anuluj
                 </button>
                 <button
                   onClick={handleCreate}
-                  disabled={!canCreate}
-                  className={`flex-1 px-4 py-2.5 rounded-xl text-sm font-bold text-white transition-all ${canCreate ? 'bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 shadow-lg shadow-blue-500/30' : 'bg-slate-300 cursor-not-allowed'}`}
+                  disabled={!canCreate || isCreating}
+                  className={`flex-1 px-4 py-2.5 rounded-xl text-sm font-bold text-white transition-all ${canCreate && !isCreating ? 'bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 shadow-lg shadow-blue-500/30' : 'bg-slate-300 cursor-not-allowed'}`}
                 >
-                  Utwórz projekt
+                  {isCreating ? 'Tworzenie…' : 'Utwórz projekt'}
                 </button>
               </div>
             </div>

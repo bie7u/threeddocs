@@ -21,17 +21,12 @@ export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, useSamplePr
     isPreviewMode, 
     setPreviewMode, 
     setProject,
-    loadFromLocalStorage,
     nodePositions,
     cameraMode,
     setCameraMode,
     editorMode,
     setEditorMode,
   } = useAppStore();
-
-  useEffect(() => {
-    loadFromLocalStorage();
-  }, [loadFromLocalStorage]);
 
   useEffect(() => {
     if (!project && useSampleProjectFallback) {

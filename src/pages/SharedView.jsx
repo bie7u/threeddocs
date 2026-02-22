@@ -1,36 +1,29 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAppStore } from '../store';
 import { PreviewMode } from '../components/PreviewMode/PreviewMode';
 import { UploadPreviewMode } from '../components/UploadModelEditor';
-
-const PROJECTS_KEY = '3ddoc-projects';
+import { fetchPublicProject } from '../services/projects';
 
 const SharedView = () => {
   const { projectId } = useParams();
   const navigate = useNavigate();
   const { project, setProject, setPreviewMode, isPreviewMode } = useAppStore();
   const previewStarted = useRef(false);
-
-  // Load the saved project synchronously (no state needed – projectId from URL is stable)
-  const savedProject = useMemo(() => {
-    const stored = localStorage.getItem(PROJECTS_KEY);
-    if (!stored) return null;
-    try {
-      const projects = JSON.parse(stored);
-      return projects.find((p) => p.project.id === projectId) ?? null;
-    } catch {
-      return null;
-    }
-  }, [projectId]);
+  const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
-    if (savedProject) {
-      setProject(savedProject.project, savedProject.nodePositions);
-      setPreviewMode(true);
-      previewStarted.current = true;
-    }
-  }, [savedProject, setProject, setPreviewMode]);
+    if (!projectId) return;
+    fetchPublicProject(projectId)
+      .then((savedProject) => {
+        setProject(savedProject.project, savedProject.nodePositions);
+        setPreviewMode(true);
+        previewStarted.current = true;
+      })
+      .catch(() => {
+        setNotFound(true);
+      });
+  }, [projectId, setProject, setPreviewMode]);
 
   // When user exits preview, navigate to home
   useEffect(() => {
@@ -39,7 +32,7 @@ const SharedView = () => {
     }
   }, [isPreviewMode, navigate]);
 
-  if (!savedProject) {
+  if (notFound) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 to-slate-800">
         <div className="text-white text-center px-6">

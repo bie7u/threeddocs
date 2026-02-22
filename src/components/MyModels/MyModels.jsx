@@ -1,15 +1,14 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAppStore } from '../../store';
 
 export const MyModels = ({ onOpenEditor, onClose }) => {
-  const { getAllProjects, deleteProject, setProject, setPreviewMode } = useAppStore();
+  const { projects, deleteProject, loadProjects, setProject, setPreviewMode } = useAppStore();
   const [copiedId, setCopiedId] = useState(null);
   const [shareError, setShareError] = useState(null);
-  // refreshKey forces a re-render after deletion because deleteProject only updates
-  // Zustand state when the deleted project is the currently active one.
-  const [refreshKey, setRefreshKey] = useState(0);
 
-  const projects = getAllProjects();
+  useEffect(() => {
+    loadProjects();
+  }, [loadProjects]);
 
   const handleOpenEditor = (savedProject) => {
     setProject(savedProject.project, savedProject.nodePositions);
@@ -34,10 +33,9 @@ export const MyModels = ({ onOpenEditor, onClose }) => {
     }
   };
 
-  const handleDelete = (projectId) => {
+  const handleDelete = async (projectId) => {
     if (window.confirm('Czy na pewno chcesz usunąć ten model?')) {
-      deleteProject(projectId);
-      setRefreshKey((k) => k + 1);
+      await deleteProject(projectId);
     }
   };
 
@@ -52,7 +50,7 @@ export const MyModels = ({ onOpenEditor, onClose }) => {
   };
 
   return (
-    <div key={refreshKey} className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       {/* Navigation Bar */}
       <nav className="bg-white shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

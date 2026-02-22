@@ -44,6 +44,7 @@ export interface InstructionStep {
 export interface GuideStep {
   id: string;
   stepId: string;
+  label?: string;
 }
 
 export interface ProjectData {
