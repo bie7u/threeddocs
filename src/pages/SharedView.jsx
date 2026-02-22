@@ -16,7 +16,7 @@ const SharedView = () => {
     if (!shareToken) return;
     fetchPublicProject(shareToken)
       .then((savedProject) => {
-        setProject(savedProject.project, savedProject.nodePositions);
+        setProject(savedProject.project, savedProject.nodePositions, false);
         setPreviewMode(true);
         previewStarted.current = true;
       })
