@@ -236,18 +236,36 @@ Deletes the project.
 
 ---
 
-#### `GET /api/projects/:id/public`
+#### `POST /api/projects/:id/share`
+
+Generates (or regenerates) a unique, unguessable share token (UUID) for the project
+and returns it. Subsequent calls may return the same token or a new one depending on
+the server implementation.
+
+**Auth:** required (access token cookie)  
+**Request body:** empty  
+
+**Response `200 OK`**
+```json
+{ "shareToken": "550e8400-e29b-41d4-a716-446655440000" }
+```
+
+**Response `404 Not Found`** – project does not exist or belongs to another user.
+
+---
+
+#### `GET /api/projects/shared/:shareToken`
 
 Returns a project document **without authentication**. Used by the shareable
-`/view/:projectId` link.
+`/view/:shareToken` link.
 
-The backend must expose this project publicly only if the owner has enabled
-sharing (or always, depending on business requirements).
+The backend must look up the project associated with `shareToken` and expose it
+publicly only if a share token exists for it.
 
 **Auth:** none  
 
 **Response `200 OK`** – same shape as `GET /api/projects/:id`.  
-**Response `404 Not Found`**
+**Response `404 Not Found`** – token is invalid or project has been deleted.
 
 ---
 

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useAppStore } from '../../store';
 import { UploadedModelCanvas } from '../UploadModelEditor/UploadedModelCanvas';
 import type { MeshHighlight } from '../UploadModelEditor/UploadedModelCanvas';
+import { generateShareToken } from '../../services/projects';
 
 export const UploadPreviewMode = ({ onGoToEditorPanel }: { onGoToEditorPanel?: () => void }) => {
   const {
@@ -12,6 +13,7 @@ export const UploadPreviewMode = ({ onGoToEditorPanel }: { onGoToEditorPanel?: (
     viewMode,
   } = useAppStore();
   const [showCopyNotification, setShowCopyNotification] = useState(false);
+  const [isGeneratingLink, setIsGeneratingLink] = useState(false);
   const [cameraMode, setCameraMode] = useState<'auto' | 'free'>('auto');
 
   if (!project || !project.projectModelUrl) {
@@ -66,13 +68,21 @@ export const UploadPreviewMode = ({ onGoToEditorPanel }: { onGoToEditorPanel?: (
 
   const handleShareLink = async () => {
     if (project) {
-      const shareUrl = `${window.location.origin}/view/${project.id}`;
+      setIsGeneratingLink(true);
       try {
-        await navigator.clipboard.writeText(shareUrl);
-        setShowCopyNotification(true);
-        setTimeout(() => setShowCopyNotification(false), 3000);
+        const token = await generateShareToken(project.id);
+        const shareUrl = `${window.location.origin}/view/${token}`;
+        try {
+          await navigator.clipboard.writeText(shareUrl);
+          setShowCopyNotification(true);
+          setTimeout(() => setShowCopyNotification(false), 3000);
+        } catch {
+          alert(`Skopiuj ten link: ${shareUrl}`);
+        }
       } catch {
-        alert(`Skopiuj ten link: ${shareUrl}`);
+        alert('Nie udało się wygenerować linku. Spróbuj ponownie.');
+      } finally {
+        setIsGeneratingLink(false);
       }
     }
   };
@@ -126,11 +136,17 @@ export const UploadPreviewMode = ({ onGoToEditorPanel }: { onGoToEditorPanel?: (
           </div>
 
           <div className="flex items-center gap-3">
-            <button onClick={handleShareLink} className="flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-xl hover:from-purple-600 hover:to-pink-700 transition-all duration-200 shadow-xl font-medium">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-              </svg>
-              Share Link
+            <button onClick={handleShareLink} disabled={isGeneratingLink} className={`flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-xl hover:from-purple-600 hover:to-pink-700 transition-all duration-200 shadow-xl font-medium ${isGeneratingLink ? 'opacity-70 cursor-not-allowed' : ''}`}>
+              {isGeneratingLink ? (
+                <svg className="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+              ) : (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                </svg>
+              )}
+              {isGeneratingLink ? 'Generowanie...' : 'Share Link'}
             </button>
             {viewMode === 'view' && onGoToEditorPanel && (
               <button onClick={onGoToEditorPanel} className="flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all duration-200 shadow-xl font-medium">

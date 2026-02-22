@@ -72,11 +72,22 @@ export const fetchProject = async (id: string): Promise<SavedProject> => {
 };
 
 /**
- * GET /api/projects/:id/public — returns a project without authentication.
+ * POST /api/projects/:id/share — generates a unique share token for the project.
+ * Returns the token string.
+ */
+export const generateShareToken = async (id: string): Promise<string> => {
+  const res = await apiRequest(`/projects/${id}/share`, { method: 'POST' });
+  if (!res.ok) throw new Error('Failed to generate share link');
+  const data = await res.json() as { shareToken: string };
+  return data.shareToken;
+};
+
+/**
+ * GET /api/projects/shared/:shareToken — returns a project without authentication.
  * Used by the SharedView page for publicly shared links.
  */
-export const fetchPublicProject = async (id: string): Promise<SavedProject> => {
-  const res = await fetch(`${API_BASE}/projects/${id}/public`, {
+export const fetchPublicProject = async (shareToken: string): Promise<SavedProject> => {
+  const res = await fetch(`${API_BASE}/projects/shared/${shareToken}`, {
     credentials: 'omit',
   });
   if (!res.ok) throw new Error('Project not found');

@@ -6,24 +6,24 @@ import { UploadPreviewMode } from '../components/UploadModelEditor';
 import { fetchPublicProject } from '../services/projects';
 
 const SharedView = () => {
-  const { projectId } = useParams();
+  const { shareToken } = useParams();
   const navigate = useNavigate();
   const { project, setProject, setPreviewMode, isPreviewMode } = useAppStore();
   const previewStarted = useRef(false);
   const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
-    if (!projectId) return;
-    fetchPublicProject(projectId)
+    if (!shareToken) return;
+    fetchPublicProject(shareToken)
       .then((savedProject) => {
-        setProject(savedProject.project, savedProject.nodePositions);
+        setProject(savedProject.project, savedProject.nodePositions, false);
         setPreviewMode(true);
         previewStarted.current = true;
       })
       .catch(() => {
         setNotFound(true);
       });
-  }, [projectId, setProject, setPreviewMode]);
+  }, [shareToken, setProject, setPreviewMode]);
 
   // When user exits preview, navigate to home
   useEffect(() => {

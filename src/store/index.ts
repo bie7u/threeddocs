@@ -41,7 +41,7 @@ interface AppStore {
   nodePositions: Record<string, { x: number; y: number }>;
   
   // Actions
-  setProject: (project: ProjectData, nodePositions?: Record<string, { x: number; y: number }>) => void;
+  setProject: (project: ProjectData, nodePositions?: Record<string, { x: number; y: number }>, persist?: boolean) => void;
   addStep: (step: InstructionStep, position?: { x: number; y: number }) => void;
   updateStep: (id: string, updates: Partial<InstructionStep>) => void;
   deleteStep: (id: string) => void;
@@ -76,12 +76,12 @@ export const useAppStore = create<AppStore>((set, get) => ({
   cameraMode: 'free',
   nodePositions: {},
 
-  setProject: (project, nodePositions) => {
+  setProject: (project, nodePositions, persist = true) => {
     set({ 
       project,
       nodePositions: nodePositions ?? get().nodePositions
     });
-    get().saveToApi();
+    if (persist) get().saveToApi();
   },
 
   addStep: (step, position) => {
