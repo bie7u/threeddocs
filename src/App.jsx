@@ -9,7 +9,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/view/:projectId" element={<SharedView />} />
+        <Route path="/view/:shareToken" element={<SharedView />} />
       </Routes>
     </Router>
   );

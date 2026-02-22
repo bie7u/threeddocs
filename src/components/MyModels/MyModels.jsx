@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useAppStore } from '../../store';
+import { generateShareToken } from '../../services/projects';
 
 export const MyModels = ({ onOpenEditor, onClose }) => {
   const { projects, deleteProject, loadProjects, setProject, setPreviewMode } = useAppStore();
   const [copiedId, setCopiedId] = useState(null);
   const [shareError, setShareError] = useState(null);
+  const [sharingId, setSharingId] = useState(null);
 
   useEffect(() => {
     loadProjects();
@@ -22,14 +24,22 @@ export const MyModels = ({ onOpenEditor, onClose }) => {
   };
 
   const handleShare = async (projectId) => {
-    const shareUrl = `${window.location.origin}/view/${projectId}`;
+    setSharingId(projectId);
+    setShareError(null);
     try {
-      await navigator.clipboard.writeText(shareUrl);
-      setCopiedId(projectId);
-      setShareError(null);
-      setTimeout(() => setCopiedId(null), 3000);
+      const token = await generateShareToken(projectId);
+      const shareUrl = `${window.location.origin}/view/${token}`;
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        setCopiedId(projectId);
+        setTimeout(() => setCopiedId(null), 3000);
+      } catch {
+        setShareError(shareUrl);
+      }
     } catch {
-      setShareError(shareUrl);
+      setShareError('Nie udało się wygenerować linku. Spróbuj ponownie.');
+    } finally {
+      setSharingId(null);
     }
   };
 
@@ -234,7 +244,8 @@ export const MyModels = ({ onOpenEditor, onClose }) => {
 
                       <button
                         onClick={() => handleShare(saved.project.id)}
-                        className={`w-full flex items-center justify-center gap-1.5 px-3 py-2 text-sm font-medium rounded-xl transition-all border ${copiedId === saved.project.id ? 'bg-green-50 border-green-400 text-green-700' : 'bg-white border-gray-200 text-gray-700 hover:border-purple-400 hover:text-purple-700 hover:bg-purple-50'}`}
+                        disabled={sharingId === saved.project.id}
+                        className={`w-full flex items-center justify-center gap-1.5 px-3 py-2 text-sm font-medium rounded-xl transition-all border ${copiedId === saved.project.id ? 'bg-green-50 border-green-400 text-green-700' : sharingId === saved.project.id ? 'bg-white border-gray-200 text-gray-400 cursor-not-allowed' : 'bg-white border-gray-200 text-gray-700 hover:border-purple-400 hover:text-purple-700 hover:bg-purple-50'}`}
                       >
                         {copiedId === saved.project.id ? (
                           <>
@@ -242,6 +253,13 @@ export const MyModels = ({ onOpenEditor, onClose }) => {
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                             </svg>
                             Link skopiowany!
+                          </>
+                        ) : sharingId === saved.project.id ? (
+                          <>
+                            <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                            Generowanie linku...
                           </>
                         ) : (
                           <>
