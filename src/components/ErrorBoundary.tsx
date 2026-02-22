@@ -39,20 +39,10 @@ export class ErrorBoundary extends Component<Props, State> {
             </p>
             <div className="space-y-3">
               <button
-                onClick={() => {
-                  // Clear localStorage and reload
-                  localStorage.clear();
-                  window.location.reload();
-                }}
-                className="w-full px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-medium"
-              >
-                Clear Data & Reload
-              </button>
-              <button
                 onClick={() => window.location.reload()}
-                className="w-full px-4 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition font-medium"
+                className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
               >
-                Try Again
+                Reload
               </button>
             </div>
             {this.state.error && (
