@@ -76,9 +76,9 @@ const SharedView = () => {
   return (
     <div className="w-screen h-screen">
       {project.projectType === 'upload' ? (
-        <UploadPreviewMode />
+        <UploadPreviewMode isPublic={true} />
       ) : (
-        <PreviewMode />
+        <PreviewMode isPublic={true} />
       )}
     </div>
   );
