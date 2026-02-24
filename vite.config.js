@@ -18,6 +18,22 @@ export default defineConfig({
         // browser scopes the cookie to the current origin (localhost:5173)
         // and includes it in every subsequent proxied request.
         cookieDomainRewrite: { '*': '' },
+        configure: (proxy) => {
+          // Strip the Secure attribute from every Set-Cookie header so that
+          // the browser accepts the cookies over plain HTTP in local dev.
+          // Without this, any cookie set with Secure by the backend is
+          // silently discarded by the browser (HTTP != HTTPS), which means
+          // the auth tokens are never stored and all subsequent requests
+          // arrive at the server without credentials, causing 400/401 errors.
+          proxy.on('proxyRes', (proxyRes) => {
+            const setCookie = proxyRes.headers['set-cookie'];
+            if (setCookie) {
+              proxyRes.headers['set-cookie'] = setCookie.map((cookie) =>
+                cookie.replace(/;\s*Secure/gi, ''),
+              );
+            }
+          });
+        },
       },
     },
   },
