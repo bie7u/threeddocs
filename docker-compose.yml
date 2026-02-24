@@ -2,7 +2,7 @@ services:
   frontend:
     build: .
     ports:
-      - "80:80"
+      - "${FRONTEND_PORT:-80}:80"
     environment:
       # URL of the backend API service (no trailing slash).
       # When the backend runs in the same Compose project, use the service name,
