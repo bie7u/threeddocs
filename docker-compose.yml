@@ -1,0 +1,12 @@
+services:
+  frontend:
+    build: .
+    ports:
+      - "80:80"
+    environment:
+      # URL of the backend API service (no trailing slash).
+      # When the backend runs in the same Compose project, use the service name,
+      # e.g. http://backend:8000.  Override via a .env file or the shell
+      # environment before running `docker compose up`.
+      - BACKEND_URL=${BACKEND_URL:-http://backend:8000}
+    restart: unless-stopped

@@ -51,6 +51,55 @@ npm run dev
 - `npm run preview` - Preview production build
 - `npm run lint` - Run ESLint
 
+## Production Deployment (Docker / Docker Compose)
+
+The repository ships a multi-stage `Dockerfile` that builds the React app and serves it with **nginx**. API requests to `/api/*` are reverse-proxied to a configurable backend URL.
+
+### Quick start
+
+```bash
+# 1. Create your local environment file
+cp .env.example .env
+
+# 2. Edit .env and set BACKEND_URL to the address of your API backend
+#    e.g. BACKEND_URL=http://backend:8000  (if running in the same Compose project)
+#         BACKEND_URL=https://api.example.com  (external backend)
+
+# 3. Build and start the frontend container
+docker compose up --build -d
+```
+
+The frontend will be available at **http://localhost**.
+
+### Environment variables
+
+| Variable | Default | Description |
+|---|---|---|
+| `BACKEND_URL` | `http://backend:8000` | Backend API base URL (no trailing slash). Nginx proxies all `/api/*` requests here. |
+
+### Build only (without Compose)
+
+```bash
+docker build -t threeddocs-frontend .
+docker run -d -p 80:80 -e BACKEND_URL=http://backend:8000 threeddocs-frontend
+```
+
+### Connecting to a backend
+
+When the backend runs in the **same Compose project** (e.g. a `backend` service defined in `docker-compose.yml`), set:
+
+```
+BACKEND_URL=http://backend:8000
+```
+
+When using an **external / hosted backend**, set the full URL:
+
+```
+BACKEND_URL=https://api.example.com
+```
+
+> **Note:** The nginx configuration uses Docker's built-in `envsubst` template mechanism. The `BACKEND_URL` variable is substituted at container start time, so you can change the target backend without rebuilding the image.
+
 ## Project Structure
 
 ```
