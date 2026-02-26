@@ -1,0 +1,35 @@
+server {
+    listen 80;
+    server_name _;
+
+    root  /usr/share/nginx/html;
+    index index.html;
+
+    # ── API proxy ───────────────────────────────────────────────────────────────
+    # Forwards /api/* requests to the backend and passes httpOnly cookies.
+    location /api/ {
+        proxy_pass          ${BACKEND_URL};
+        proxy_http_version  1.1;
+        proxy_set_header    Host              $http_host;
+        proxy_set_header    X-Real-IP         $remote_addr;
+        proxy_set_header    X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header    X-Forwarded-Proto $scheme;
+
+        # Rewrite any backend-set cookie Domain to the browser-facing host so
+        # the browser always includes the cookie in subsequent requests.
+        proxy_cookie_domain ~. $host;
+
+        # Strip the Secure attribute from Set-Cookie so the browser stores
+        # httpOnly cookies over plain HTTP.  Browsers silently discard cookies
+        # marked Secure on non-HTTPS connections, which breaks cookie-based
+        # authentication.
+        proxy_cookie_flags ~ nosecure;
+    }
+
+    # ── SPA fallback ────────────────────────────────────────────────────────────
+    # Every request that does not match a real file is served index.html so
+    # that React Router can handle the path on the client side.
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}
