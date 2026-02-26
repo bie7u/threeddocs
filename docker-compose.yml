@@ -1,20 +1,6 @@
+version: '3.8'
 services:
   frontend:
     build: .
     ports:
-      - "${FRONTEND_PORT:-80}:80"
-    environment:
-      # URL of the backend API service, used by nginx to proxy /api/* requests.
-      BACKEND_URL: ${BACKEND_URL:-http://backend:8000}
-    # ── SSL (HTTPS) ──────────────────────────────────────────────────────────
-    # To enable HTTPS on port 443, mount your TLS certificate and private key
-    # and add the port mapping below.
-    #
-    # Example (create the ssl/ directory next to this file and place your
-    # certificate chain and private key there):
-    #   ports:
-    #     - "${FRONTEND_HTTPS_PORT:-443}:443"
-    #   volumes:
-    #     - ./ssl/cert.pem:/etc/nginx/ssl/cert.pem:ro
-    #     - ./ssl/key.pem:/etc/nginx/ssl/key.pem:ro
-    restart: unless-stopped
+      - "5223:80"
