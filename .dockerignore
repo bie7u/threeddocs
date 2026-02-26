@@ -7,3 +7,5 @@ dist-ssr
 *.log
 npm-debug.log*
 README.md
+.env
+ssl
