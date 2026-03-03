@@ -9,7 +9,7 @@ authentication (access token + refresh token).
 ## Base URL
 
 All endpoints are prefixed with `/api`.  
-During local development Vite proxies `/api` → `http://localhost:3000`.
+During local development Vite proxies `/api` → `http://localhost:8000`.
 
 Set a custom backend URL via the environment variable:
 

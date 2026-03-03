@@ -23,7 +23,12 @@ server {
         # httpOnly cookies over plain HTTP.  Browsers silently discard cookies
         # marked Secure on non-HTTPS connections, which breaks cookie-based
         # authentication.
-        proxy_cookie_flags ~ nosecure;
+        # Also downgrade SameSite=None to SameSite=Lax: Chrome 80+ requires the
+        # Secure attribute on any SameSite=None cookie (RFC 6265bis §5.3.7).
+        # After nosecure removes Secure, a bare SameSite=None would be treated
+        # as invalid and silently dropped.  SameSite=Lax is safe here because
+        # all browser requests go to the same origin (the nginx host).
+        proxy_cookie_flags ~ nosecure samesite=lax;
     }
 
     # ── SPA fallback ────────────────────────────────────────────────────────────

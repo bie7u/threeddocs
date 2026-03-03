@@ -19,17 +19,28 @@ export default defineConfig({
         // and includes it in every subsequent proxied request.
         cookieDomainRewrite: { '*': '' },
         configure: (proxy) => {
-          // Strip the Secure attribute from every Set-Cookie header so that
-          // the browser accepts the cookies over plain HTTP in local dev.
-          // Without this, any cookie set with Secure by the backend is
-          // silently discarded by the browser (HTTP != HTTPS), which means
-          // the auth tokens are never stored and all subsequent requests
-          // arrive at the server without credentials, causing 400/401 errors.
+          // Rewrite Set-Cookie attributes so that browsers accept the cookies
+          // over plain HTTP during local development:
+          //
+          // 1. Strip "Secure" — browsers silently discard cookies marked
+          //    Secure on non-HTTPS connections, which causes auth tokens to
+          //    never be stored and every subsequent request to get a 401.
+          //
+          // 2. Replace "SameSite=None" with "SameSite=Lax" — Chrome 80+
+          //    enforces that SameSite=None cookies MUST also carry the Secure
+          //    attribute (RFC 6265bis §5.3.7).  After step 1 removes Secure,
+          //    any remaining SameSite=None cookie is treated as invalid and
+          //    silently dropped by the browser.  Downgrading to SameSite=Lax
+          //    is safe for local dev because all requests are same-origin
+          //    (the Vite proxy rewrites /api/* as same-origin from the
+          //    browser's perspective).
           proxy.on('proxyRes', (proxyRes) => {
             const setCookie = proxyRes.headers['set-cookie'];
             if (setCookie) {
               proxyRes.headers['set-cookie'] = setCookie.map((cookie) =>
-                cookie.replace(/;\s*Secure/gi, ''),
+                cookie
+                  .replace(/;\s*Secure/gi, '')
+                  .replace(/;\s*SameSite=None/gi, '; SameSite=Lax'),
               );
             }
           });
