@@ -6,6 +6,10 @@ import type { EngravedBlockParams } from '../../types';
 
 const TARGET_TEXT_SIZE = 0.3; // target letter height in units
 const BASE_BLOCK_DEPTH = 1;   // depth (Z) of the block
+const FLOAT_GAP = 0.35;       // gap between cube top and text bottom
+
+const OUTER_GLOW_SCALE = 1.1;  // scale of outermost glow halo
+const INNER_GLOW_SCALE = 1.05; // scale of inner glow halo
 
 const FONT_URLS: Record<NonNullable<EngravedBlockParams['font']>, string> = {
   helvetiker: '/fonts/helvetiker_regular.typeface.json',
@@ -42,8 +46,8 @@ function validateText(raw: string): string {
 interface BlockState {
   blockGeo: THREE.BufferGeometry;
   textGeo: THREE.BufferGeometry;
-  textPosition: [number, number, number];
-  textRotation: [number, number, number];
+  // Text geometry is centered at origin; this is the world position of that center
+  textCenter: [number, number, number];
 }
 
 interface EngravedBlockMeshProps {
@@ -63,12 +67,10 @@ export const EngravedBlock = ({
   // Ref tracks the current state so we can dispose geometries when they change
   const stateRef = useRef<BlockState | null>(null);
 
-  const text       = validateText(params.text);
-  const font       = params.font    ?? 'helvetiker';
-  // params.depth is repurposed here as text protrusion depth (not engraving depth)
-  const protrusion = Math.max(0.05, Math.min(0.3,  params.depth   ?? 0.12));
-  const padding    = Math.max(0.05, Math.min(0.2,  params.padding ?? 0.1));
-  const face       = params.face    ?? 'front';
+  const text      = validateText(params.text);
+  const font      = params.font    ?? 'helvetiker';
+  const thickness = Math.max(0.05, Math.min(0.3,  params.depth   ?? 0.12));
+  const padding   = Math.max(0.05, Math.min(0.2,  params.padding ?? 0.1));
 
   useEffect(() => {
     let cancelled = false;
@@ -89,79 +91,41 @@ export const EngravedBlock = ({
       const textH = bb.max.y - bb.min.y;
       measureGeo.dispose();
 
-      // -- compute block face dimensions --
-      const faceW = textW + 2 * padding;
-      const faceH = textH + 2 * padding;
+      // Block sized to fit the text with padding
+      const blockW = Math.max(1, textW + 2 * padding);
+      const blockH = Math.max(1, textH + 2 * padding);
+      const blockGeo = new THREE.BoxGeometry(blockW, blockH, BASE_BLOCK_DEPTH);
 
-      let blockW: number, blockH: number, blockD: number;
-      if (face === 'front' || face === 'back') {
-        blockW = Math.max(1, faceW);
-        blockH = Math.max(1, faceH);
-        blockD = BASE_BLOCK_DEPTH;
-      } else if (face === 'left' || face === 'right') {
-        blockW = BASE_BLOCK_DEPTH;
-        blockH = Math.max(1, faceH);
-        blockD = Math.max(1, faceW);
-      } else {
-        // top / bottom
-        blockW = Math.max(1, faceW);
-        blockH = BASE_BLOCK_DEPTH;
-        blockD = Math.max(1, textH + 2 * padding);
-      }
-
-      const blockGeo = new THREE.BoxGeometry(blockW, blockH, blockD);
-
-      // -- 3D text that protrudes outward from the chosen face --
+      // -- 3D floating text geometry --
       const textGeo = new TextGeometry(text, {
         font: loadedFont,
         size: TARGET_TEXT_SIZE,
-        depth: protrusion,
+        depth: thickness,
         bevelEnabled: true,
-        bevelThickness: 0.02,
-        bevelSize: 0.015,
+        bevelThickness: 0.015,
+        bevelSize: 0.012,
         bevelSegments: 4,
       });
       textGeo.computeBoundingBox();
       const tbb = textGeo.boundingBox!;
       const tW = tbb.max.x - tbb.min.x;
       const tH = tbb.max.y - tbb.min.y;
+
+      // Center the geometry at its own midpoint so glow scaling works correctly
+      textGeo.translate(-tbb.min.x - tW / 2, -tbb.min.y - tH / 2, -thickness / 2);
       textGeo.computeVertexNormals();
 
-      // Position text centered on chosen face, letters pointing outward
-      let textPosition: [number, number, number];
-      let textRotation: [number, number, number];
-
-      switch (face) {
-        case 'back':
-          textPosition = [tW / 2, -tH / 2, -(blockD / 2)];
-          textRotation = [0, Math.PI, 0];
-          break;
-        case 'left':
-          textPosition = [-(blockW / 2), -tH / 2, tW / 2];
-          textRotation = [0, -Math.PI / 2, 0];
-          break;
-        case 'right':
-          textPosition = [blockW / 2, -tH / 2, -tW / 2];
-          textRotation = [0, Math.PI / 2, 0];
-          break;
-        case 'top':
-          textPosition = [-tW / 2, blockH / 2, tH / 2];
-          textRotation = [-Math.PI / 2, 0, 0];
-          break;
-        case 'bottom':
-          textPosition = [-tW / 2, -(blockH / 2), -tH / 2];
-          textRotation = [Math.PI / 2, 0, 0];
-          break;
-        default: // front
-          textPosition = [-tW / 2, -tH / 2, blockD / 2];
-          textRotation = [0, 0, 0];
-      }
+      // Text floats above the cube, centered horizontally
+      const textCenter: [number, number, number] = [
+        0,
+        blockH / 2 + FLOAT_GAP + tH / 2,
+        0,
+      ];
 
       if (!cancelled) {
-        // Dispose the previous geometries before storing the new ones
         stateRef.current?.blockGeo.dispose();
         stateRef.current?.textGeo.dispose();
-        const newState = { blockGeo, textGeo, textPosition, textRotation };
+        const newState = { blockGeo, textGeo, textCenter };
         stateRef.current = newState;
         setBlockState(newState);
       } else {
@@ -173,7 +137,7 @@ export const EngravedBlock = ({
     });
 
     return () => { cancelled = true; };
-  }, [text, font, protrusion, padding, face]);
+  }, [text, font, thickness, padding]);
 
   // Dispose geometries on unmount
   useEffect(() => {
@@ -204,19 +168,33 @@ export const EngravedBlock = ({
           emissiveIntensity={emissiveIntensity}
         />
       </mesh>
-      {/* Raised 3D text on the face – gold with emissive glow so it stands out */}
+
+      {/* Outer glow halo – large scale, very low opacity, no depth write */}
       <mesh
-        castShadow
         geometry={blockState.textGeo}
-        position={blockState.textPosition}
-        rotation={blockState.textRotation}
+        position={blockState.textCenter}
+        scale={[OUTER_GLOW_SCALE, OUTER_GLOW_SCALE, 1.0]}
       >
+        <meshBasicMaterial color="#ffffff" transparent opacity={0.1} depthWrite={false} />
+      </mesh>
+
+      {/* Inner glow halo */}
+      <mesh
+        geometry={blockState.textGeo}
+        position={blockState.textCenter}
+        scale={[INNER_GLOW_SCALE, INNER_GLOW_SCALE, 1.0]}
+      >
+        <meshBasicMaterial color="#ffffff" transparent opacity={0.2} depthWrite={false} />
+      </mesh>
+
+      {/* Core floating text – white with strong emissive glow */}
+      <mesh castShadow geometry={blockState.textGeo} position={blockState.textCenter}>
         <meshStandardMaterial
-          color="#ffd700"
-          emissive="#ff8800"
-          emissiveIntensity={0.55}
-          metalness={0.45}
-          roughness={0.2}
+          color="#ffffff"
+          emissive="#ffffff"
+          emissiveIntensity={1.2}
+          metalness={0.0}
+          roughness={0.35}
         />
       </mesh>
     </group>

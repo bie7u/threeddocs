@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { useAppStore } from '../../store';
-import type { InstructionStep, ShapeType, EngravedBlockParams, EngravedBlockFace } from '../../types';
+import type { InstructionStep, ShapeType, EngravedBlockParams } from '../../types';
 import { RichTextEditor } from '../RichTextEditor';
 
 export const StepProperties = () => {
@@ -188,7 +188,7 @@ export const StepProperties = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Text Depth <span className="text-gray-400 font-normal">(0.05 – 0.3, protrusion)</span>
+                    Text Thickness <span className="text-gray-400 font-normal">(0.05 – 0.3)</span>
                   </label>
                   <div className="flex items-center gap-3">
                     <input
@@ -235,21 +235,6 @@ export const StepProperties = () => {
                       className="w-20 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Face</label>
-                  <select
-                    value={formData.engravedBlockParams?.face ?? 'front'}
-                    onChange={(e) => handleEngravedParamChange('face', e.target.value as EngravedBlockFace)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="front">Front</option>
-                    <option value="back">Back</option>
-                    <option value="left">Left</option>
-                    <option value="right">Right</option>
-                    <option value="top">Top</option>
-                    <option value="bottom">Bottom</option>
-                  </select>
                 </div>
               </div>
             )}
