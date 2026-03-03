@@ -5,6 +5,7 @@ import * as THREE from 'three';
 import type { InstructionStep, ConnectionStyle, ShapeType } from '../../types';
 import type { ProjectData } from '../../types';
 import { calculateCreatorBasedLayout } from '../../utils/layoutCalculator';
+import { EngravedBlock } from './EngravedBlock';
 
 // Error Boundary for catching errors in 3D components
 class ModelErrorBoundary extends Component<
@@ -161,10 +162,11 @@ interface Shape3DProps {
   emissiveIntensity?: number;
   customModelUrl?: string;
   modelScale?: number;
+  engravedBlockParams?: InstructionStep['engravedBlockParams'];
 }
 
 // Reusable 3D shape component
-const Shape3D = ({ shapeType = 'cube', size = 2, color, emissive = '#000000', emissiveIntensity = 0, customModelUrl, modelScale = 1 }: Shape3DProps) => {
+const Shape3D = ({ shapeType = 'cube', size = 2, color, emissive = '#000000', emissiveIntensity = 0, customModelUrl, modelScale = 1, engravedBlockParams }: Shape3DProps) => {
   if (shapeType === 'custom' && customModelUrl) {
     return (
       <ModelErrorBoundary fallback={<ModelErrorFallback />}>
@@ -178,6 +180,18 @@ const Shape3D = ({ shapeType = 'cube', size = 2, color, emissive = '#000000', em
           />
         </Suspense>
       </ModelErrorBoundary>
+    );
+  }
+
+  if (shapeType === 'engravedBlock') {
+    const ebParams = engravedBlockParams ?? { text: 'DB', font: 'helvetiker', depth: 0.08, padding: 0.1, face: 'front' };
+    return (
+      <EngravedBlock
+        params={ebParams}
+        color={color}
+        emissive={emissive}
+        emissiveIntensity={emissiveIntensity}
+      />
     );
   }
   
@@ -207,6 +221,7 @@ const Shape3D = ({ shapeType = 'cube', size = 2, color, emissive = '#000000', em
   );
 };
 
+
 interface StepCubeProps {
   step: InstructionStep;
   position: [number, number, number];
@@ -219,7 +234,7 @@ const StepCube = ({ step, position, isActive }: StepCubeProps) => {
   
   useFrame((state) => {
     if (meshRef.current) {
-      meshRef.current.rotation.y += 0.003;
+      meshRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.6) * (Math.PI / 10);
     }
     if (glowRef.current && isActive) {
       const scale = 1 + Math.sin(state.clock.elapsedTime * 2) * 0.1;
@@ -256,9 +271,10 @@ const StepCube = ({ step, position, isActive }: StepCubeProps) => {
           emissiveIntensity={isActive ? 0.3 : 0}
           customModelUrl={step.customModelUrl}
           modelScale={step.modelScale}
+          engravedBlockParams={step.engravedBlockParams}
         />
       </group>
-      {isActive && shapeType !== 'custom' && (
+      {isActive && shapeType !== 'custom' && shapeType !== 'engravedBlock' && (
         <mesh ref={glowRef}>
           {renderGlowGeometry()}
           <meshBasicMaterial 
@@ -312,8 +328,7 @@ const ConnectionTube = ({ startPos, endPos, isActive, style = 'standard', shapeT
       }
     }
     if (shapeRef.current) {
-      shapeRef.current.rotation.y += 0.01;
-      shapeRef.current.rotation.x += 0.005;
+      shapeRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.6) * (Math.PI / 10);
     }
   });
 

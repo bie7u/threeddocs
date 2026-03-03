@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { useAppStore } from '../../store';
-import type { InstructionStep, ShapeType } from '../../types';
+import type { InstructionStep, ShapeType, EngravedBlockParams } from '../../types';
 import { RichTextEditor } from '../RichTextEditor';
 
 export const StepProperties = () => {
@@ -18,6 +18,13 @@ export const StepProperties = () => {
     shapeType: 'cube',
     customModelUrl: '',
     modelScale: 1,
+    engravedBlockParams: {
+      text: 'DB',
+      font: 'helvetiker',
+      depth: 0.08,
+      padding: 0.1,
+      face: 'front',
+    },
   });
 
   useEffect(() => {
@@ -39,12 +46,29 @@ export const StepProperties = () => {
         shapeType: selectedStep.shapeType || 'cube',
         customModelUrl: selectedStep.customModelUrl || '',
         modelScale: selectedStep.modelScale || 1,
+        engravedBlockParams: selectedStep.engravedBlockParams || {
+          text: 'DB',
+          font: 'helvetiker',
+          depth: 0.08,
+          padding: 0.1,
+          face: 'front',
+        },
       });
     }
   }, [selectedStep]);
 
   const handleInputChange = (field: keyof InstructionStep, value: string | number) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleEngravedParamChange = (field: keyof EngravedBlockParams, value: string | number) => {
+    setFormData((prev) => ({
+      ...prev,
+      engravedBlockParams: {
+        ...(prev.engravedBlockParams ?? { text: 'DB', font: 'helvetiker', depth: 0.08, padding: 0.1, face: 'front' }),
+        [field]: value,
+      },
+    }));
   };
 
   const handleSave = () => {
@@ -131,8 +155,89 @@ export const StepProperties = () => {
                 <option value="cylinder">Cylinder</option>
                 <option value="cone">Cone</option>
                 <option value="custom">Custom Model</option>
+                <option value="engravedBlock">Engraved Block (Grawerowany klocek)</option>
               </select>
             </div>
+
+            {formData.shapeType === 'engravedBlock' && (
+              <div className="space-y-3 border border-gray-200 rounded p-3 bg-gray-50">
+                <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Engraved Block Settings</p>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Text <span className="text-gray-400 font-normal">(max 3 words, 24 chars)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.engravedBlockParams?.text ?? 'DB'}
+                    onChange={(e) => handleEngravedParamChange('text', e.target.value)}
+                    maxLength={24}
+                    className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Font</label>
+                  <select
+                    value={formData.engravedBlockParams?.font ?? 'helvetiker'}
+                    onChange={(e) => handleEngravedParamChange('font', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="helvetiker">Sans (Helvetiker)</option>
+                    <option value="optimer">Serif (Optimer)</option>
+                    <option value="gentilis">Mono (Gentilis)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Text Thickness <span className="text-gray-400 font-normal">(0.05 – 0.3)</span>
+                  </label>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="range"
+                      min="0.05"
+                      max="0.3"
+                      step="0.01"
+                      value={formData.engravedBlockParams?.depth ?? 0.12}
+                      onChange={(e) => handleEngravedParamChange('depth', parseFloat(e.target.value))}
+                      className="flex-1"
+                    />
+                    <input
+                      type="number"
+                      min="0.05"
+                      max="0.3"
+                      step="0.01"
+                      value={formData.engravedBlockParams?.depth ?? 0.12}
+                      onChange={(e) => handleEngravedParamChange('depth', parseFloat(e.target.value))}
+                      className="w-20 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Padding <span className="text-gray-400 font-normal">(0.05 – 0.2)</span>
+                  </label>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="range"
+                      min="0.05"
+                      max="0.2"
+                      step="0.01"
+                      value={formData.engravedBlockParams?.padding ?? 0.1}
+                      onChange={(e) => handleEngravedParamChange('padding', parseFloat(e.target.value))}
+                      className="flex-1"
+                    />
+                    <input
+                      type="number"
+                      min="0.05"
+                      max="0.2"
+                      step="0.01"
+                      value={formData.engravedBlockParams?.padding ?? 0.1}
+                      onChange={(e) => handleEngravedParamChange('padding', parseFloat(e.target.value))}
+                      className="w-20 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
 
             {formData.shapeType === 'custom' && (
               <div className="space-y-3">
