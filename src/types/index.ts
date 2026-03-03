@@ -17,7 +17,17 @@ export interface Annotation {
 
 export type ConnectionStyle = 'standard' | 'glass' | 'glow' | 'neon';
 
-export type ShapeType = 'cube' | 'sphere' | 'cylinder' | 'cone' | 'custom';
+export type ShapeType = 'cube' | 'sphere' | 'cylinder' | 'cone' | 'custom' | 'engravedBlock';
+
+export type EngravedBlockFace = 'front' | 'back' | 'left' | 'right' | 'top' | 'bottom';
+
+export interface EngravedBlockParams {
+  text: string;
+  font: 'helvetiker' | 'optimer' | 'gentilis';
+  depth: number;
+  padding: number;
+  face: EngravedBlockFace;
+}
 
 export interface ConnectionData {
   style?: ConnectionStyle;
@@ -36,6 +46,8 @@ export interface InstructionStep {
   shapeType?: ShapeType;
   customModelUrl?: string;
   modelScale?: number;
+  // Engraved block specific parameters
+  engravedBlockParams?: EngravedBlockParams;
   // Upload-model specific: which mesh element this step focuses on
   focusMeshName?: string;
   focusPoint?: [number, number, number];
