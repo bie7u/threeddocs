@@ -188,24 +188,24 @@ export const StepProperties = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Engraving Depth <span className="text-gray-400 font-normal">(0.01 – 0.2)</span>
+                    Text Depth <span className="text-gray-400 font-normal">(0.05 – 0.3, protrusion)</span>
                   </label>
                   <div className="flex items-center gap-3">
                     <input
                       type="range"
-                      min="0.01"
-                      max="0.2"
+                      min="0.05"
+                      max="0.3"
                       step="0.01"
-                      value={formData.engravedBlockParams?.depth ?? 0.08}
+                      value={formData.engravedBlockParams?.depth ?? 0.12}
                       onChange={(e) => handleEngravedParamChange('depth', parseFloat(e.target.value))}
                       className="flex-1"
                     />
                     <input
                       type="number"
-                      min="0.01"
-                      max="0.2"
+                      min="0.05"
+                      max="0.3"
                       step="0.01"
-                      value={formData.engravedBlockParams?.depth ?? 0.08}
+                      value={formData.engravedBlockParams?.depth ?? 0.12}
                       onChange={(e) => handleEngravedParamChange('depth', parseFloat(e.target.value))}
                       className="w-20 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
