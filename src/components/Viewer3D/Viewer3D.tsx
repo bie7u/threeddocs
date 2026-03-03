@@ -234,7 +234,7 @@ const StepCube = ({ step, position, isActive }: StepCubeProps) => {
   
   useFrame((state) => {
     if (meshRef.current) {
-      meshRef.current.rotation.y += 0.003;
+      meshRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.6) * (Math.PI / 10);
     }
     if (glowRef.current && isActive) {
       const scale = 1 + Math.sin(state.clock.elapsedTime * 2) * 0.1;
@@ -328,8 +328,7 @@ const ConnectionTube = ({ startPos, endPos, isActive, style = 'standard', shapeT
       }
     }
     if (shapeRef.current) {
-      shapeRef.current.rotation.y += 0.01;
-      shapeRef.current.rotation.x += 0.005;
+      shapeRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.6) * (Math.PI / 10);
     }
   });
 
