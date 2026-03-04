@@ -497,26 +497,37 @@ const ConnectionTube = ({ startPos, endPos, isActive, style = 'standard', shapeT
       : arrowDirection ?? 'none';
 
   // Classic "→" arrow sign: straight shaft + two V-shaped arms at the tip + soft glow.
-  // The arrow floats above the 3D cubes (cube tops are at Y=+1) at a fixed elevation.
+  // The arrow sits at cube-center height (same Y as the tube) but is trimmed so it
+  // does not touch the cube geometry on either end.
   const renderArrowSign = () => {
-    // Arrow hovers 2.5 units above the cube center plane (cube half-height = 1)
-    const ELEVATION = 2.5;
-    const SHAFT_R = 0.08;   // main shaft cylinder radius
-    const GLOW_R  = 0.22;   // glow halo radius (wider, transparent)
+    // Cube half-size = 1.0; trim each end back by this amount to leave a clear gap.
+    const TRIM_GAP = 1.35;
+    const SHAFT_R = 0.07;   // main shaft cylinder radius (slightly smaller)
+    const GLOW_R  = 0.18;   // glow halo radius (wider, transparent)
     const GLOW_OPACITY = isActive ? 0.38 : 0.20;
-    const ARM_LEN    = 1.3;  // length of each arrowhead arm tube
-    const ARM_SPREAD = 0.65; // perpendicular distance between arm endpoints
+    const ARM_LEN    = 1.0;  // length of each arrowhead arm tube
+    const ARM_SPREAD = 0.50; // perpendicular distance between arm endpoints
 
     const mainColor = arrowColor;
     const emissiveIntensity = isActive ? 1.3 : 0.55;
 
-    // Flatten to arrow elevation (ignore original Y so arrow is always above cubes)
-    const s = new THREE.Vector3(startPos[0], ELEVATION, startPos[2]);
-    const e = new THREE.Vector3(endPos[0],   ELEVATION, endPos[2]);
+    // Use the same Y as the cubes/tube (startPos[1] == endPos[1] == 0 from layoutCalculator)
+    const rawS = new THREE.Vector3(...startPos);
+    const rawE = new THREE.Vector3(...endPos);
+    const totalDist = rawS.distanceTo(rawE);
+    if (totalDist < 0.01) return null;
+
+    const dir = new THREE.Vector3().subVectors(rawE, rawS).normalize();
+
+    // Trim both endpoints back so the shaft clears cube surfaces.
+    // Cap at 40% of total distance (i.e. 20% per side) so the shaft never
+    // collapses to zero length when cubes are placed very close together.
+    const trimPerEndpoint = Math.min(TRIM_GAP, totalDist * 0.4);
+    const s = rawS.clone().addScaledVector(dir,  trimPerEndpoint);
+    const e = rawE.clone().addScaledVector(dir, -trimPerEndpoint);
 
     if (s.distanceTo(e) < 0.01) return null;
 
-    const dir = new THREE.Vector3().subVectors(e, s).normalize();
     // Perpendicular in XZ plane for the V-arms (check length before normalizing)
     const rawPerp = new THREE.Vector3().crossVectors(dir, new THREE.Vector3(0, 1, 0));
     const perp = rawPerp.length() > 0.001 ? rawPerp.normalize() : new THREE.Vector3(1, 0, 0);
