@@ -2,7 +2,7 @@ import { useRef, useEffect, useMemo, Suspense, useState, Component, type ReactNo
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera, useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
-import type { InstructionStep, ConnectionStyle, ShapeType } from '../../types';
+import type { InstructionStep, ConnectionStyle, ShapeType, ArrowDirection } from '../../types';
 import type { ProjectData } from '../../types';
 import { calculateCreatorBasedLayout } from '../../utils/layoutCalculator';
 import { EngravedBlock } from './EngravedBlock';
@@ -39,6 +39,7 @@ interface ConnectionWithIndices {
   style: ConnectionStyle;
   description?: string;
   shapeType?: ShapeType;
+  arrowDirection?: ArrowDirection;
 }
 
 interface CustomModelProps {
@@ -296,10 +297,11 @@ interface ConnectionTubeProps {
   style?: 'standard' | 'glass' | 'glow' | 'neon';
   description?: string;
   shapeType?: ShapeType;
+  arrowDirection?: ArrowDirection;
   onClick?: () => void;
 }
 
-const ConnectionTube = ({ startPos, endPos, isActive, style = 'standard', shapeType, onClick }: ConnectionTubeProps) => {
+const ConnectionTube = ({ startPos, endPos, isActive, style = 'standard', shapeType, arrowDirection, onClick }: ConnectionTubeProps) => {
   const tubeRef = useRef<THREE.Mesh>(null);
   const glowRef = useRef<THREE.Mesh>(null);
   const shapeRef = useRef<THREE.Group>(null);
@@ -319,6 +321,42 @@ const ConnectionTube = ({ startPos, endPos, isActive, style = 'standard', shapeT
     );
   }, [startPos, endPos]);
 
+  // Compute arrow head transforms: position at tube tip, oriented along travel direction
+  const ARROW_INSET_OFFSET = 0.35; // inset from endpoint so arrowhead sits on the tube tip
+  const ARROW_RADIUS = 0.3;
+  const ARROW_HEIGHT = 0.7;
+  const ARROW_SEGMENTS = 8;
+
+  const arrowTransforms = useMemo(() => {
+    const start = new THREE.Vector3(...startPos);
+    const end = new THREE.Vector3(...endPos);
+    const dir = new THREE.Vector3().subVectors(end, start).normalize();
+    const back = dir.clone().negate();
+
+    const makeQuaternion = (direction: THREE.Vector3) => {
+      // Cone default axis is Y; rotate so Y aligns with direction
+      const up = new THREE.Vector3(0, 1, 0);
+      return new THREE.Quaternion().setFromUnitVectors(up, direction);
+    };
+
+    // Place arrowhead slightly inside the tube end so it doesn't float
+    const forwardPos: [number, number, number] = [
+      end.x - dir.x * ARROW_INSET_OFFSET,
+      end.y - dir.y * ARROW_INSET_OFFSET,
+      end.z - dir.z * ARROW_INSET_OFFSET,
+    ];
+    const backwardPos: [number, number, number] = [
+      start.x + dir.x * ARROW_INSET_OFFSET,
+      start.y + dir.y * ARROW_INSET_OFFSET,
+      start.z + dir.z * ARROW_INSET_OFFSET,
+    ];
+
+    return {
+      forward: { position: forwardPos, quaternion: makeQuaternion(dir) },
+      backward: { position: backwardPos, quaternion: makeQuaternion(back) },
+    };
+  }, [startPos, endPos]);
+
   useFrame((state) => {
     if (glowRef.current && (style === 'glow' || style === 'neon')) {
       const pulse = Math.sin(state.clock.elapsedTime * 2) * 0.3 + 0.7;
@@ -331,6 +369,29 @@ const ConnectionTube = ({ startPos, endPos, isActive, style = 'standard', shapeT
       shapeRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.6) * (Math.PI / 10);
     }
   });
+
+  // Derive arrowhead color from current style
+  const arrowColor = useMemo(() => {
+    switch (style) {
+      case 'glass': return isActive ? '#60a5fa' : '#93c5fd';
+      case 'glow': return isActive ? '#fbbf24' : '#fcd34d';
+      case 'neon': return isActive ? '#ec4899' : '#f472b6';
+      default: return isActive ? '#60a5fa' : '#4b5563';
+    }
+  }, [style, isActive]);
+
+  const renderArrowHead = (pos: [number, number, number], quaternion: THREE.Quaternion) => (
+    <mesh position={pos} quaternion={quaternion}>
+      <coneGeometry args={[ARROW_RADIUS, ARROW_HEIGHT, ARROW_SEGMENTS]} />
+      <meshStandardMaterial
+        color={arrowColor}
+        emissive={arrowColor}
+        emissiveIntensity={isActive ? 0.8 : 0.3}
+        metalness={0.4}
+        roughness={0.3}
+      />
+    </mesh>
+  );
 
   const renderByStyle = () => {
     switch (style) {
@@ -440,6 +501,10 @@ const ConnectionTube = ({ startPos, endPos, isActive, style = 'standard', shapeT
   return (
     <group onClick={onClick} onPointerOver={handlePointerOver} onPointerOut={handlePointerOut}>
       {renderByStyle()}
+      {(arrowDirection === 'forward' || arrowDirection === 'bidirectional') &&
+        renderArrowHead(arrowTransforms.forward.position, arrowTransforms.forward.quaternion)}
+      {(arrowDirection === 'backward' || arrowDirection === 'bidirectional') &&
+        renderArrowHead(arrowTransforms.backward.position, arrowTransforms.backward.quaternion)}
       {shapeType && (
         <group ref={shapeRef} position={[midPoint.x, midPoint.y, midPoint.z]}>
           <Shape3D 
@@ -491,7 +556,8 @@ const UnifiedModel = ({ project, currentStepId, nodePositions, onConnectionClick
           targetIndex, 
           style: conn.data?.style || 'standard' as ConnectionStyle,
           description: conn.data?.description,
-          shapeType: conn.data?.shapeType
+          shapeType: conn.data?.shapeType,
+          arrowDirection: conn.data?.arrowDirection,
         } as ConnectionWithIndices;
       })
       .filter((c): c is ConnectionWithIndices => c !== null);
@@ -522,6 +588,7 @@ const UnifiedModel = ({ project, currentStepId, nodePositions, onConnectionClick
           style={conn.style}
           description={conn.description}
           shapeType={conn.shapeType}
+          arrowDirection={conn.arrowDirection}
           onClick={conn.description && onConnectionClick ? () => onConnectionClick(conn.description as string) : undefined}
         />
       ))}

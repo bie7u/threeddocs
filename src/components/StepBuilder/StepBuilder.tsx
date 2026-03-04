@@ -18,7 +18,7 @@ import ReactFlow, {
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { useAppStore } from '../../store';
-import type { InstructionStep, ConnectionData, ConnectionStyle, ShapeType } from '../../types';
+import type { InstructionStep, ConnectionData, ConnectionStyle, ShapeType, ArrowDirection } from '../../types';
 
 // Custom node component
 const StepNode = ({ data, selected }: NodeProps<InstructionStep>) => {
@@ -47,7 +47,8 @@ const StepNode = ({ data, selected }: NodeProps<InstructionStep>) => {
 interface ConnectionEditDialogProps {
   description: string;
   shapeType?: ShapeType;
-  onSave: (description: string, shapeType?: ShapeType) => void;
+  arrowDirection?: ArrowDirection;
+  onSave: (description: string, shapeType?: ShapeType, arrowDirection?: ArrowDirection) => void;
   onCancel: () => void;
   position: { x: number; y: number };
 }
@@ -55,15 +56,17 @@ interface ConnectionEditDialogProps {
 const ConnectionEditDialog = ({ 
   description, 
   shapeType, 
+  arrowDirection,
   onSave, 
   onCancel,
   position 
 }: ConnectionEditDialogProps) => {
   const [tempDescription, setTempDescription] = useState(description);
   const [tempShapeType, setTempShapeType] = useState<ShapeType | undefined>(shapeType);
+  const [tempArrowDirection, setTempArrowDirection] = useState<ArrowDirection>(arrowDirection || 'none');
   
   const handleSave = () => {
-    onSave(tempDescription, tempShapeType);
+    onSave(tempDescription, tempShapeType, tempArrowDirection);
   };
   
   return (
@@ -100,6 +103,19 @@ const ConnectionEditDialog = ({
           <option value="cone">Cone</option>
         </select>
       </div>
+      <div className="mb-3">
+        <label className="block text-xs font-medium text-gray-700 mb-1">Arrow Direction</label>
+        <select
+          value={tempArrowDirection}
+          onChange={(e) => setTempArrowDirection(e.target.value as ArrowDirection)}
+          className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="none">None (pipe only)</option>
+          <option value="forward">Forward →</option>
+          <option value="backward">Backward ←</option>
+          <option value="bidirectional">Bidirectional ↔</option>
+        </select>
+      </div>
       <div className="flex gap-2 justify-end">
         <button onClick={onCancel} className="px-3 py-1 text-xs bg-gray-300 hover:bg-gray-400 rounded transition">Cancel</button>
         <button onClick={handleSave} className="px-3 py-1 text-xs bg-blue-500 hover:bg-blue-600 text-white rounded transition">Save</button>
@@ -117,6 +133,7 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
   const currentStyle = data?.style || 'standard';
   const currentDescription = data?.description || '';
   const currentShapeType = data?.shapeType;
+  const currentArrowDirection = data?.arrowDirection;
   
   const styles: { value: ConnectionStyle; label: string; color: string }[] = [
     { value: 'standard', label: 'Standard', color: '#4b5563' },
@@ -134,10 +151,10 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
     setShowStyleMenu(false);
   };
   
-  const handleDescriptionChange = (description: string, shapeType?: ShapeType) => {
+  const handleDescriptionChange = (description: string, shapeType?: ShapeType, arrowDirection?: ArrowDirection) => {
     if (!project) return;
     const updatedConnections = project.connections.map(conn => 
-      conn.id === id ? { ...conn, data: { ...conn.data, description, shapeType } } : conn
+      conn.id === id ? { ...conn, data: { ...conn.data, description, shapeType, arrowDirection } } : conn
     );
     updateConnections(updatedConnections);
     setShowEditDialog(false);
@@ -207,6 +224,7 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
           <ConnectionEditDialog
             description={currentDescription}
             shapeType={currentShapeType}
+            arrowDirection={currentArrowDirection}
             onSave={handleDescriptionChange}
             onCancel={() => setShowEditDialog(false)}
             position={{ x: labelX, y: labelY }}
