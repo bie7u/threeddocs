@@ -307,6 +307,7 @@ const ConnectionTube = ({ startPos, endPos, isActive, style = 'standard', shapeT
   const tubeRef = useRef<THREE.Mesh>(null);
   const glowRef = useRef<THREE.Mesh>(null);
   const shapeRef = useRef<THREE.Group>(null);
+  const arrowGroupRef = useRef<THREE.Group>(null);
   
   const path = useMemo(() => {
     return new THREE.CatmullRomCurve3([
@@ -321,6 +322,68 @@ const ConnectionTube = ({ startPos, endPos, isActive, style = 'standard', shapeT
       (startPos[1] + endPos[1]) / 2 + 2,
       (startPos[2] + endPos[2]) / 2
     );
+  }, [startPos, endPos]);
+
+  // Arrow-specific geometry: trimmed endpoints (outside cubes) + raised arc path
+  const arrowData = useMemo(() => {
+    const start = new THREE.Vector3(...startPos);
+    const end = new THREE.Vector3(...endPos);
+    const dist = start.distanceTo(end);
+    const dir = new THREE.Vector3().subVectors(end, start).normalize();
+
+    // Offset endpoints so the shaft starts/ends just outside the cube surfaces.
+    // Cube half-extent is 1.0 (size=2); 1.5 units provides clearance beyond the surface.
+    const TRIM_OFFSET = Math.min(1.5, dist * 0.25);
+    // Minimum shaft length: below this the geometry would be degenerate
+    const MIN_SHAFT_LENGTH = 0.5;
+    const trimmedStart = start.clone().addScaledVector(dir, TRIM_OFFSET);
+    // Move back from end toward start so it clears cube B's near surface
+    const trimmedEnd = end.clone().addScaledVector(dir, -TRIM_OFFSET);
+    const valid = trimmedEnd.distanceTo(trimmedStart) > MIN_SHAFT_LENGTH;
+    const effectiveStart = valid ? trimmedStart : start;
+    const effectiveEnd = valid ? trimmedEnd : end;
+
+    // Raised arc: lift midpoint 3 units above Y=0 so the shaft clearly clears
+    // the cube tops (which are at Y=+1). Extra height makes the arc easy to see.
+    const ARC_HEIGHT = 3.0;
+    const arcMid = effectiveStart.clone()
+      .lerp(effectiveEnd, 0.5)
+      .add(new THREE.Vector3(0, ARC_HEIGHT, 0));
+    const curve = new THREE.CatmullRomCurve3([effectiveStart, arcMid, effectiveEnd]);
+
+    // Sway axis: perpendicular to dir in XZ plane
+    const up = new THREE.Vector3(0, 1, 0);
+    const swayAxis = new THREE.Vector3().crossVectors(dir, up);
+    if (swayAxis.length() < 0.01) swayAxis.set(1, 0, 0);
+    else swayAxis.normalize();
+
+    // Arrowhead placement (base at effectiveEnd, tip pointing outward along dir)
+    const ARROW_H = 1.5;
+    const halfH = ARROW_H / 2;
+    const makeRotation = (direction: THREE.Vector3): [number, number, number] => {
+      const q = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction);
+      const e = new THREE.Euler().setFromQuaternion(q);
+      return [e.x, e.y, e.z];
+    };
+    const forwardHeadPos: [number, number, number] = [
+      effectiveEnd.x + dir.x * halfH,
+      effectiveEnd.y + dir.y * halfH,
+      effectiveEnd.z + dir.z * halfH,
+    ];
+    const backwardHeadPos: [number, number, number] = [
+      effectiveStart.x - dir.x * halfH,
+      effectiveStart.y - dir.y * halfH,
+      effectiveStart.z - dir.z * halfH,
+    ];
+
+    return {
+      curve,
+      swayAxis,
+      arrowHead: {
+        forward: { position: forwardHeadPos, rotation: makeRotation(dir) },
+        backward: { position: backwardHeadPos, rotation: makeRotation(dir.clone().negate()) },
+      },
+    };
   }, [startPos, endPos]);
 
   // Compute arrow head transforms: position at tube tip, oriented along travel direction
@@ -370,6 +433,20 @@ const ConnectionTube = ({ startPos, endPos, isActive, style = 'standard', shapeT
     }
     if (shapeRef.current) {
       shapeRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.6) * (Math.PI / 10);
+    }
+    if (arrowGroupRef.current && connectionType === 'arrow') {
+      const t = state.clock.elapsedTime;
+      const SWAY_FREQUENCY = 1.3;
+      const SWAY_AMPLITUDE = 0.4;
+      const BOB_FREQUENCY = 0.8;
+      const BOB_AMPLITUDE = 0.15;
+      const sway = Math.sin(t * SWAY_FREQUENCY) * SWAY_AMPLITUDE;
+      const bob = Math.sin(t * BOB_FREQUENCY) * BOB_AMPLITUDE;
+      arrowGroupRef.current.position.set(
+        arrowData.swayAxis.x * sway,
+        bob,
+        arrowData.swayAxis.z * sway,
+      );
     }
   });
 
@@ -490,17 +567,36 @@ const ConnectionTube = ({ startPos, endPos, isActive, style = 'standard', shapeT
     }
   };
 
-  // Arrow-only mode: thin shaft (no tube body) that matches the current style color
+  // Large, visible arrowhead for arrow connection type
+  const BIG_ARROW_RADIUS = 0.55;
+  const BIG_ARROW_HEIGHT = 1.5;
+  const BIG_ARROW_SEGMENTS = 12;
+
+  const renderArrowHeadBig = (pos: [number, number, number], rotation: [number, number, number]) => (
+    <mesh position={pos} rotation={rotation}>
+      <coneGeometry args={[BIG_ARROW_RADIUS, BIG_ARROW_HEIGHT, BIG_ARROW_SEGMENTS]} />
+      <meshStandardMaterial
+        color={arrowColor}
+        emissive={arrowColor}
+        emissiveIntensity={isActive ? 1.5 : 0.8}
+        metalness={0.3}
+        roughness={0.2}
+      />
+    </mesh>
+  );
+
+  // Arrow-only mode: raised arc shaft (thicker, visible) + large arrowheads
   const renderArrowShaft = () => {
+    const SHAFT_RADIUS = 0.12;
     switch (style) {
       case 'glass':
         return (
           <mesh>
-            <tubeGeometry args={[path, 20, 0.04, 6, false]} />
+            <tubeGeometry args={[arrowData.curve, 30, SHAFT_RADIUS, 8, false]} />
             <meshPhysicalMaterial
               color={isActive ? '#60a5fa' : '#93c5fd'}
               transparent
-              opacity={0.5}
+              opacity={0.6}
               metalness={0.1}
               roughness={0.1}
               transmission={0.7}
@@ -509,35 +605,49 @@ const ConnectionTube = ({ startPos, endPos, isActive, style = 'standard', shapeT
         );
       case 'glow':
         return (
-          <mesh>
-            <tubeGeometry args={[path, 20, 0.04, 6, false]} />
-            <meshStandardMaterial
-              color={isActive ? '#fbbf24' : '#fcd34d'}
-              emissive="#fbbf24"
-              emissiveIntensity={isActive ? 1.5 : 0.8}
-            />
-          </mesh>
+          <>
+            <mesh>
+              <tubeGeometry args={[arrowData.curve, 30, SHAFT_RADIUS, 8, false]} />
+              <meshStandardMaterial
+                color={isActive ? '#fbbf24' : '#fcd34d'}
+                emissive="#fbbf24"
+                emissiveIntensity={isActive ? 1.5 : 0.8}
+              />
+            </mesh>
+            <mesh>
+              {/* Outer glow halo: 1.8× shaft radius */}
+              <tubeGeometry args={[arrowData.curve, 30, SHAFT_RADIUS * 1.8, 8, false]} />
+              <meshBasicMaterial color="#fbbf24" transparent opacity={isActive ? 0.3 : 0.15} />
+            </mesh>
+          </>
         );
       case 'neon':
         return (
-          <mesh>
-            <tubeGeometry args={[path, 20, 0.04, 6, false]} />
-            <meshStandardMaterial
-              color={isActive ? '#ec4899' : '#f472b6'}
-              emissive={isActive ? '#ec4899' : '#f472b6'}
-              emissiveIntensity={2}
-            />
-          </mesh>
+          <>
+            <mesh>
+              <tubeGeometry args={[arrowData.curve, 30, SHAFT_RADIUS, 8, false]} />
+              <meshStandardMaterial
+                color={isActive ? '#ec4899' : '#f472b6'}
+                emissive={isActive ? '#ec4899' : '#f472b6'}
+                emissiveIntensity={2}
+              />
+            </mesh>
+            <mesh>
+              {/* Neon outer halo: 2× shaft radius (wider than glow for stronger effect) */}
+              <tubeGeometry args={[arrowData.curve, 30, SHAFT_RADIUS * 2, 8, false]} />
+              <meshBasicMaterial color="#ec4899" transparent opacity={0.35} />
+            </mesh>
+          </>
         );
       case 'standard':
       default:
         return (
           <mesh>
-            <tubeGeometry args={[path, 20, 0.04, 6, false]} />
+            <tubeGeometry args={[arrowData.curve, 30, SHAFT_RADIUS, 8, false]} />
             <meshStandardMaterial
               color={isActive ? '#60a5fa' : '#4b5563'}
-              emissive={isActive ? '#3b82f6' : '#000000'}
-              emissiveIntensity={isActive ? 0.5 : 0}
+              emissive={isActive ? '#3b82f6' : '#1d4ed8'}
+              emissiveIntensity={isActive ? 0.8 : 0.4}
               metalness={0.5}
               roughness={0.3}
             />
@@ -565,11 +675,23 @@ const ConnectionTube = ({ startPos, endPos, isActive, style = 'standard', shapeT
 
   return (
     <group onClick={onClick} onPointerOver={handlePointerOver} onPointerOut={handlePointerOut}>
-      {connectionType === 'arrow' ? renderArrowShaft() : renderByStyle()}
-      {(effectiveArrowDirection === 'forward' || effectiveArrowDirection === 'bidirectional') &&
-        renderArrowHead(arrowTransforms.forward.position, arrowTransforms.forward.rotation)}
-      {(effectiveArrowDirection === 'backward' || effectiveArrowDirection === 'bidirectional') &&
-        renderArrowHead(arrowTransforms.backward.position, arrowTransforms.backward.rotation)}
+      {connectionType === 'arrow' ? (
+        <group ref={arrowGroupRef}>
+          {renderArrowShaft()}
+          {(effectiveArrowDirection === 'forward' || effectiveArrowDirection === 'bidirectional') &&
+            renderArrowHeadBig(arrowData.arrowHead.forward.position, arrowData.arrowHead.forward.rotation)}
+          {(effectiveArrowDirection === 'backward' || effectiveArrowDirection === 'bidirectional') &&
+            renderArrowHeadBig(arrowData.arrowHead.backward.position, arrowData.arrowHead.backward.rotation)}
+        </group>
+      ) : (
+        <>
+          {renderByStyle()}
+          {(effectiveArrowDirection === 'forward' || effectiveArrowDirection === 'bidirectional') &&
+            renderArrowHead(arrowTransforms.forward.position, arrowTransforms.forward.rotation)}
+          {(effectiveArrowDirection === 'backward' || effectiveArrowDirection === 'bidirectional') &&
+            renderArrowHead(arrowTransforms.backward.position, arrowTransforms.backward.rotation)}
+        </>
+      )}
       {shapeType && (
         <group ref={shapeRef} position={[midPoint.x, midPoint.y, midPoint.z]}>
           <Shape3D 
