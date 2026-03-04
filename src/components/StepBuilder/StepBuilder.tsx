@@ -18,7 +18,7 @@ import ReactFlow, {
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { useAppStore } from '../../store';
-import type { InstructionStep, ConnectionData, ConnectionStyle, ShapeType, ArrowDirection } from '../../types';
+import type { InstructionStep, ConnectionData, ConnectionStyle, ShapeType, ArrowDirection, ConnectionType } from '../../types';
 
 // Custom node component
 const StepNode = ({ data, selected }: NodeProps<InstructionStep>) => {
@@ -48,7 +48,8 @@ interface ConnectionEditDialogProps {
   description: string;
   shapeType?: ShapeType;
   arrowDirection?: ArrowDirection;
-  onSave: (description: string, shapeType?: ShapeType, arrowDirection?: ArrowDirection) => void;
+  connectionType?: ConnectionType;
+  onSave: (description: string, shapeType?: ShapeType, arrowDirection?: ArrowDirection, connectionType?: ConnectionType) => void;
   onCancel: () => void;
   position: { x: number; y: number };
 }
@@ -57,6 +58,7 @@ const ConnectionEditDialog = ({
   description, 
   shapeType, 
   arrowDirection,
+  connectionType,
   onSave, 
   onCancel,
   position 
@@ -64,9 +66,10 @@ const ConnectionEditDialog = ({
   const [tempDescription, setTempDescription] = useState(description);
   const [tempShapeType, setTempShapeType] = useState<ShapeType | undefined>(shapeType);
   const [tempArrowDirection, setTempArrowDirection] = useState<ArrowDirection>(arrowDirection || 'none');
+  const [tempConnectionType, setTempConnectionType] = useState<ConnectionType>(connectionType || 'tube');
   
   const handleSave = () => {
-    onSave(tempDescription, tempShapeType, tempArrowDirection);
+    onSave(tempDescription, tempShapeType, tempArrowDirection, tempConnectionType);
   };
   
   return (
@@ -104,6 +107,17 @@ const ConnectionEditDialog = ({
         </select>
       </div>
       <div className="mb-3">
+        <label className="block text-xs font-medium text-gray-700 mb-1">Connection Type</label>
+        <select
+          value={tempConnectionType}
+          onChange={(e) => setTempConnectionType(e.target.value as ConnectionType)}
+          className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="tube">Tube (pipe)</option>
+          <option value="arrow">Arrow</option>
+        </select>
+      </div>
+      <div className="mb-3">
         <label className="block text-xs font-medium text-gray-700 mb-1">Arrow Direction</label>
         <select
           value={tempArrowDirection}
@@ -134,6 +148,7 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
   const currentDescription = data?.description || '';
   const currentShapeType = data?.shapeType;
   const currentArrowDirection = data?.arrowDirection;
+  const currentConnectionType = data?.connectionType;
   
   const styles: { value: ConnectionStyle; label: string; color: string }[] = [
     { value: 'standard', label: 'Standard', color: '#4b5563' },
@@ -151,10 +166,10 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
     setShowStyleMenu(false);
   };
   
-  const handleDescriptionChange = (description: string, shapeType?: ShapeType, arrowDirection?: ArrowDirection) => {
+  const handleDescriptionChange = (description: string, shapeType?: ShapeType, arrowDirection?: ArrowDirection, connectionType?: ConnectionType) => {
     if (!project) return;
     const updatedConnections = project.connections.map(conn => 
-      conn.id === id ? { ...conn, data: { ...conn.data, description, shapeType, arrowDirection } } : conn
+      conn.id === id ? { ...conn, data: { ...conn.data, description, shapeType, arrowDirection, connectionType } } : conn
     );
     updateConnections(updatedConnections);
     setShowEditDialog(false);
@@ -225,6 +240,7 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
             description={currentDescription}
             shapeType={currentShapeType}
             arrowDirection={currentArrowDirection}
+            connectionType={currentConnectionType}
             onSave={handleDescriptionChange}
             onCancel={() => setShowEditDialog(false)}
             position={{ x: labelX, y: labelY }}

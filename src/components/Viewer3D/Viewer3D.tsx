@@ -2,7 +2,7 @@ import { useRef, useEffect, useMemo, Suspense, useState, Component, type ReactNo
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera, useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
-import type { InstructionStep, ConnectionStyle, ShapeType, ArrowDirection } from '../../types';
+import type { InstructionStep, ConnectionStyle, ShapeType, ArrowDirection, ConnectionType } from '../../types';
 import type { ProjectData } from '../../types';
 import { calculateCreatorBasedLayout } from '../../utils/layoutCalculator';
 import { EngravedBlock } from './EngravedBlock';
@@ -40,6 +40,7 @@ interface ConnectionWithIndices {
   description?: string;
   shapeType?: ShapeType;
   arrowDirection?: ArrowDirection;
+  connectionType?: ConnectionType;
 }
 
 interface CustomModelProps {
@@ -298,10 +299,11 @@ interface ConnectionTubeProps {
   description?: string;
   shapeType?: ShapeType;
   arrowDirection?: ArrowDirection;
+  connectionType?: ConnectionType;
   onClick?: () => void;
 }
 
-const ConnectionTube = ({ startPos, endPos, isActive, style = 'standard', shapeType, arrowDirection, onClick }: ConnectionTubeProps) => {
+const ConnectionTube = ({ startPos, endPos, isActive, style = 'standard', shapeType, arrowDirection, connectionType = 'tube', onClick }: ConnectionTubeProps) => {
   const tubeRef = useRef<THREE.Mesh>(null);
   const glowRef = useRef<THREE.Mesh>(null);
   const shapeRef = useRef<THREE.Group>(null);
@@ -488,6 +490,68 @@ const ConnectionTube = ({ startPos, endPos, isActive, style = 'standard', shapeT
     }
   };
 
+  // Arrow-only mode: thin shaft (no tube body) that matches the current style color
+  const renderArrowShaft = () => {
+    switch (style) {
+      case 'glass':
+        return (
+          <mesh>
+            <tubeGeometry args={[path, 20, 0.04, 6, false]} />
+            <meshPhysicalMaterial
+              color={isActive ? '#60a5fa' : '#93c5fd'}
+              transparent
+              opacity={0.5}
+              metalness={0.1}
+              roughness={0.1}
+              transmission={0.7}
+            />
+          </mesh>
+        );
+      case 'glow':
+        return (
+          <mesh>
+            <tubeGeometry args={[path, 20, 0.04, 6, false]} />
+            <meshStandardMaterial
+              color={isActive ? '#fbbf24' : '#fcd34d'}
+              emissive="#fbbf24"
+              emissiveIntensity={isActive ? 1.5 : 0.8}
+            />
+          </mesh>
+        );
+      case 'neon':
+        return (
+          <mesh>
+            <tubeGeometry args={[path, 20, 0.04, 6, false]} />
+            <meshStandardMaterial
+              color={isActive ? '#ec4899' : '#f472b6'}
+              emissive={isActive ? '#ec4899' : '#f472b6'}
+              emissiveIntensity={2}
+            />
+          </mesh>
+        );
+      case 'standard':
+      default:
+        return (
+          <mesh>
+            <tubeGeometry args={[path, 20, 0.04, 6, false]} />
+            <meshStandardMaterial
+              color={isActive ? '#60a5fa' : '#4b5563'}
+              emissive={isActive ? '#3b82f6' : '#000000'}
+              emissiveIntensity={isActive ? 0.5 : 0}
+              metalness={0.5}
+              roughness={0.3}
+            />
+          </mesh>
+        );
+    }
+  };
+
+  // In arrow mode, default to forward when direction is unset
+  const effectiveArrowDirection: ArrowDirection =
+    connectionType === 'arrow' && (!arrowDirection || arrowDirection === 'none')
+      ? 'forward'
+      : arrowDirection ?? 'none';
+
   const handlePointerOver = (e: React.PointerEvent<THREE.Group>) => {
     e.stopPropagation();
     if (onClick) {
@@ -501,10 +565,10 @@ const ConnectionTube = ({ startPos, endPos, isActive, style = 'standard', shapeT
 
   return (
     <group onClick={onClick} onPointerOver={handlePointerOver} onPointerOut={handlePointerOut}>
-      {renderByStyle()}
-      {(arrowDirection === 'forward' || arrowDirection === 'bidirectional') &&
+      {connectionType === 'arrow' ? renderArrowShaft() : renderByStyle()}
+      {(effectiveArrowDirection === 'forward' || effectiveArrowDirection === 'bidirectional') &&
         renderArrowHead(arrowTransforms.forward.position, arrowTransforms.forward.rotation)}
-      {(arrowDirection === 'backward' || arrowDirection === 'bidirectional') &&
+      {(effectiveArrowDirection === 'backward' || effectiveArrowDirection === 'bidirectional') &&
         renderArrowHead(arrowTransforms.backward.position, arrowTransforms.backward.rotation)}
       {shapeType && (
         <group ref={shapeRef} position={[midPoint.x, midPoint.y, midPoint.z]}>
@@ -559,6 +623,7 @@ const UnifiedModel = ({ project, currentStepId, nodePositions, onConnectionClick
           description: conn.data?.description,
           shapeType: conn.data?.shapeType,
           arrowDirection: conn.data?.arrowDirection,
+          connectionType: conn.data?.connectionType,
         } as ConnectionWithIndices;
       })
       .filter((c): c is ConnectionWithIndices => c !== null);
@@ -590,6 +655,7 @@ const UnifiedModel = ({ project, currentStepId, nodePositions, onConnectionClick
           description={conn.description}
           shapeType={conn.shapeType}
           arrowDirection={conn.arrowDirection}
+          connectionType={conn.connectionType}
           onClick={conn.description && onConnectionClick ? () => onConnectionClick(conn.description as string) : undefined}
         />
       ))}
