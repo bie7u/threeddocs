@@ -322,7 +322,6 @@ const ConnectionTube = ({ startPos, endPos, isActive, style = 'standard', shapeT
   }, [startPos, endPos]);
 
   // Compute arrow head transforms: position at tube tip, oriented along travel direction
-  const ARROW_INSET_OFFSET = 0.35; // inset from endpoint so arrowhead sits on the tube tip
   const ARROW_RADIUS = 0.3;
   const ARROW_HEIGHT = 0.7;
   const ARROW_SEGMENTS = 8;
@@ -333,27 +332,29 @@ const ConnectionTube = ({ startPos, endPos, isActive, style = 'standard', shapeT
     const dir = new THREE.Vector3().subVectors(end, start).normalize();
     const back = dir.clone().negate();
 
-    const makeQuaternion = (direction: THREE.Vector3) => {
+    const makeRotation = (direction: THREE.Vector3): [number, number, number] => {
       // Cone default axis is Y; rotate so Y aligns with direction
-      const up = new THREE.Vector3(0, 1, 0);
-      return new THREE.Quaternion().setFromUnitVectors(up, direction);
+      const q = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction);
+      const e = new THREE.Euler().setFromQuaternion(q);
+      return [e.x, e.y, e.z];
     };
 
-    // Place arrowhead slightly inside the tube end so it doesn't float
+    // Place arrowhead with base at tube endpoint and tip protruding outward
+    const halfHeight = ARROW_HEIGHT / 2;
     const forwardPos: [number, number, number] = [
-      end.x - dir.x * ARROW_INSET_OFFSET,
-      end.y - dir.y * ARROW_INSET_OFFSET,
-      end.z - dir.z * ARROW_INSET_OFFSET,
+      end.x + dir.x * halfHeight,
+      end.y + dir.y * halfHeight,
+      end.z + dir.z * halfHeight,
     ];
     const backwardPos: [number, number, number] = [
-      start.x + dir.x * ARROW_INSET_OFFSET,
-      start.y + dir.y * ARROW_INSET_OFFSET,
-      start.z + dir.z * ARROW_INSET_OFFSET,
+      start.x - dir.x * halfHeight,
+      start.y - dir.y * halfHeight,
+      start.z - dir.z * halfHeight,
     ];
 
     return {
-      forward: { position: forwardPos, quaternion: makeQuaternion(dir) },
-      backward: { position: backwardPos, quaternion: makeQuaternion(back) },
+      forward: { position: forwardPos, rotation: makeRotation(dir) },
+      backward: { position: backwardPos, rotation: makeRotation(back) },
     };
   }, [startPos, endPos]);
 
@@ -380,8 +381,8 @@ const ConnectionTube = ({ startPos, endPos, isActive, style = 'standard', shapeT
     }
   }, [style, isActive]);
 
-  const renderArrowHead = (pos: [number, number, number], quaternion: THREE.Quaternion) => (
-    <mesh position={pos} quaternion={quaternion}>
+  const renderArrowHead = (pos: [number, number, number], rotation: [number, number, number]) => (
+    <mesh position={pos} rotation={rotation}>
       <coneGeometry args={[ARROW_RADIUS, ARROW_HEIGHT, ARROW_SEGMENTS]} />
       <meshStandardMaterial
         color={arrowColor}
@@ -502,9 +503,9 @@ const ConnectionTube = ({ startPos, endPos, isActive, style = 'standard', shapeT
     <group onClick={onClick} onPointerOver={handlePointerOver} onPointerOut={handlePointerOut}>
       {renderByStyle()}
       {(arrowDirection === 'forward' || arrowDirection === 'bidirectional') &&
-        renderArrowHead(arrowTransforms.forward.position, arrowTransforms.forward.quaternion)}
+        renderArrowHead(arrowTransforms.forward.position, arrowTransforms.forward.rotation)}
       {(arrowDirection === 'backward' || arrowDirection === 'bidirectional') &&
-        renderArrowHead(arrowTransforms.backward.position, arrowTransforms.backward.quaternion)}
+        renderArrowHead(arrowTransforms.backward.position, arrowTransforms.backward.rotation)}
       {shapeType && (
         <group ref={shapeRef} position={[midPoint.x, midPoint.y, midPoint.z]}>
           <Shape3D 
