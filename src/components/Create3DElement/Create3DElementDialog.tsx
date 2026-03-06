@@ -74,7 +74,7 @@ export const Create3DElementDialog = ({ existing, onClose, onSaved }: Props) => 
       return;
     }
     const element: Custom3DElement = {
-      id: existing?.id ?? `custom3d-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+      id: existing?.id ?? `custom3d-${crypto.randomUUID()}`,
       name: trimmed,
       text: trimmed,
       color,

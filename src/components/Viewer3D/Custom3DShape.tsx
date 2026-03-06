@@ -19,6 +19,8 @@ async function loadFont(): Promise<Font> {
   return font;
 }
 
+const DEFAULT_TEXT = 'TXT';
+
 interface Custom3DShapeProps {
   element: Custom3DElement;
 }
@@ -32,7 +34,7 @@ export const Custom3DShape = ({ element }: Custom3DShapeProps) => {
   // Build text geometry
   useEffect(() => {
     let cancelled = false;
-    const safeText = (element.text || 'TXT').slice(0, 5) || 'TXT';
+    const safeText = (element.text || DEFAULT_TEXT).slice(0, 5) || DEFAULT_TEXT;
 
     loadFont().then((font) => {
       if (cancelled) return;

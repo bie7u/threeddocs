@@ -187,7 +187,7 @@ export const StepProperties = () => {
                 </select>
                 {custom3DElements.length === 0 && (
                   <p className="mt-1 text-xs text-amber-600">
-                    Brak elementów 3D. Utwórz je w Ustawienia &gt; Stwórz element 3D.
+                    Brak elementów 3D. Utwórz je w Ustawienia {'>'} Stwórz element 3D.
                   </p>
                 )}
               </div>
