@@ -6,6 +6,9 @@ import type { InstructionStep, ConnectionStyle, ShapeType, ArrowDirection, Conne
 import type { ProjectData } from '../../types';
 import { calculateCreatorBasedLayout } from '../../utils/layoutCalculator';
 import { EngravedBlock } from './EngravedBlock';
+import { Custom3DShape } from './Custom3DShape';
+import { getCustom3DElementById } from '../../utils/custom3DElements';
+import { getUploadedModelById } from '../../utils/uploadedModels';
 
 // Error Boundary for catching errors in 3D components
 class ModelErrorBoundary extends Component<
@@ -49,6 +52,7 @@ interface CustomModelProps {
   emissive?: string;
   emissiveIntensity?: number;
   scale?: number;
+  preserveMaterials?: boolean;
 }
 
 // Fallback component shown while model is loading
@@ -80,7 +84,7 @@ const ModelErrorFallback = () => (
 );
 
 // Component for loading custom GLTF/GLB models
-const CustomModel = ({ url, color, emissive = '#000000', emissiveIntensity = 0, scale = 1 }: CustomModelProps) => {
+const CustomModel = ({ url, color, emissive = '#000000', emissiveIntensity = 0, scale = 1, preserveMaterials = false }: CustomModelProps) => {
   // Convert data URL to blob URL for useGLTF compatibility
   const [blobUrl, setBlobUrl] = useState<string | null>(null);
   const blobUrlRef = useRef<string | null>(null);
@@ -117,11 +121,11 @@ const CustomModel = ({ url, color, emissive = '#000000', emissiveIntensity = 0, 
     return <ModelLoadingFallback />;
   }
   
-  return <CustomModelRenderer url={blobUrl} color={color} emissive={emissive} emissiveIntensity={emissiveIntensity} scale={scale} />;
+  return <CustomModelRenderer url={blobUrl} color={color} emissive={emissive} emissiveIntensity={emissiveIntensity} scale={scale} preserveMaterials={preserveMaterials} />;
 };
 
 // Actual renderer component that uses useGLTF
-const CustomModelRenderer = ({ url, color, emissive = '#000000', emissiveIntensity = 0, scale = 1 }: CustomModelProps) => {
+const CustomModelRenderer = ({ url, color, emissive = '#000000', emissiveIntensity = 0, scale = 1, preserveMaterials = false }: CustomModelProps) => {
   const { scene } = useGLTF(url);
   
   // Clone the scene to avoid modifying the cached version
@@ -132,7 +136,7 @@ const CustomModelRenderer = ({ url, color, emissive = '#000000', emissiveIntensi
     clonedScene.traverse((child) => {
       if (child instanceof THREE.Mesh) {
         child.castShadow = true;
-        if (child.material) {
+        if (!preserveMaterials && child.material) {
           const oldMaterial = child.material as THREE.Material;
           const metalness = (oldMaterial as THREE.MeshStandardMaterial).metalness ?? 0.5;
           const roughness = (oldMaterial as THREE.MeshStandardMaterial).roughness ?? 0.5;
@@ -147,7 +151,7 @@ const CustomModelRenderer = ({ url, color, emissive = '#000000', emissiveIntensi
         }
       }
     });
-  }, [clonedScene, color, emissive, emissiveIntensity]);
+  }, [clonedScene, color, emissive, emissiveIntensity, preserveMaterials]);
   
   useEffect(() => {
     clonedScene.scale.set(scale, scale, scale);
@@ -165,35 +169,93 @@ interface Shape3DProps {
   customModelUrl?: string;
   modelScale?: number;
   engravedBlockParams?: InstructionStep['engravedBlockParams'];
+  custom3dElementId?: string;
+  uploadedModelId?: string;
+  modelPositionY?: number;
 }
 
 // Reusable 3D shape component
-const Shape3D = ({ shapeType = 'cube', size = 2, color, emissive = '#000000', emissiveIntensity = 0, customModelUrl, modelScale = 1, engravedBlockParams }: Shape3DProps) => {
+const Shape3D = ({ shapeType = 'cube', size = 2, color, emissive = '#000000', emissiveIntensity = 0, customModelUrl, modelScale = 1, engravedBlockParams, custom3dElementId, uploadedModelId, modelPositionY = 0 }: Shape3DProps) => {
   if (shapeType === 'custom' && customModelUrl) {
     return (
-      <ModelErrorBoundary fallback={<ModelErrorFallback />}>
-        <Suspense fallback={<ModelLoadingFallback />}>
-          <CustomModel 
-            url={customModelUrl}
-            color={color}
-            emissive={emissive}
-            emissiveIntensity={emissiveIntensity}
-            scale={modelScale}
-          />
-        </Suspense>
-      </ModelErrorBoundary>
+      <group position={[0, modelPositionY, 0]}>
+        <ModelErrorBoundary fallback={<ModelErrorFallback />}>
+          <Suspense fallback={<ModelLoadingFallback />}>
+            <CustomModel 
+              url={customModelUrl}
+              color={color}
+              emissive={emissive}
+              emissiveIntensity={emissiveIntensity}
+              scale={modelScale}
+            />
+          </Suspense>
+        </ModelErrorBoundary>
+      </group>
+    );
+  }
+
+  if (shapeType === 'uploadedModel' && uploadedModelId) {
+    const model = getUploadedModelById(uploadedModelId);
+    if (model) {
+      return (
+        <group position={[0, modelPositionY, 0]}>
+          <ModelErrorBoundary fallback={<ModelErrorFallback />}>
+            <Suspense fallback={<ModelLoadingFallback />}>
+              <CustomModel
+                url={model.modelDataUrl}
+                color={color}
+                emissive={emissive}
+                emissiveIntensity={emissiveIntensity}
+                scale={modelScale * model.modelScale}
+                preserveMaterials={true}
+              />
+            </Suspense>
+          </ModelErrorBoundary>
+        </group>
+      );
+    }
+    // Fallback if model not found
+    return (
+      <group position={[0, modelPositionY, 0]} scale={[modelScale, modelScale, modelScale]}>
+        <mesh castShadow>
+          <boxGeometry args={[size, size, size]} />
+          <meshStandardMaterial color={color} wireframe />
+        </mesh>
+      </group>
+    );
+  }
+
+  if (shapeType === 'custom3dElement' && custom3dElementId) {
+    const element = getCustom3DElementById(custom3dElementId);
+    if (element) {
+      return (
+        <group position={[0, modelPositionY, 0]} scale={[modelScale, modelScale, modelScale]}>
+          <Custom3DShape element={element} />
+        </group>
+      );
+    }
+    // Fallback if element not found
+    return (
+      <group position={[0, modelPositionY, 0]} scale={[modelScale, modelScale, modelScale]}>
+        <mesh castShadow>
+          <boxGeometry args={[size, size, size]} />
+          <meshStandardMaterial color={color} wireframe />
+        </mesh>
+      </group>
     );
   }
 
   if (shapeType === 'engravedBlock') {
     const ebParams = engravedBlockParams ?? { text: 'DB', font: 'helvetiker', depth: 0.08, padding: 0.1, face: 'front' };
     return (
-      <EngravedBlock
-        params={ebParams}
-        color={color}
-        emissive={emissive}
-        emissiveIntensity={emissiveIntensity}
-      />
+      <group position={[0, modelPositionY, 0]} scale={[modelScale, modelScale, modelScale]}>
+        <EngravedBlock
+          params={ebParams}
+          color={color}
+          emissive={emissive}
+          emissiveIntensity={emissiveIntensity}
+        />
+      </group>
     );
   }
   
@@ -212,14 +274,16 @@ const Shape3D = ({ shapeType = 'cube', size = 2, color, emissive = '#000000', em
   };
 
   return (
-    <mesh castShadow>
-      {renderGeometry()}
-      <meshStandardMaterial 
-        color={color}
-        emissive={emissive}
-        emissiveIntensity={emissiveIntensity}
-      />
-    </mesh>
+    <group position={[0, modelPositionY, 0]} scale={[modelScale, modelScale, modelScale]}>
+      <mesh castShadow>
+        {renderGeometry()}
+        <meshStandardMaterial 
+          color={color}
+          emissive={emissive}
+          emissiveIntensity={emissiveIntensity}
+        />
+      </mesh>
+    </group>
   );
 };
 
@@ -246,9 +310,11 @@ const StepCube = ({ step, position, isActive }: StepCubeProps) => {
 
   const color = step.highlightColor || '#4299e1';
   const shapeType = step.shapeType || 'cube';
+  const modelScale = step.modelScale ?? 1;
+  const modelPositionY = step.modelPositionY ?? 0;
 
   const renderGlowGeometry = () => {
-    const glowSize = 2.3;
+    const glowSize = 2.3 * modelScale;
     switch (shapeType) {
       case 'sphere':
         return <sphereGeometry args={[glowSize / 2, 32, 32]} />;
@@ -272,12 +338,15 @@ const StepCube = ({ step, position, isActive }: StepCubeProps) => {
           emissive={isActive ? color : '#000000'}
           emissiveIntensity={isActive ? 0.3 : 0}
           customModelUrl={step.customModelUrl}
-          modelScale={step.modelScale}
+          modelScale={modelScale}
+          modelPositionY={modelPositionY}
           engravedBlockParams={step.engravedBlockParams}
+          custom3dElementId={step.custom3dElementId}
+          uploadedModelId={step.uploadedModelId}
         />
       </group>
-      {isActive && shapeType !== 'custom' && shapeType !== 'engravedBlock' && (
-        <mesh ref={glowRef}>
+      {isActive && shapeType !== 'custom' && shapeType !== 'engravedBlock' && shapeType !== 'custom3dElement' && shapeType !== 'uploadedModel' && (
+        <mesh ref={glowRef} position={[0, modelPositionY, 0]}>
           {renderGlowGeometry()}
           <meshBasicMaterial 
             color={color}

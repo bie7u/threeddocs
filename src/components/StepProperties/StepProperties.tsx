@@ -1,7 +1,10 @@
 import { useEffect, useState, useRef } from 'react';
 import { useAppStore } from '../../store';
-import type { InstructionStep, ShapeType, EngravedBlockParams } from '../../types';
+import type { InstructionStep, ShapeType, EngravedBlockParams, UploadedModel3D } from '../../types';
 import { RichTextEditor } from '../RichTextEditor';
+import { loadCustom3DElements } from '../../utils/custom3DElements';
+import { loadUploadedModels } from '../../utils/uploadedModels';
+import type { Custom3DElement } from '../../types';
 
 export const StepProperties = () => {
   const { project, selectedStepId, updateStep, deleteStep, addStep } = useAppStore();
@@ -11,6 +14,14 @@ export const StepProperties = () => {
   const blobUrlRef = useRef<string | null>(null);
   const uploadedFileNameRef = useRef<string | null>(null);
   
+  const [custom3DElements, setCustom3DElements] = useState<Custom3DElement[]>([]);
+  const [uploadedModels, setUploadedModels] = useState<UploadedModel3D[]>([]);
+
+  useEffect(() => {
+    setCustom3DElements(loadCustom3DElements());
+    setUploadedModels(loadUploadedModels());
+  }, []);
+  
   const [formData, setFormData] = useState<Partial<InstructionStep>>({
     title: '',
     description: '',
@@ -18,6 +29,9 @@ export const StepProperties = () => {
     shapeType: 'cube',
     customModelUrl: '',
     modelScale: 1,
+    modelPositionY: 0,
+    custom3dElementId: undefined,
+    uploadedModelId: undefined,
     engravedBlockParams: {
       text: 'DB',
       font: 'helvetiker',
@@ -46,6 +60,9 @@ export const StepProperties = () => {
         shapeType: selectedStep.shapeType || 'cube',
         customModelUrl: selectedStep.customModelUrl || '',
         modelScale: selectedStep.modelScale || 1,
+        modelPositionY: selectedStep.modelPositionY ?? 0,
+        custom3dElementId: selectedStep.custom3dElementId,
+        uploadedModelId: selectedStep.uploadedModelId,
         engravedBlockParams: selectedStep.engravedBlockParams || {
           text: 'DB',
           font: 'helvetiker',
@@ -156,8 +173,56 @@ export const StepProperties = () => {
                 <option value="cone">Cone</option>
                 <option value="custom">Custom Model</option>
                 <option value="engravedBlock">Engraved Block (Grawerowany klocek)</option>
+                {custom3DElements.length > 0 && (
+                  <option value="custom3dElement">Mój element 3D</option>
+                )}
+                {uploadedModels.length > 0 && (
+                  <option value="uploadedModel">Wgrany model 3D</option>
+                )}
               </select>
             </div>
+
+            {formData.shapeType === 'custom3dElement' && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Wybierz element 3D</label>
+                <select
+                  value={formData.custom3dElementId || ''}
+                  onChange={(e) => handleInputChange('custom3dElementId', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">-- wybierz element --</option>
+                  {custom3DElements.map((el) => (
+                    <option key={el.id} value={el.id}>{el.name}</option>
+                  ))}
+                </select>
+                {custom3DElements.length === 0 && (
+                  <p className="mt-1 text-xs text-amber-600">
+                    Brak elementów 3D. Utwórz je w Ustawienia {'>'} Stwórz element 3D.
+                  </p>
+                )}
+              </div>
+            )}
+
+            {formData.shapeType === 'uploadedModel' && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Wybierz wgrany model 3D</label>
+                <select
+                  value={formData.uploadedModelId || ''}
+                  onChange={(e) => handleInputChange('uploadedModelId', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">-- wybierz model --</option>
+                  {uploadedModels.map((m) => (
+                    <option key={m.id} value={m.id}>{m.name}</option>
+                  ))}
+                </select>
+                {uploadedModels.length === 0 && (
+                  <p className="mt-1 text-xs text-amber-600">
+                    Brak wgranych modeli. Dodaj je w Ustawienia {'>'} Wgraj element 3D.
+                  </p>
+                )}
+              </div>
+            )}
 
             {formData.shapeType === 'engravedBlock' && (
               <div className="space-y-3 border border-gray-200 rounded p-3 bg-gray-50">
@@ -320,33 +385,59 @@ export const StepProperties = () => {
               </div>
             )}
 
-            {formData.shapeType === 'custom' && (
-              <div>
-                <label htmlFor="model-scale" className="block text-sm font-medium text-gray-700 mb-1">Model Scale</label>
-                <div className="flex items-center gap-3">
-                  <input
-                    id="model-scale"
-                    type="range"
-                    min="0.1"
-                    max="5"
-                    step="0.1"
-                    value={formData.modelScale || 1}
-                    onChange={(e) => handleInputChange('modelScale', parseFloat(e.target.value))}
-                    className="flex-1"
-                  />
-                  <input
-                    type="number"
-                    min="0.1"
-                    max="5"
-                    step="0.1"
-                    value={formData.modelScale || 1}
-                    onChange={(e) => handleInputChange('modelScale', parseFloat(e.target.value))}
-                    className="w-20 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                <p className="mt-1 text-xs text-gray-500">Adjust the size of the 3D model (0.1 - 5.0)</p>
+            <div>
+              <label htmlFor="model-scale" className="block text-sm font-medium text-gray-700 mb-1">
+                Scale <span className="text-gray-400 font-normal">(0.1 – 5.0)</span>
+              </label>
+              <div className="flex items-center gap-3">
+                <input
+                  id="model-scale"
+                  type="range"
+                  min="0.1"
+                  max="5"
+                  step="0.1"
+                  value={formData.modelScale ?? 1}
+                  onChange={(e) => handleInputChange('modelScale', parseFloat(e.target.value))}
+                  className="flex-1"
+                />
+                <input
+                  type="number"
+                  min="0.1"
+                  max="5"
+                  step="0.1"
+                  value={formData.modelScale ?? 1}
+                  onChange={(e) => handleInputChange('modelScale', parseFloat(e.target.value))}
+                  className="w-20 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
               </div>
-            )}
+            </div>
+
+            <div>
+              <label htmlFor="model-position-y" className="block text-sm font-medium text-gray-700 mb-1">
+                Position Y <span className="text-gray-400 font-normal">(-10 – 10, up / down)</span>
+              </label>
+              <div className="flex items-center gap-3">
+                <input
+                  id="model-position-y"
+                  type="range"
+                  min="-10"
+                  max="10"
+                  step="0.1"
+                  value={formData.modelPositionY ?? 0}
+                  onChange={(e) => handleInputChange('modelPositionY', parseFloat(e.target.value))}
+                  className="flex-1"
+                />
+                <input
+                  type="number"
+                  min="-10"
+                  max="10"
+                  step="0.1"
+                  value={formData.modelPositionY ?? 0}
+                  onChange={(e) => handleInputChange('modelPositionY', parseFloat(e.target.value))}
+                  className="w-20 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            </div>
 
             <div className="pt-4 space-y-2">
               <button onClick={handleSave} className="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">Save Changes</button>
