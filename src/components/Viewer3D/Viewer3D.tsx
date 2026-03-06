@@ -347,6 +347,10 @@ const StepCube = ({ step, position, isActive, hasActiveStep, onClick }: StepCube
 
   const dimmed = hasActiveStep && !isActive;
 
+  const RING_VERTICAL_OFFSET = 1.2;
+  const RING_INNER_RADIUS = 1.4;
+  const RING_OUTER_RADIUS = 2.2;
+
   return (
     <group position={position} onClick={onClick} onPointerOver={handlePointerOver} onPointerOut={handlePointerOut}>
       <group ref={meshRef}>
@@ -376,8 +380,8 @@ const StepCube = ({ step, position, isActive, hasActiveStep, onClick }: StepCube
         </mesh>
       )}
       {isActive && (
-        <mesh ref={ringRef} position={[0, modelPositionY - 1.2 * modelScale, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-          <ringGeometry args={[1.4 * modelScale, 2.2 * modelScale, 48]} />
+        <mesh ref={ringRef} position={[0, modelPositionY - RING_VERTICAL_OFFSET * modelScale, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+          <ringGeometry args={[RING_INNER_RADIUS * modelScale, RING_OUTER_RADIUS * modelScale, 48]} />
           <meshBasicMaterial color={color} transparent opacity={0.7} side={THREE.DoubleSide} />
         </mesh>
       )}
