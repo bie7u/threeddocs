@@ -2,7 +2,7 @@ import { useRef, useEffect, useMemo, Suspense, useState, Component, type ReactNo
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera, useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
-import type { InstructionStep, ConnectionStyle, ShapeType } from '../../types';
+import type { InstructionStep, ConnectionStyle, ShapeType, ArrowDirection, ConnectionType } from '../../types';
 import type { ProjectData } from '../../types';
 import { calculateCreatorBasedLayout } from '../../utils/layoutCalculator';
 import { EngravedBlock } from './EngravedBlock';
@@ -39,6 +39,8 @@ interface ConnectionWithIndices {
   style: ConnectionStyle;
   description?: string;
   shapeType?: ShapeType;
+  arrowDirection?: ArrowDirection;
+  connectionType?: ConnectionType;
 }
 
 interface CustomModelProps {
@@ -296,10 +298,12 @@ interface ConnectionTubeProps {
   style?: 'standard' | 'glass' | 'glow' | 'neon';
   description?: string;
   shapeType?: ShapeType;
+  arrowDirection?: ArrowDirection;
+  connectionType?: ConnectionType;
   onClick?: () => void;
 }
 
-const ConnectionTube = ({ startPos, endPos, isActive, style = 'standard', shapeType, onClick }: ConnectionTubeProps) => {
+const ConnectionTube = ({ startPos, endPos, isActive, style = 'standard', shapeType, arrowDirection, connectionType = 'tube', onClick }: ConnectionTubeProps) => {
   const tubeRef = useRef<THREE.Mesh>(null);
   const glowRef = useRef<THREE.Mesh>(null);
   const shapeRef = useRef<THREE.Group>(null);
@@ -319,6 +323,43 @@ const ConnectionTube = ({ startPos, endPos, isActive, style = 'standard', shapeT
     );
   }, [startPos, endPos]);
 
+  // Compute arrow head transforms: position at tube tip, oriented along travel direction
+  const ARROW_RADIUS = 0.3;
+  const ARROW_HEIGHT = 0.7;
+  const ARROW_SEGMENTS = 8;
+
+  const arrowTransforms = useMemo(() => {
+    const start = new THREE.Vector3(...startPos);
+    const end = new THREE.Vector3(...endPos);
+    const dir = new THREE.Vector3().subVectors(end, start).normalize();
+    const back = dir.clone().negate();
+
+    const makeRotation = (direction: THREE.Vector3): [number, number, number] => {
+      // Cone default axis is Y; rotate so Y aligns with direction
+      const q = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction);
+      const e = new THREE.Euler().setFromQuaternion(q);
+      return [e.x, e.y, e.z];
+    };
+
+    // Place arrowhead with base at tube endpoint and tip protruding outward
+    const halfHeight = ARROW_HEIGHT / 2;
+    const forwardPos: [number, number, number] = [
+      end.x + dir.x * halfHeight,
+      end.y + dir.y * halfHeight,
+      end.z + dir.z * halfHeight,
+    ];
+    const backwardPos: [number, number, number] = [
+      start.x - dir.x * halfHeight,
+      start.y - dir.y * halfHeight,
+      start.z - dir.z * halfHeight,
+    ];
+
+    return {
+      forward: { position: forwardPos, rotation: makeRotation(dir) },
+      backward: { position: backwardPos, rotation: makeRotation(back) },
+    };
+  }, [startPos, endPos]);
+
   useFrame((state) => {
     if (glowRef.current && (style === 'glow' || style === 'neon')) {
       const pulse = Math.sin(state.clock.elapsedTime * 2) * 0.3 + 0.7;
@@ -331,6 +372,29 @@ const ConnectionTube = ({ startPos, endPos, isActive, style = 'standard', shapeT
       shapeRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.6) * (Math.PI / 10);
     }
   });
+
+  // Derive arrowhead color from current style
+  const arrowColor = useMemo(() => {
+    switch (style) {
+      case 'glass': return isActive ? '#60a5fa' : '#93c5fd';
+      case 'glow': return isActive ? '#fbbf24' : '#fcd34d';
+      case 'neon': return isActive ? '#ec4899' : '#f472b6';
+      default: return isActive ? '#60a5fa' : '#4b5563';
+    }
+  }, [style, isActive]);
+
+  const renderArrowHead = (pos: [number, number, number], rotation: [number, number, number]) => (
+    <mesh position={pos} rotation={rotation}>
+      <coneGeometry args={[ARROW_RADIUS, ARROW_HEIGHT, ARROW_SEGMENTS]} />
+      <meshStandardMaterial
+        color={arrowColor}
+        emissive={arrowColor}
+        emissiveIntensity={isActive ? 0.8 : 0.3}
+        metalness={0.4}
+        roughness={0.3}
+      />
+    </mesh>
+  );
 
   const renderByStyle = () => {
     switch (style) {
@@ -426,6 +490,97 @@ const ConnectionTube = ({ startPos, endPos, isActive, style = 'standard', shapeT
     }
   };
 
+  // In arrow mode, default to forward when direction is unset
+  const effectiveArrowDirection: ArrowDirection =
+    connectionType === 'arrow' && (!arrowDirection || arrowDirection === 'none')
+      ? 'forward'
+      : arrowDirection ?? 'none';
+
+  // Classic "→" arrow sign: straight shaft + two V-shaped arms at the tip + soft glow.
+  // The arrow sits at cube-center height (same Y as the tube) but is trimmed so it
+  // does not touch the cube geometry on either end.
+  const renderArrowSign = () => {
+    // Cube half-size = 1.0; trim each end back by this amount to leave a clear gap.
+    const TRIM_GAP = 1.35;
+    const SHAFT_R = 0.07;   // main shaft cylinder radius (slightly smaller)
+    const GLOW_R  = 0.18;   // glow halo radius (wider, transparent)
+    const GLOW_OPACITY = isActive ? 0.38 : 0.20;
+    const ARM_LEN    = 1.0;  // length of each arrowhead arm tube
+    const ARM_SPREAD = 0.50; // perpendicular distance between arm endpoints
+
+    const mainColor = arrowColor;
+    const emissiveIntensity = isActive ? 1.3 : 0.55;
+
+    // Use the same Y as the cubes/tube (startPos[1] == endPos[1] == 0 from layoutCalculator)
+    const rawS = new THREE.Vector3(...startPos);
+    const rawE = new THREE.Vector3(...endPos);
+    const totalDist = rawS.distanceTo(rawE);
+    if (totalDist < 0.01) return null;
+
+    const dir = new THREE.Vector3().subVectors(rawE, rawS).normalize();
+
+    // Trim both endpoints back so the shaft clears cube surfaces.
+    // Cap at 40% of total distance (i.e. 20% per side) so the shaft never
+    // collapses to zero length when cubes are placed very close together.
+    const trimPerEndpoint = Math.min(TRIM_GAP, totalDist * 0.4);
+    const s = rawS.clone().addScaledVector(dir,  trimPerEndpoint);
+    const e = rawE.clone().addScaledVector(dir, -trimPerEndpoint);
+
+    if (s.distanceTo(e) < 0.01) return null;
+
+    // Perpendicular in XZ plane for the V-arms (check length before normalizing)
+    const rawPerp = new THREE.Vector3().crossVectors(dir, new THREE.Vector3(0, 1, 0));
+    const perp = rawPerp.length() > 0.001 ? rawPerp.normalize() : new THREE.Vector3(1, 0, 0);
+
+    // Forward arrowhead: tip at e, arms angled back+spread
+    const fwdArm1 = e.clone().addScaledVector(dir, -ARM_LEN).addScaledVector(perp,  ARM_SPREAD);
+    const fwdArm2 = e.clone().addScaledVector(dir, -ARM_LEN).addScaledVector(perp, -ARM_SPREAD);
+    // Backward arrowhead: tip at s, arms angled forward+spread
+    const bwdArm1 = s.clone().addScaledVector(dir,  ARM_LEN).addScaledVector(perp,  ARM_SPREAD);
+    const bwdArm2 = s.clone().addScaledVector(dir,  ARM_LEN).addScaledVector(perp, -ARM_SPREAD);
+
+    const showFwd = effectiveArrowDirection === 'forward' || effectiveArrowDirection === 'bidirectional';
+    const showBwd = effectiveArrowDirection === 'backward' || effectiveArrowDirection === 'bidirectional';
+
+    // Helper: render a cylinder between two world-space points
+    const cyl = (p1: THREE.Vector3, p2: THREE.Vector3, radius: number, glow: boolean) => {
+      const delta = new THREE.Vector3().subVectors(p2, p1);
+      const h = delta.length();
+      if (h < 0.001) return null;
+      const mid = p1.clone().lerp(p2, 0.5);
+      const unitDir = delta.clone().normalize();
+      const q = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), unitDir);
+      const eu = new THREE.Euler().setFromQuaternion(q);
+      return (
+        <mesh position={[mid.x, mid.y, mid.z]} rotation={[eu.x, eu.y, eu.z]}>
+          <cylinderGeometry args={[radius, radius, h, 8, 1]} />
+          {glow
+            ? <meshBasicMaterial color={mainColor} transparent opacity={GLOW_OPACITY} depthWrite={false} />
+            : <meshStandardMaterial color={mainColor} emissive={mainColor} emissiveIntensity={emissiveIntensity} metalness={0.2} roughness={0.3} />
+          }
+        </mesh>
+      );
+    };
+
+    return (
+      <>
+        {/* Glow halos (wider, transparent, drawn behind solid parts) */}
+        {cyl(s, e, GLOW_R, true)}
+        {showFwd && cyl(e, fwdArm1, GLOW_R, true)}
+        {showFwd && cyl(e, fwdArm2, GLOW_R, true)}
+        {showBwd && cyl(s, bwdArm1, GLOW_R, true)}
+        {showBwd && cyl(s, bwdArm2, GLOW_R, true)}
+        {/* Solid arrow: shaft + arms */}
+        {cyl(s, e, SHAFT_R, false)}
+        {showFwd && cyl(e, fwdArm1, SHAFT_R, false)}
+        {showFwd && cyl(e, fwdArm2, SHAFT_R, false)}
+        {showBwd && cyl(s, bwdArm1, SHAFT_R, false)}
+        {showBwd && cyl(s, bwdArm2, SHAFT_R, false)}
+      </>
+    );
+  };
+
+
   const handlePointerOver = (e: React.PointerEvent<THREE.Group>) => {
     e.stopPropagation();
     if (onClick) {
@@ -439,7 +594,17 @@ const ConnectionTube = ({ startPos, endPos, isActive, style = 'standard', shapeT
 
   return (
     <group onClick={onClick} onPointerOver={handlePointerOver} onPointerOut={handlePointerOut}>
-      {renderByStyle()}
+      {connectionType === 'arrow' ? (
+        renderArrowSign()
+      ) : (
+        <>
+          {renderByStyle()}
+          {(effectiveArrowDirection === 'forward' || effectiveArrowDirection === 'bidirectional') &&
+            renderArrowHead(arrowTransforms.forward.position, arrowTransforms.forward.rotation)}
+          {(effectiveArrowDirection === 'backward' || effectiveArrowDirection === 'bidirectional') &&
+            renderArrowHead(arrowTransforms.backward.position, arrowTransforms.backward.rotation)}
+        </>
+      )}
       {shapeType && (
         <group ref={shapeRef} position={[midPoint.x, midPoint.y, midPoint.z]}>
           <Shape3D 
@@ -491,7 +656,9 @@ const UnifiedModel = ({ project, currentStepId, nodePositions, onConnectionClick
           targetIndex, 
           style: conn.data?.style || 'standard' as ConnectionStyle,
           description: conn.data?.description,
-          shapeType: conn.data?.shapeType
+          shapeType: conn.data?.shapeType,
+          arrowDirection: conn.data?.arrowDirection,
+          connectionType: conn.data?.connectionType,
         } as ConnectionWithIndices;
       })
       .filter((c): c is ConnectionWithIndices => c !== null);
@@ -522,6 +689,8 @@ const UnifiedModel = ({ project, currentStepId, nodePositions, onConnectionClick
           style={conn.style}
           description={conn.description}
           shapeType={conn.shapeType}
+          arrowDirection={conn.arrowDirection}
+          connectionType={conn.connectionType}
           onClick={conn.description && onConnectionClick ? () => onConnectionClick(conn.description as string) : undefined}
         />
       ))}

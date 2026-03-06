@@ -17,6 +17,8 @@ export interface Annotation {
 
 export type ConnectionStyle = 'standard' | 'glass' | 'glow' | 'neon';
 
+export type ArrowDirection = 'none' | 'forward' | 'backward' | 'bidirectional';
+
 export type ShapeType = 'cube' | 'sphere' | 'cylinder' | 'cone' | 'custom' | 'engravedBlock';
 
 export type EngravedBlockFace = 'front' | 'back' | 'left' | 'right' | 'top' | 'bottom';
@@ -29,10 +31,14 @@ export interface EngravedBlockParams {
   face: EngravedBlockFace;
 }
 
+export type ConnectionType = 'tube' | 'arrow';
+
 export interface ConnectionData {
   style?: ConnectionStyle;
   description?: string;
   shapeType?: ShapeType;
+  arrowDirection?: ArrowDirection;
+  connectionType?: ConnectionType;
 }
 
 export interface InstructionStep {
