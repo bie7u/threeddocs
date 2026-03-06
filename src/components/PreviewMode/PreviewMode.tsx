@@ -66,7 +66,17 @@ export const PreviewMode = ({ onGoToEditorPanel, isPublic }: { onGoToEditorPanel
 
   return (
     <div className="w-full h-full relative bg-gradient-to-br from-slate-900 to-slate-800">
-      <Viewer3D project={project} currentStepId={currentStep.id} nodePositions={nodePositions} cameraMode={cameraMode} showStepOverlay={false} />
+      <Viewer3D
+        project={project}
+        currentStepId={currentStep.id}
+        nodePositions={nodePositions}
+        cameraMode={cameraMode}
+        showStepOverlay={false}
+        onStepSelect={(stepId) => {
+          const idx = guideSteps.findIndex((s) => s.id === stepId);
+          if (idx !== -1) setCurrentPreviewStepIndex(idx);
+        }}
+      />
 
       {showCopyNotification && (
         <div className="absolute top-20 right-6 bg-green-500 text-white px-6 py-3 rounded-xl shadow-2xl z-50 flex items-center gap-3">

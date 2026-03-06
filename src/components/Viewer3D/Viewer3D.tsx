@@ -230,7 +230,7 @@ const Shape3D = ({ shapeType = 'cube', size = 2, color, emissive = '#000000', em
     if (element) {
       return (
         <group position={[0, modelPositionY, 0]} scale={[modelScale, modelScale, modelScale]}>
-          <Custom3DShape element={element} />
+          <Custom3DShape element={element} emissive={emissive} emissiveIntensity={emissiveIntensity} />
         </group>
       );
     }
@@ -368,7 +368,7 @@ const StepCube = ({ step, position, isActive, hasActiveStep, onClick }: StepCube
           uploadedModelId={step.uploadedModelId}
         />
       </group>
-      {isActive && shapeType !== 'custom' && shapeType !== 'engravedBlock' && shapeType !== 'custom3dElement' && shapeType !== 'uploadedModel' && (
+      {isActive && shapeType !== 'custom' && shapeType !== 'engravedBlock' && shapeType !== 'uploadedModel' && (
         <mesh ref={glowRef} position={[0, modelPositionY, 0]}>
           {renderGlowGeometry()}
           <meshBasicMaterial 
