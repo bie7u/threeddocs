@@ -354,33 +354,32 @@ export const StepProperties = () => {
               </div>
             )}
 
-            {formData.shapeType === 'custom' && (
-              <div>
-                <label htmlFor="model-scale" className="block text-sm font-medium text-gray-700 mb-1">Model Scale</label>
-                <div className="flex items-center gap-3">
-                  <input
-                    id="model-scale"
-                    type="range"
-                    min="0.1"
-                    max="5"
-                    step="0.1"
-                    value={formData.modelScale || 1}
-                    onChange={(e) => handleInputChange('modelScale', parseFloat(e.target.value))}
-                    className="flex-1"
-                  />
-                  <input
-                    type="number"
-                    min="0.1"
-                    max="5"
-                    step="0.1"
-                    value={formData.modelScale || 1}
-                    onChange={(e) => handleInputChange('modelScale', parseFloat(e.target.value))}
-                    className="w-20 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                <p className="mt-1 text-xs text-gray-500">Adjust the size of the 3D model (0.1 - 5.0)</p>
+            <div>
+              <label htmlFor="model-scale" className="block text-sm font-medium text-gray-700 mb-1">
+                Scale <span className="text-gray-400 font-normal">(0.1 – 5.0)</span>
+              </label>
+              <div className="flex items-center gap-3">
+                <input
+                  id="model-scale"
+                  type="range"
+                  min="0.1"
+                  max="5"
+                  step="0.1"
+                  value={formData.modelScale ?? 1}
+                  onChange={(e) => handleInputChange('modelScale', parseFloat(e.target.value))}
+                  className="flex-1"
+                />
+                <input
+                  type="number"
+                  min="0.1"
+                  max="5"
+                  step="0.1"
+                  value={formData.modelScale ?? 1}
+                  onChange={(e) => handleInputChange('modelScale', parseFloat(e.target.value))}
+                  className="w-20 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
               </div>
-            )}
+            </div>
 
             <div className="pt-4 space-y-2">
               <button onClick={handleSave} className="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">Save Changes</button>

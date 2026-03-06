@@ -191,26 +191,34 @@ const Shape3D = ({ shapeType = 'cube', size = 2, color, emissive = '#000000', em
   if (shapeType === 'custom3dElement' && custom3dElementId) {
     const element = getCustom3DElementById(custom3dElementId);
     if (element) {
-      return <Custom3DShape element={element} />;
+      return (
+        <group scale={[modelScale, modelScale, modelScale]}>
+          <Custom3DShape element={element} />
+        </group>
+      );
     }
     // Fallback if element not found
     return (
-      <mesh castShadow>
-        <boxGeometry args={[size, size, size]} />
-        <meshStandardMaterial color={color} wireframe />
-      </mesh>
+      <group scale={[modelScale, modelScale, modelScale]}>
+        <mesh castShadow>
+          <boxGeometry args={[size, size, size]} />
+          <meshStandardMaterial color={color} wireframe />
+        </mesh>
+      </group>
     );
   }
 
   if (shapeType === 'engravedBlock') {
     const ebParams = engravedBlockParams ?? { text: 'DB', font: 'helvetiker', depth: 0.08, padding: 0.1, face: 'front' };
     return (
-      <EngravedBlock
-        params={ebParams}
-        color={color}
-        emissive={emissive}
-        emissiveIntensity={emissiveIntensity}
-      />
+      <group scale={[modelScale, modelScale, modelScale]}>
+        <EngravedBlock
+          params={ebParams}
+          color={color}
+          emissive={emissive}
+          emissiveIntensity={emissiveIntensity}
+        />
+      </group>
     );
   }
   
@@ -229,14 +237,16 @@ const Shape3D = ({ shapeType = 'cube', size = 2, color, emissive = '#000000', em
   };
 
   return (
-    <mesh castShadow>
-      {renderGeometry()}
-      <meshStandardMaterial 
-        color={color}
-        emissive={emissive}
-        emissiveIntensity={emissiveIntensity}
-      />
-    </mesh>
+    <group scale={[modelScale, modelScale, modelScale]}>
+      <mesh castShadow>
+        {renderGeometry()}
+        <meshStandardMaterial 
+          color={color}
+          emissive={emissive}
+          emissiveIntensity={emissiveIntensity}
+        />
+      </mesh>
+    </group>
   );
 };
 
@@ -263,9 +273,10 @@ const StepCube = ({ step, position, isActive }: StepCubeProps) => {
 
   const color = step.highlightColor || '#4299e1';
   const shapeType = step.shapeType || 'cube';
+  const modelScale = step.modelScale ?? 1;
 
   const renderGlowGeometry = () => {
-    const glowSize = 2.3;
+    const glowSize = 2.3 * modelScale;
     switch (shapeType) {
       case 'sphere':
         return <sphereGeometry args={[glowSize / 2, 32, 32]} />;
@@ -289,7 +300,7 @@ const StepCube = ({ step, position, isActive }: StepCubeProps) => {
           emissive={isActive ? color : '#000000'}
           emissiveIntensity={isActive ? 0.3 : 0}
           customModelUrl={step.customModelUrl}
-          modelScale={step.modelScale}
+          modelScale={modelScale}
           engravedBlockParams={step.engravedBlockParams}
           custom3dElementId={step.custom3dElementId}
         />
