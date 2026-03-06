@@ -26,6 +26,7 @@ export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, useSamplePr
     setCameraMode,
     editorMode,
     setEditorMode,
+    setSelectedStepId,
   } = useAppStore();
 
   useEffect(() => {
@@ -188,7 +189,7 @@ export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, useSamplePr
                   </div>
                 </div>
                 <div className="flex-1 relative bg-gradient-to-br from-slate-900 to-slate-800">
-                  <Viewer3D project={project} currentStepId={selectedStepId} nodePositions={nodePositions} cameraMode={cameraMode} />
+                  <Viewer3D project={project} currentStepId={selectedStepId} nodePositions={nodePositions} cameraMode={cameraMode} onStepSelect={setSelectedStepId} />
                   {!selectedStepId && project && project.steps.length > 0 && (
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                       <div className="bg-black/60 backdrop-blur-sm text-white px-6 py-4 rounded-xl shadow-2xl border border-white/10">

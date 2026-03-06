@@ -111,7 +111,7 @@ export const GuideBuilder = () => {
             </div>
           </div>
           <div className="flex-1 relative bg-gradient-to-br from-slate-900 to-slate-800">
-            <Viewer3D project={project} currentStepId={selectedStepId} nodePositions={nodePositions} cameraMode={cameraMode} showStepOverlay={false} />
+            <Viewer3D project={project} currentStepId={selectedStepId} nodePositions={nodePositions} cameraMode={cameraMode} showStepOverlay={false} onStepSelect={setSelectedStepId} />
           </div>
         </div>
 

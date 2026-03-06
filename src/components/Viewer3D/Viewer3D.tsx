@@ -292,21 +292,38 @@ interface StepCubeProps {
   step: InstructionStep;
   position: [number, number, number];
   isActive: boolean;
+  hasActiveStep?: boolean;
+  onClick?: () => void;
 }
 
-const StepCube = ({ step, position, isActive }: StepCubeProps) => {
+const StepCube = ({ step, position, isActive, hasActiveStep, onClick }: StepCubeProps) => {
   const meshRef = useRef<THREE.Group>(null);
   const glowRef = useRef<THREE.Mesh>(null);
+  const ringRef = useRef<THREE.Mesh>(null);
   
   useFrame((state) => {
     if (meshRef.current) {
       meshRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.6) * (Math.PI / 10);
     }
     if (glowRef.current && isActive) {
-      const scale = 1 + Math.sin(state.clock.elapsedTime * 2) * 0.1;
+      const scale = 1 + Math.sin(state.clock.elapsedTime * 2) * 0.12;
       glowRef.current.scale.set(scale, scale, scale);
     }
+    if (ringRef.current && isActive) {
+      ringRef.current.rotation.z = state.clock.elapsedTime * 1.2;
+      const ringScale = 1 + Math.sin(state.clock.elapsedTime * 1.5) * 0.08;
+      ringRef.current.scale.set(ringScale, ringScale, 1);
+    }
   });
+
+  const handlePointerOver = (e: { stopPropagation: () => void }) => {
+    e.stopPropagation();
+    if (onClick) document.body.style.cursor = 'pointer';
+  };
+
+  const handlePointerOut = () => {
+    document.body.style.cursor = 'default';
+  };
 
   const color = step.highlightColor || '#4299e1';
   const shapeType = step.shapeType || 'cube';
@@ -328,15 +345,17 @@ const StepCube = ({ step, position, isActive }: StepCubeProps) => {
     }
   };
 
+  const dimmed = hasActiveStep && !isActive;
+
   return (
-    <group position={position}>
+    <group position={position} onClick={onClick} onPointerOver={handlePointerOver} onPointerOut={handlePointerOut}>
       <group ref={meshRef}>
         <Shape3D 
           shapeType={shapeType}
           size={2}
-          color={color}
+          color={dimmed ? '#888888' : color}
           emissive={isActive ? color : '#000000'}
-          emissiveIntensity={isActive ? 0.3 : 0}
+          emissiveIntensity={isActive ? 0.8 : 0}
           customModelUrl={step.customModelUrl}
           modelScale={modelScale}
           modelPositionY={modelPositionY}
@@ -351,9 +370,15 @@ const StepCube = ({ step, position, isActive }: StepCubeProps) => {
           <meshBasicMaterial 
             color={color}
             transparent 
-            opacity={0.2}
+            opacity={0.45}
             side={THREE.BackSide}
           />
+        </mesh>
+      )}
+      {isActive && (
+        <mesh ref={ringRef} position={[0, modelPositionY - 1.2 * modelScale, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+          <ringGeometry args={[1.4 * modelScale, 2.2 * modelScale, 48]} />
+          <meshBasicMaterial color={color} transparent opacity={0.7} side={THREE.DoubleSide} />
         </mesh>
       )}
     </group>
@@ -694,9 +719,10 @@ interface UnifiedModelProps {
   currentStepId: string | null;
   nodePositions: Record<string, { x: number; y: number }>;
   onConnectionClick?: (description: string) => void;
+  onStepClick?: (stepId: string) => void;
 }
 
-const UnifiedModel = ({ project, currentStepId, nodePositions, onConnectionClick }: UnifiedModelProps) => {
+const UnifiedModel = ({ project, currentStepId, nodePositions, onConnectionClick, onStepClick }: UnifiedModelProps) => {
   const steps = project.steps;
   
   const layout = useMemo(() => {
@@ -747,6 +773,8 @@ const UnifiedModel = ({ project, currentStepId, nodePositions, onConnectionClick
           step={step}
           position={positions[index]}
           isActive={step.id === currentStepId}
+          hasActiveStep={!!currentStepId}
+          onClick={onStepClick ? () => onStepClick(step.id) : undefined}
         />
       ))}
       {connections.map((conn, index) => (
@@ -840,9 +868,10 @@ interface Viewer3DProps {
   nodePositions?: Record<string, { x: number; y: number }>;
   cameraMode?: 'auto' | 'free';
   showStepOverlay?: boolean;
+  onStepSelect?: (stepId: string) => void;
 }
 
-export const Viewer3D = ({ project, currentStepId, nodePositions = {}, cameraMode = 'free', showStepOverlay = true }: Viewer3DProps) => {
+export const Viewer3D = ({ project, currentStepId, nodePositions = {}, cameraMode = 'free', showStepOverlay = true, onStepSelect }: Viewer3DProps) => {
   const currentStep = project?.steps.find(s => s.id === currentStepId);
   const [selectedConnectionDesc, setSelectedConnectionDesc] = useState<string | null>(null);
   
@@ -910,6 +939,7 @@ export const Viewer3D = ({ project, currentStepId, nodePositions = {}, cameraMod
             currentStepId={currentStepId}
             nodePositions={nodePositions}
             onConnectionClick={handleConnectionClick}
+            onStepClick={onStepSelect}
           />
         )}
         
