@@ -19,7 +19,18 @@ export type ConnectionStyle = 'standard' | 'glass' | 'glow' | 'neon';
 
 export type ArrowDirection = 'none' | 'forward' | 'backward' | 'bidirectional';
 
-export type ShapeType = 'cube' | 'sphere' | 'cylinder' | 'cone' | 'custom' | 'engravedBlock';
+export type ShapeType = 'cube' | 'sphere' | 'cylinder' | 'cone' | 'custom' | 'engravedBlock' | 'custom3dElement';
+
+export interface Custom3DElement {
+  id: string;
+  name: string;
+  text: string; // max 5 characters – source for the 3D text shape
+  color: string;
+  wireframe: boolean;
+  wireframeColor: string;
+  textureDataUrl?: string; // base64-encoded image
+  createdAt: number;
+}
 
 export type EngravedBlockFace = 'front' | 'back' | 'left' | 'right' | 'top' | 'bottom';
 
@@ -54,6 +65,8 @@ export interface InstructionStep {
   modelScale?: number;
   // Engraved block specific parameters
   engravedBlockParams?: EngravedBlockParams;
+  // Custom 3D element reference
+  custom3dElementId?: string;
   // Upload-model specific: which mesh element this step focuses on
   focusMeshName?: string;
   focusPoint?: [number, number, number];

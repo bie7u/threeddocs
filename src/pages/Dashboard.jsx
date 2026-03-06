@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { MainLayout } from '../components/Layout/MainLayout';
 import { NewProjectDialog } from '../components/ProjectList/NewProjectDialog';
 import { MyModels } from '../components/MyModels/MyModels';
+import Settings from './Settings';
 import { useAppStore } from '../store';
 import { getMe } from '../services/auth';
 import { logout } from '../services/auth';
@@ -14,6 +15,7 @@ const Dashboard = () => {
   const [showNewProjectDialog, setShowNewProjectDialog] = useState(false);
   const [showEditor, setShowEditor] = useState(false);
   const [showMyModels, setShowMyModels] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [createError, setCreateError] = useState('');
@@ -80,6 +82,13 @@ const Dashboard = () => {
         }}
         onClose={() => setShowMyModels(false)}
       />
+    );
+  }
+
+  // When Settings view is open
+  if (showSettings) {
+    return (
+      <Settings onClose={() => setShowSettings(false)} />
     );
   }
 
@@ -180,7 +189,10 @@ const Dashboard = () => {
             </div>
 
             {/* Ustawienia (Settings) */}
-            <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow cursor-pointer border border-gray-200 hover:border-green-400">
+            <div
+              onClick={() => setShowSettings(true)}
+              className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow cursor-pointer border border-gray-200 hover:border-green-400 group"
+            >
               <div className="text-green-500 mb-4">
                 <svg
                   className="w-12 h-12 mx-auto"

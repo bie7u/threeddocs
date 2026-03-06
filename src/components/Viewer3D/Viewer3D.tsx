@@ -6,6 +6,8 @@ import type { InstructionStep, ConnectionStyle, ShapeType, ArrowDirection, Conne
 import type { ProjectData } from '../../types';
 import { calculateCreatorBasedLayout } from '../../utils/layoutCalculator';
 import { EngravedBlock } from './EngravedBlock';
+import { Custom3DShape } from './Custom3DShape';
+import { getCustom3DElementById } from '../../utils/custom3DElements';
 
 // Error Boundary for catching errors in 3D components
 class ModelErrorBoundary extends Component<
@@ -165,10 +167,11 @@ interface Shape3DProps {
   customModelUrl?: string;
   modelScale?: number;
   engravedBlockParams?: InstructionStep['engravedBlockParams'];
+  custom3dElementId?: string;
 }
 
 // Reusable 3D shape component
-const Shape3D = ({ shapeType = 'cube', size = 2, color, emissive = '#000000', emissiveIntensity = 0, customModelUrl, modelScale = 1, engravedBlockParams }: Shape3DProps) => {
+const Shape3D = ({ shapeType = 'cube', size = 2, color, emissive = '#000000', emissiveIntensity = 0, customModelUrl, modelScale = 1, engravedBlockParams, custom3dElementId }: Shape3DProps) => {
   if (shapeType === 'custom' && customModelUrl) {
     return (
       <ModelErrorBoundary fallback={<ModelErrorFallback />}>
@@ -182,6 +185,20 @@ const Shape3D = ({ shapeType = 'cube', size = 2, color, emissive = '#000000', em
           />
         </Suspense>
       </ModelErrorBoundary>
+    );
+  }
+
+  if (shapeType === 'custom3dElement' && custom3dElementId) {
+    const element = getCustom3DElementById(custom3dElementId);
+    if (element) {
+      return <Custom3DShape element={element} />;
+    }
+    // Fallback if element not found
+    return (
+      <mesh castShadow>
+        <boxGeometry args={[size, size, size]} />
+        <meshStandardMaterial color={color} wireframe />
+      </mesh>
     );
   }
 
@@ -274,9 +291,10 @@ const StepCube = ({ step, position, isActive }: StepCubeProps) => {
           customModelUrl={step.customModelUrl}
           modelScale={step.modelScale}
           engravedBlockParams={step.engravedBlockParams}
+          custom3dElementId={step.custom3dElementId}
         />
       </group>
-      {isActive && shapeType !== 'custom' && shapeType !== 'engravedBlock' && (
+      {isActive && shapeType !== 'custom' && shapeType !== 'engravedBlock' && shapeType !== 'custom3dElement' && (
         <mesh ref={glowRef}>
           {renderGlowGeometry()}
           <meshBasicMaterial 

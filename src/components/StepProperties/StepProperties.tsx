@@ -2,6 +2,8 @@ import { useEffect, useState, useRef } from 'react';
 import { useAppStore } from '../../store';
 import type { InstructionStep, ShapeType, EngravedBlockParams } from '../../types';
 import { RichTextEditor } from '../RichTextEditor';
+import { loadCustom3DElements } from '../../utils/custom3DElements';
+import type { Custom3DElement } from '../../types';
 
 export const StepProperties = () => {
   const { project, selectedStepId, updateStep, deleteStep, addStep } = useAppStore();
@@ -11,6 +13,12 @@ export const StepProperties = () => {
   const blobUrlRef = useRef<string | null>(null);
   const uploadedFileNameRef = useRef<string | null>(null);
   
+  const [custom3DElements, setCustom3DElements] = useState<Custom3DElement[]>([]);
+
+  useEffect(() => {
+    setCustom3DElements(loadCustom3DElements());
+  }, []);
+  
   const [formData, setFormData] = useState<Partial<InstructionStep>>({
     title: '',
     description: '',
@@ -18,6 +26,7 @@ export const StepProperties = () => {
     shapeType: 'cube',
     customModelUrl: '',
     modelScale: 1,
+    custom3dElementId: undefined,
     engravedBlockParams: {
       text: 'DB',
       font: 'helvetiker',
@@ -46,6 +55,7 @@ export const StepProperties = () => {
         shapeType: selectedStep.shapeType || 'cube',
         customModelUrl: selectedStep.customModelUrl || '',
         modelScale: selectedStep.modelScale || 1,
+        custom3dElementId: selectedStep.custom3dElementId,
         engravedBlockParams: selectedStep.engravedBlockParams || {
           text: 'DB',
           font: 'helvetiker',
@@ -156,8 +166,32 @@ export const StepProperties = () => {
                 <option value="cone">Cone</option>
                 <option value="custom">Custom Model</option>
                 <option value="engravedBlock">Engraved Block (Grawerowany klocek)</option>
+                {custom3DElements.length > 0 && (
+                  <option value="custom3dElement">Mój element 3D</option>
+                )}
               </select>
             </div>
+
+            {formData.shapeType === 'custom3dElement' && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Wybierz element 3D</label>
+                <select
+                  value={formData.custom3dElementId || ''}
+                  onChange={(e) => handleInputChange('custom3dElementId', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">-- wybierz element --</option>
+                  {custom3DElements.map((el) => (
+                    <option key={el.id} value={el.id}>{el.name}</option>
+                  ))}
+                </select>
+                {custom3DElements.length === 0 && (
+                  <p className="mt-1 text-xs text-amber-600">
+                    Brak elementów 3D. Utwórz je w Ustawienia &gt; Stwórz element 3D.
+                  </p>
+                )}
+              </div>
+            )}
 
             {formData.shapeType === 'engravedBlock' && (
               <div className="space-y-3 border border-gray-200 rounded p-3 bg-gray-50">
