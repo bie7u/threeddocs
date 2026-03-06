@@ -368,7 +368,7 @@ const StepCube = ({ step, position, isActive, hasActiveStep, onClick }: StepCube
           uploadedModelId={step.uploadedModelId}
         />
       </group>
-      {isActive && shapeType !== 'custom' && shapeType !== 'engravedBlock' && shapeType !== 'uploadedModel' && (
+      {isActive && shapeType !== 'custom' && shapeType !== 'engravedBlock' && shapeType !== 'custom3dElement' && shapeType !== 'uploadedModel' && (
         <mesh ref={glowRef} position={[0, modelPositionY, 0]}>
           {renderGlowGeometry()}
           <meshBasicMaterial 
