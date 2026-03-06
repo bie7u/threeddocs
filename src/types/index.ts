@@ -72,6 +72,7 @@ export interface InstructionStep {
   shapeType?: ShapeType;
   customModelUrl?: string;
   modelScale?: number;
+  modelPositionY?: number;
   // Engraved block specific parameters
   engravedBlockParams?: EngravedBlockParams;
   // Custom 3D element reference

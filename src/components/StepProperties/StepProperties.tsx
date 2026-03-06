@@ -29,6 +29,7 @@ export const StepProperties = () => {
     shapeType: 'cube',
     customModelUrl: '',
     modelScale: 1,
+    modelPositionY: 0,
     custom3dElementId: undefined,
     uploadedModelId: undefined,
     engravedBlockParams: {
@@ -59,6 +60,7 @@ export const StepProperties = () => {
         shapeType: selectedStep.shapeType || 'cube',
         customModelUrl: selectedStep.customModelUrl || '',
         modelScale: selectedStep.modelScale || 1,
+        modelPositionY: selectedStep.modelPositionY ?? 0,
         custom3dElementId: selectedStep.custom3dElementId,
         uploadedModelId: selectedStep.uploadedModelId,
         engravedBlockParams: selectedStep.engravedBlockParams || {
@@ -405,6 +407,33 @@ export const StepProperties = () => {
                   step="0.1"
                   value={formData.modelScale ?? 1}
                   onChange={(e) => handleInputChange('modelScale', parseFloat(e.target.value))}
+                  className="w-20 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="model-position-y" className="block text-sm font-medium text-gray-700 mb-1">
+                Position Y <span className="text-gray-400 font-normal">(-10 – 10, up / down)</span>
+              </label>
+              <div className="flex items-center gap-3">
+                <input
+                  id="model-position-y"
+                  type="range"
+                  min="-10"
+                  max="10"
+                  step="0.1"
+                  value={formData.modelPositionY ?? 0}
+                  onChange={(e) => handleInputChange('modelPositionY', parseFloat(e.target.value))}
+                  className="flex-1"
+                />
+                <input
+                  type="number"
+                  min="-10"
+                  max="10"
+                  step="0.1"
+                  value={formData.modelPositionY ?? 0}
+                  onChange={(e) => handleInputChange('modelPositionY', parseFloat(e.target.value))}
                   className="w-20 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
