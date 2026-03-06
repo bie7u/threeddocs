@@ -8,6 +8,7 @@ import { calculateCreatorBasedLayout } from '../../utils/layoutCalculator';
 import { EngravedBlock } from './EngravedBlock';
 import { Custom3DShape } from './Custom3DShape';
 import { getCustom3DElementById } from '../../utils/custom3DElements';
+import { getUploadedModelById } from '../../utils/uploadedModels';
 
 // Error Boundary for catching errors in 3D components
 class ModelErrorBoundary extends Component<
@@ -168,10 +169,11 @@ interface Shape3DProps {
   modelScale?: number;
   engravedBlockParams?: InstructionStep['engravedBlockParams'];
   custom3dElementId?: string;
+  uploadedModelId?: string;
 }
 
 // Reusable 3D shape component
-const Shape3D = ({ shapeType = 'cube', size = 2, color, emissive = '#000000', emissiveIntensity = 0, customModelUrl, modelScale = 1, engravedBlockParams, custom3dElementId }: Shape3DProps) => {
+const Shape3D = ({ shapeType = 'cube', size = 2, color, emissive = '#000000', emissiveIntensity = 0, customModelUrl, modelScale = 1, engravedBlockParams, custom3dElementId, uploadedModelId }: Shape3DProps) => {
   if (shapeType === 'custom' && customModelUrl) {
     return (
       <ModelErrorBoundary fallback={<ModelErrorFallback />}>
@@ -185,6 +187,34 @@ const Shape3D = ({ shapeType = 'cube', size = 2, color, emissive = '#000000', em
           />
         </Suspense>
       </ModelErrorBoundary>
+    );
+  }
+
+  if (shapeType === 'uploadedModel' && uploadedModelId) {
+    const model = getUploadedModelById(uploadedModelId);
+    if (model) {
+      return (
+        <ModelErrorBoundary fallback={<ModelErrorFallback />}>
+          <Suspense fallback={<ModelLoadingFallback />}>
+            <CustomModel
+              url={model.modelDataUrl}
+              color={color}
+              emissive={emissive}
+              emissiveIntensity={emissiveIntensity}
+              scale={modelScale * model.modelScale}
+            />
+          </Suspense>
+        </ModelErrorBoundary>
+      );
+    }
+    // Fallback if model not found
+    return (
+      <group scale={[modelScale, modelScale, modelScale]}>
+        <mesh castShadow>
+          <boxGeometry args={[size, size, size]} />
+          <meshStandardMaterial color={color} wireframe />
+        </mesh>
+      </group>
     );
   }
 
@@ -303,9 +333,10 @@ const StepCube = ({ step, position, isActive }: StepCubeProps) => {
           modelScale={modelScale}
           engravedBlockParams={step.engravedBlockParams}
           custom3dElementId={step.custom3dElementId}
+          uploadedModelId={step.uploadedModelId}
         />
       </group>
-      {isActive && shapeType !== 'custom' && shapeType !== 'engravedBlock' && shapeType !== 'custom3dElement' && (
+      {isActive && shapeType !== 'custom' && shapeType !== 'engravedBlock' && shapeType !== 'custom3dElement' && shapeType !== 'uploadedModel' && (
         <mesh ref={glowRef}>
           {renderGlowGeometry()}
           <meshBasicMaterial 

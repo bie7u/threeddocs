@@ -1,14 +1,24 @@
 import { useState } from 'react';
 import { Create3DElementDialog } from '../components/Create3DElement/Create3DElementDialog';
+import { UploadModelDialog } from '../components/UploadModelDialog/UploadModelDialog';
 import { loadCustom3DElements, deleteCustom3DElement } from '../utils/custom3DElements';
+import { loadUploadedModels, deleteUploadedModel } from '../utils/uploadedModels';
 
 const Settings = ({ onClose }) => {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [editingElement, setEditingElement] = useState(null);
   const [elements, setElements] = useState(() => loadCustom3DElements());
 
+  const [showUploadDialog, setShowUploadDialog] = useState(false);
+  const [editingModel, setEditingModel] = useState(null);
+  const [uploadedModels, setUploadedModels] = useState(() => loadUploadedModels());
+
   const refreshElements = () => {
     setElements(loadCustom3DElements());
+  };
+
+  const refreshModels = () => {
+    setUploadedModels(loadUploadedModels());
   };
 
   const handleDelete = (id) => {
@@ -31,6 +41,28 @@ const Settings = ({ onClose }) => {
     setShowCreateDialog(false);
     setEditingElement(null);
     refreshElements();
+  };
+
+  const handleUploadModel = () => {
+    setEditingModel(null);
+    setShowUploadDialog(true);
+  };
+
+  const handleEditModel = (model) => {
+    setEditingModel(model);
+    setShowUploadDialog(true);
+  };
+
+  const handleDeleteModel = (id) => {
+    if (!window.confirm('Czy na pewno chcesz usunąć ten model?')) return;
+    deleteUploadedModel(id);
+    refreshModels();
+  };
+
+  const handleModelSaved = () => {
+    setShowUploadDialog(false);
+    setEditingModel(null);
+    refreshModels();
   };
 
   return (
@@ -90,9 +122,26 @@ const Settings = ({ onClose }) => {
               Utwórz własny kształt 3D z tekstu (maks. 5 znaków)
             </p>
           </div>
+
+          {/* Upload 3D Model */}
+          <div
+            onClick={handleUploadModel}
+            className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all cursor-pointer border border-gray-200 hover:border-indigo-400 group"
+          >
+            <div className="text-indigo-500 mb-4 group-hover:scale-110 transition-transform">
+              <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-semibold text-gray-800 mb-1">Wgraj element 3D</h3>
+            <p className="text-sm text-gray-600">
+              Wgraj model 3D (.gltf / .glb) i nadaj mu nazwę oraz skalę
+            </p>
+          </div>
         </div>
 
-        {/* Existing custom elements */}
+        {/* Existing custom 3D text elements */}
         {elements.length > 0 && (
           <div className="mt-12">
             <h3 className="text-xl font-bold text-gray-800 mb-4">Moje elementy 3D</h3>
@@ -135,14 +184,66 @@ const Settings = ({ onClose }) => {
             </div>
           </div>
         )}
+
+        {/* Uploaded 3D models */}
+        {uploadedModels.length > 0 && (
+          <div className="mt-12">
+            <h3 className="text-xl font-bold text-gray-800 mb-4">Wgrane modele 3D</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {uploadedModels.map((model) => (
+                <div
+                  key={model.id}
+                  className="bg-white rounded-xl shadow border border-gray-200 p-4 flex items-center gap-4"
+                >
+                  {/* Icon */}
+                  <div className="w-12 h-12 rounded-lg flex-shrink-0 flex items-center justify-center bg-indigo-100 text-indigo-600">
+                    <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                        d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                    </svg>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-gray-800 truncate">{model.name}</p>
+                    <p className="text-xs text-gray-500">
+                      Skala: {model.modelScale} · {model.modelFileName} · {new Date(model.createdAt).toLocaleDateString('pl-PL')}
+                    </p>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleEditModel(model); }}
+                      className="px-3 py-1 text-xs bg-indigo-500 text-white rounded hover:bg-indigo-600 transition"
+                    >
+                      Edytuj
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleDeleteModel(model.id); }}
+                      className="px-3 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600 transition"
+                    >
+                      Usuń
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Create / Edit dialog */}
+      {/* Create / Edit 3D text element dialog */}
       {showCreateDialog && (
         <Create3DElementDialog
           existing={editingElement}
           onClose={() => { setShowCreateDialog(false); setEditingElement(null); }}
           onSaved={handleSaved}
+        />
+      )}
+
+      {/* Upload / Edit 3D model dialog */}
+      {showUploadDialog && (
+        <UploadModelDialog
+          existing={editingModel}
+          onClose={() => { setShowUploadDialog(false); setEditingModel(null); }}
+          onSaved={handleModelSaved}
         />
       )}
     </div>

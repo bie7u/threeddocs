@@ -1,8 +1,9 @@
 import { useEffect, useState, useRef } from 'react';
 import { useAppStore } from '../../store';
-import type { InstructionStep, ShapeType, EngravedBlockParams } from '../../types';
+import type { InstructionStep, ShapeType, EngravedBlockParams, UploadedModel3D } from '../../types';
 import { RichTextEditor } from '../RichTextEditor';
 import { loadCustom3DElements } from '../../utils/custom3DElements';
+import { loadUploadedModels } from '../../utils/uploadedModels';
 import type { Custom3DElement } from '../../types';
 
 export const StepProperties = () => {
@@ -14,9 +15,11 @@ export const StepProperties = () => {
   const uploadedFileNameRef = useRef<string | null>(null);
   
   const [custom3DElements, setCustom3DElements] = useState<Custom3DElement[]>([]);
+  const [uploadedModels, setUploadedModels] = useState<UploadedModel3D[]>([]);
 
   useEffect(() => {
     setCustom3DElements(loadCustom3DElements());
+    setUploadedModels(loadUploadedModels());
   }, []);
   
   const [formData, setFormData] = useState<Partial<InstructionStep>>({
@@ -27,6 +30,7 @@ export const StepProperties = () => {
     customModelUrl: '',
     modelScale: 1,
     custom3dElementId: undefined,
+    uploadedModelId: undefined,
     engravedBlockParams: {
       text: 'DB',
       font: 'helvetiker',
@@ -56,6 +60,7 @@ export const StepProperties = () => {
         customModelUrl: selectedStep.customModelUrl || '',
         modelScale: selectedStep.modelScale || 1,
         custom3dElementId: selectedStep.custom3dElementId,
+        uploadedModelId: selectedStep.uploadedModelId,
         engravedBlockParams: selectedStep.engravedBlockParams || {
           text: 'DB',
           font: 'helvetiker',
@@ -169,6 +174,9 @@ export const StepProperties = () => {
                 {custom3DElements.length > 0 && (
                   <option value="custom3dElement">Mój element 3D</option>
                 )}
+                {uploadedModels.length > 0 && (
+                  <option value="uploadedModel">Wgrany model 3D</option>
+                )}
               </select>
             </div>
 
@@ -188,6 +196,27 @@ export const StepProperties = () => {
                 {custom3DElements.length === 0 && (
                   <p className="mt-1 text-xs text-amber-600">
                     Brak elementów 3D. Utwórz je w Ustawienia {'>'} Stwórz element 3D.
+                  </p>
+                )}
+              </div>
+            )}
+
+            {formData.shapeType === 'uploadedModel' && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Wybierz wgrany model 3D</label>
+                <select
+                  value={formData.uploadedModelId || ''}
+                  onChange={(e) => handleInputChange('uploadedModelId', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">-- wybierz model --</option>
+                  {uploadedModels.map((m) => (
+                    <option key={m.id} value={m.id}>{m.name}</option>
+                  ))}
+                </select>
+                {uploadedModels.length === 0 && (
+                  <p className="mt-1 text-xs text-amber-600">
+                    Brak wgranych modeli. Dodaj je w Ustawienia {'>'} Wgraj element 3D.
                   </p>
                 )}
               </div>
