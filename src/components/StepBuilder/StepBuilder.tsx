@@ -22,24 +22,43 @@ import type { InstructionStep, ConnectionData, ConnectionStyle, ShapeType, Arrow
 
 // Custom node component
 const StepNode = ({ data, selected }: NodeProps<InstructionStep>) => {
+  const color = data.highlightColor || '#4299e1';
+  const shapeIcon: Record<string, string> = {
+    cube: '📦', sphere: '🔵', cylinder: '🥫', cone: '🔺', custom: '🗿',
+    engravedBlock: '🔲', custom3dElement: '🧩', uploadedModel: '📤',
+  };
+  const icon = shapeIcon[data.shapeType || 'cube'] || '📦';
+
   return (
     <div
-      className={`px-4 py-3 rounded-lg border-2 bg-white shadow-lg min-w-[200px] ${
-        selected ? 'border-blue-500' : 'border-gray-300'
+      className={`rounded-xl bg-white shadow-lg min-w-[190px] max-w-[240px] transition-all duration-150 ${
+        selected
+          ? 'ring-2 ring-offset-1 ring-blue-500 shadow-blue-200'
+          : 'border border-slate-200 hover:shadow-md'
       }`}
     >
-      <Handle type="target" position={Position.Top} />
-      <Handle type="target" position={Position.Left} />
-      <Handle type="target" position={Position.Right} />
-      <div className="font-bold text-sm mb-1">{data.title}</div>
-      <div className="text-xs text-gray-600 line-clamp-2">{data.description}</div>
-      <div
-        className="mt-2 h-2 rounded"
-        style={{ backgroundColor: data.highlightColor || '#4299e1' }}
-      />
-      <Handle type="source" position={Position.Bottom} />
-      <Handle type="source" position={Position.Left} />
-      <Handle type="source" position={Position.Right} />
+      <Handle type="target" position={Position.Top} className="!w-2.5 !h-2.5 !bg-slate-400 !border-white !border-2" />
+      <Handle type="target" position={Position.Left} className="!w-2.5 !h-2.5 !bg-slate-400 !border-white !border-2" />
+      <Handle type="target" position={Position.Right} className="!w-2.5 !h-2.5 !bg-slate-400 !border-white !border-2" />
+
+      {/* Color accent bar */}
+      <div className="h-1 rounded-t-xl" style={{ backgroundColor: color }} />
+
+      <div className="px-3 py-2.5">
+        <div className="flex items-center gap-2 mb-1">
+          <span className="text-base leading-none">{icon}</span>
+          <div className="font-semibold text-slate-800 text-sm leading-tight truncate">{data.title}</div>
+        </div>
+        {data.description && (
+          <div className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
+            {data.description.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()}
+          </div>
+        )}
+      </div>
+
+      <Handle type="source" position={Position.Bottom} className="!w-2.5 !h-2.5 !bg-indigo-500 !border-white !border-2" />
+      <Handle type="source" position={Position.Left} className="!w-2.5 !h-2.5 !bg-indigo-500 !border-white !border-2" />
+      <Handle type="source" position={Position.Right} className="!w-2.5 !h-2.5 !bg-indigo-500 !border-white !border-2" />
     </div>
   );
 };
@@ -337,7 +356,7 @@ export const StepBuilder = () => {
   );
 
   return (
-    <div className="w-full h-full bg-gray-50">
+    <div className="w-full h-full bg-slate-50 relative">
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -350,11 +369,25 @@ export const StepBuilder = () => {
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         fitView
-        className="bg-gray-50"
+        className="bg-slate-50"
+        proOptions={{ hideAttribution: true }}
       >
-        <Background />
-        <Controls />
+        <Background color="#cbd5e1" gap={20} size={1} />
+        <Controls className="shadow-lg border border-slate-200 rounded-lg overflow-hidden" />
       </ReactFlow>
+      {nodes.length === 0 && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <div className="text-center">
+            <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-purple-100 to-indigo-100 rounded-2xl flex items-center justify-center">
+              <svg className="w-8 h-8 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z" />
+              </svg>
+            </div>
+            <p className="text-slate-500 font-medium text-sm">Brak kroków</p>
+            <p className="text-slate-400 text-xs mt-1">Dodaj krok w panelu po lewej</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
