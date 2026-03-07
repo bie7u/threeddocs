@@ -23,9 +23,11 @@ const DEFAULT_TEXT = 'TXT';
 
 interface Custom3DShapeProps {
   element: Custom3DElement;
+  emissive?: string;
+  emissiveIntensity?: number;
 }
 
-export const Custom3DShape = ({ element }: Custom3DShapeProps) => {
+export const Custom3DShape = ({ element, emissive = '#000000', emissiveIntensity = 0 }: Custom3DShapeProps) => {
   const [geo, setGeo] = useState<THREE.BufferGeometry | null>(null);
   const geoRef = useRef<THREE.BufferGeometry | null>(null);
   const [texture, setTexture] = useState<THREE.Texture | null>(null);
@@ -100,7 +102,7 @@ export const Custom3DShape = ({ element }: Custom3DShapeProps) => {
     return (
       <mesh castShadow>
         <boxGeometry args={[1, 1, 0.4]} />
-        <meshStandardMaterial color={element.color} wireframe />
+        <meshStandardMaterial color={element.color} emissive={emissive} emissiveIntensity={emissiveIntensity} wireframe />
       </mesh>
     );
   }
@@ -111,6 +113,8 @@ export const Custom3DShape = ({ element }: Custom3DShapeProps) => {
       <mesh castShadow geometry={geo}>
         <meshStandardMaterial
           color={element.color}
+          emissive={emissive}
+          emissiveIntensity={emissiveIntensity}
           map={texture ?? undefined}
         />
       </mesh>
