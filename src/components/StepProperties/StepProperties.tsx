@@ -186,7 +186,6 @@ export const StepProperties = () => {
                 <option value="sphere">🔵 Kula (Sphere)</option>
                 <option value="cylinder">🥫 Walec (Cylinder)</option>
                 <option value="cone">🔺 Stożek (Cone)</option>
-                <option value="custom">🗿 Model niestandardowy</option>
                 <option value="engravedBlock">🔲 Grawerowany klocek</option>
                 {custom3DElements.length > 0 && (
                   <option value="custom3dElement">🧩 Mój element 3D</option>
@@ -315,88 +314,6 @@ export const StepProperties = () => {
                       className="w-16 px-2 py-1 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
-                </div>
-              </div>
-            )}
-
-            {formData.shapeType === 'custom' && (
-              <div className="bg-white rounded-lg border border-slate-200 p-3 shadow-sm space-y-3">
-                <p className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Model niestandardowy</p>
-                <div>
-                  <label htmlFor="model-file-upload" className="block text-sm font-medium text-gray-700 mb-1">
-                    Wgraj plik modelu
-                  </label>
-                  <input
-                    id="model-file-upload"
-                    type="file"
-                    accept=".gltf,.glb"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        const maxSize = 50 * 1024 * 1024;
-                        if (file.size > maxSize) {
-                          alert('File size exceeds 50MB limit. Please choose a smaller file.');
-                          e.target.value = '';
-                          return;
-                        }
-                        const validTypes = ['model/gltf+json', 'model/gltf-binary', 'model/gltf.binary', 'application/octet-stream'];
-                        if (file.type && !validTypes.includes(file.type) && !file.name.match(/\.(gltf|glb)$/i)) {
-                          alert('Invalid file type. Please select a GLTF (.gltf) or GLB (.glb) file.');
-                          e.target.value = '';
-                          return;
-                        }
-                        const reader = new FileReader();
-                        reader.onload = (event) => {
-                          const dataUrl = event.target?.result as string;
-                          if (dataUrl) {
-                            if (blobUrlRef.current) {
-                              URL.revokeObjectURL(blobUrlRef.current);
-                              blobUrlRef.current = null;
-                            }
-                            uploadedFileNameRef.current = file.name;
-                            handleInputChange('customModelUrl', dataUrl);
-                          }
-                        };
-                        reader.onerror = () => { alert('Failed to read file. Please try again.'); };
-                        reader.readAsDataURL(file);
-                      } else {
-                        if (blobUrlRef.current) {
-                          URL.revokeObjectURL(blobUrlRef.current);
-                          blobUrlRef.current = null;
-                          uploadedFileNameRef.current = null;
-                          handleInputChange('customModelUrl', '');
-                        }
-                      }
-                    }}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  {uploadedFileNameRef.current && (
-                    <p className="mt-1 text-sm text-green-600 font-medium">✓ Wgrano: {uploadedFileNameRef.current}</p>
-                  )}
-                  <p className="mt-1 text-xs text-slate-400">Plik GLTF (.gltf) lub GLB (.glb), max 50 MB</p>
-                </div>
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-200"></div></div>
-                  <div className="relative flex justify-center text-xs"><span className="px-2 bg-white text-slate-400">LUB</span></div>
-                </div>
-                <div>
-                  <label htmlFor="model-url-input" className="block text-sm font-medium text-gray-700 mb-1">URL modelu</label>
-                  <input
-                    id="model-url-input"
-                    type="text"
-                    value={formData.customModelUrl?.startsWith('blob:') || formData.customModelUrl?.startsWith('data:') ? '' : (formData.customModelUrl || '')}
-                    onChange={(e) => {
-                      if (blobUrlRef.current) {
-                        URL.revokeObjectURL(blobUrlRef.current);
-                        blobUrlRef.current = null;
-                        uploadedFileNameRef.current = null;
-                      }
-                      handleInputChange('customModelUrl', e.target.value);
-                    }}
-                    placeholder="https://example.com/model.glb"
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                  <p className="mt-1 text-xs text-slate-400">Lub podaj URL do pliku GLTF/GLB</p>
                 </div>
               </div>
             )}

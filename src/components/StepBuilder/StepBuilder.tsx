@@ -63,208 +63,217 @@ const StepNode = ({ data, selected }: NodeProps<InstructionStep>) => {
   );
 };
 
-interface ConnectionEditDialogProps {
-  description: string;
-  shapeType?: ShapeType;
-  arrowDirection?: ArrowDirection;
-  connectionType?: ConnectionType;
-  onSave: (description: string, shapeType?: ShapeType, arrowDirection?: ArrowDirection, connectionType?: ConnectionType) => void;
-  onCancel: () => void;
-  position: { x: number; y: number };
-}
+// ─── Connection styles ────────────────────────────────────────────────────────
+const CONNECTION_STYLES: { value: ConnectionStyle; label: string; color: string; textColor: string }[] = [
+  { value: 'standard', label: 'Standard', color: '#64748b', textColor: '#fff' },
+  { value: 'glass',    label: 'Szklane',  color: '#60a5fa', textColor: '#fff' },
+  { value: 'glow',     label: 'Złote',    color: '#fbbf24', textColor: '#1e1e1e' },
+  { value: 'neon',     label: 'Neonowe',  color: '#ec4899', textColor: '#fff' },
+];
 
-const ConnectionEditDialog = ({ 
-  description, 
-  shapeType, 
-  arrowDirection,
-  connectionType,
-  onSave, 
-  onCancel,
-  position 
-}: ConnectionEditDialogProps) => {
-  const [tempDescription, setTempDescription] = useState(description);
-  const [tempShapeType, setTempShapeType] = useState<ShapeType | undefined>(shapeType);
-  const [tempArrowDirection, setTempArrowDirection] = useState<ArrowDirection>(arrowDirection || 'none');
-  const [tempConnectionType, setTempConnectionType] = useState<ConnectionType>(connectionType || 'tube');
-  
-  const handleSave = () => {
-    onSave(tempDescription, tempShapeType, tempArrowDirection, tempConnectionType);
-  };
-  
-  return (
-    <div
-      style={{
-        position: 'absolute',
-        transform: `translate(-50%, -50%) translate(${position.x}px,${position.y}px)`,
-        pointerEvents: 'all',
-      }}
-      className="nodrag nopan bg-white rounded-lg shadow-xl border border-gray-300 p-4 min-w-[300px] z-20"
-    >
-      <h3 className="text-sm font-bold mb-3">Edit Connection</h3>
-      <div className="mb-3">
-        <label className="block text-xs font-medium text-gray-700 mb-1">Description</label>
-        <textarea
-          value={tempDescription}
-          onChange={(e) => setTempDescription(e.target.value)}
-          className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-          rows={3}
-          placeholder="Enter connection description..."
-        />
-      </div>
-      <div className="mb-3">
-        <label className="block text-xs font-medium text-gray-700 mb-1">Shape Marker</label>
-        <select
-          value={tempShapeType || ''}
-          onChange={(e) => setTempShapeType(e.target.value ? (e.target.value as ShapeType) : undefined)}
-          className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          <option value="">None</option>
-          <option value="cube">Cube</option>
-          <option value="sphere">Sphere</option>
-          <option value="cylinder">Cylinder</option>
-          <option value="cone">Cone</option>
-        </select>
-      </div>
-      <div className="mb-3">
-        <label className="block text-xs font-medium text-gray-700 mb-1">Connection Type</label>
-        <select
-          value={tempConnectionType}
-          onChange={(e) => setTempConnectionType(e.target.value as ConnectionType)}
-          className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          <option value="tube">Tube (pipe)</option>
-          <option value="arrow">Arrow</option>
-        </select>
-      </div>
-      <div className="mb-3">
-        <label className="block text-xs font-medium text-gray-700 mb-1">Arrow Direction</label>
-        <select
-          value={tempArrowDirection}
-          onChange={(e) => setTempArrowDirection(e.target.value as ArrowDirection)}
-          className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          <option value="none">None (pipe only)</option>
-          <option value="forward">Forward →</option>
-          <option value="backward">Backward ←</option>
-          <option value="bidirectional">Bidirectional ↔</option>
-        </select>
-      </div>
-      <div className="flex gap-2 justify-end">
-        <button onClick={onCancel} className="px-3 py-1 text-xs bg-gray-300 hover:bg-gray-400 rounded transition">Cancel</button>
-        <button onClick={handleSave} className="px-3 py-1 text-xs bg-blue-500 hover:bg-blue-600 text-white rounded transition">Save</button>
-      </div>
-    </div>
-  );
-};
+const ARROW_DIRS: { value: ArrowDirection; label: string }[] = [
+  { value: 'none',          label: '— Brak' },
+  { value: 'forward',       label: '→ Naprzód' },
+  { value: 'backward',      label: '← Wstecz' },
+  { value: 'bidirectional', label: '↔ Dwukierunkowe' },
+];
 
+const CONN_TYPES: { value: ConnectionType; label: string }[] = [
+  { value: 'tube',  label: '🔩 Rura' },
+  { value: 'arrow', label: '➡ Strzałka' },
+];
+
+const SHAPE_MARKERS: { value: string; label: string }[] = [
+  { value: '',         label: 'Brak' },
+  { value: 'cube',     label: '📦 Sześcian' },
+  { value: 'sphere',   label: '🔵 Kula' },
+  { value: 'cylinder', label: '🥫 Walec' },
+  { value: 'cone',     label: '🔺 Stożek' },
+];
+
+// ─── Inline connection editor rendered on the edge label ──────────────────────
 const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<ConnectionData>) => {
   const { updateConnections, project } = useAppStore();
-  const [showStyleMenu, setShowStyleMenu] = useState(false);
-  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [open, setOpen] = useState(false);
   const [edgePath, labelX, labelY] = getBezierPath({ sourceX, sourceY, targetX, targetY });
-  
-  const currentStyle = data?.style || 'standard';
-  const currentDescription = data?.description || '';
-  const currentShapeType = data?.shapeType;
-  const currentArrowDirection = data?.arrowDirection;
-  const currentConnectionType = data?.connectionType;
-  
-  const styles: { value: ConnectionStyle; label: string; color: string }[] = [
-    { value: 'standard', label: 'Standard', color: '#4b5563' },
-    { value: 'glass', label: 'Glass', color: '#60a5fa' },
-    { value: 'glow', label: 'Glow', color: '#fbbf24' },
-    { value: 'neon', label: 'Neon', color: '#ec4899' },
-  ];
-  
-  const handleStyleChange = (newStyle: ConnectionStyle) => {
+
+  const currentStyle       = data?.style          || 'standard';
+  const currentDescription = data?.description    || '';
+  const currentShapeType   = data?.shapeType;
+  const currentArrowDir    = data?.arrowDirection || 'none';
+  const currentConnType    = data?.connectionType || 'tube';
+
+  // Local draft state – only committed on Save
+  const [draftDesc,     setDraftDesc]     = useState(currentDescription);
+  const [draftStyle,    setDraftStyle]    = useState<ConnectionStyle>(currentStyle);
+  const [draftShape,    setDraftShape]    = useState<ShapeType | undefined>(currentShapeType);
+  const [draftArrow,    setDraftArrow]    = useState<ArrowDirection>(currentArrowDir);
+  const [draftConnType, setDraftConnType] = useState<ConnectionType>(currentConnType);
+
+  // Re-sync draft when edge data changes externally
+  useEffect(() => {
+    setDraftDesc(data?.description    || '');
+    setDraftStyle(data?.style          || 'standard');
+    setDraftShape(data?.shapeType);
+    setDraftArrow(data?.arrowDirection || 'none');
+    setDraftConnType(data?.connectionType || 'tube');
+  }, [data]);
+
+  const styleInfo = CONNECTION_STYLES.find(s => s.value === currentStyle) || CONNECTION_STYLES[0];
+
+  const handleSave = () => {
     if (!project) return;
-    const updatedConnections = project.connections.map(conn => 
-      conn.id === id ? { ...conn, data: { ...conn.data, style: newStyle } } : conn
+    const updated = project.connections.map(conn =>
+      conn.id === id
+        ? { ...conn, data: { ...conn.data, description: draftDesc, style: draftStyle, shapeType: draftShape, arrowDirection: draftArrow, connectionType: draftConnType } }
+        : conn
     );
-    updateConnections(updatedConnections);
-    setShowStyleMenu(false);
+    updateConnections(updated);
+    setOpen(false);
   };
-  
-  const handleDescriptionChange = (description: string, shapeType?: ShapeType, arrowDirection?: ArrowDirection, connectionType?: ConnectionType) => {
-    if (!project) return;
-    const updatedConnections = project.connections.map(conn => 
-      conn.id === id ? { ...conn, data: { ...conn.data, description, shapeType, arrowDirection, connectionType } } : conn
-    );
-    updateConnections(updatedConnections);
-    setShowEditDialog(false);
-  };
-  
+
   const handleDelete = () => {
     if (!project) return;
-    if (!window.confirm('Are you sure you want to delete this connection?')) return;
-    const updatedConnections = project.connections.filter(conn => conn.id !== id);
-    updateConnections(updatedConnections);
+    if (!window.confirm('Usunąć to połączenie?')) return;
+    updateConnections(project.connections.filter(conn => conn.id !== id));
   };
-  
-  const currentStyleInfo = styles.find(s => s.value === currentStyle) || styles[0];
-  
+
   return (
     <>
       <BaseEdge id={id} path={edgePath} />
       <EdgeLabelRenderer>
+        {/* Collapsed pill – always visible */}
         <div
           style={{
             position: 'absolute',
             transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
             pointerEvents: 'all',
           }}
-          className="nodrag nopan flex gap-1"
+          className="nodrag nopan"
         >
-          <button
-            onClick={() => setShowStyleMenu(!showStyleMenu)}
-            className="px-2 py-1 text-xs rounded shadow-md hover:shadow-lg transition"
-            style={{ backgroundColor: currentStyleInfo.color, color: 'white' }}
-          >
-            {currentStyleInfo.label}
-          </button>
-          <button
-            onClick={() => setShowEditDialog(true)}
-            className="px-2 py-1 text-xs rounded shadow-md hover:shadow-lg transition bg-blue-500 hover:bg-blue-600 text-white"
-            title={currentDescription ? "Edit connection description" : "Add connection description"}
-            aria-label={currentDescription ? "Edit connection description" : "Add connection description"}
-          >
-            {currentDescription ? '📝' : '➕'}
-          </button>
-          <button
-            onClick={handleDelete}
-            className="px-2 py-1 text-xs rounded shadow-md hover:shadow-lg transition bg-red-500 hover:bg-red-600 text-white"
-            title="Delete connection"
-            aria-label="Delete connection"
-          >
-            ✕
-          </button>
-          {showStyleMenu && (
-            <div className="absolute top-full mt-1 left-1/2 transform -translate-x-1/2 bg-white rounded shadow-lg border border-gray-200 z-10">
-              {styles.map(style => (
+          {!open ? (
+            <button
+              onClick={() => setOpen(true)}
+              title="Edytuj połączenie"
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold shadow-md hover:scale-105 active:scale-95 transition-transform"
+              style={{ backgroundColor: styleInfo.color, color: styleInfo.textColor }}
+            >
+              <span>{styleInfo.label}</span>
+              {currentDescription && (
+                <span className="opacity-80" title={currentDescription}>📝</span>
+              )}
+              <svg className="w-3 h-3 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15.232 5.232l3.536 3.536M9 13l6.586-6.586a2 2 0 112.828 2.828L11.828 15.828a2 2 0 01-1.414.586H8v-2.414a2 2 0 01.586-1.414z" />
+              </svg>
+            </button>
+          ) : (
+            /* Expanded editor panel */
+            <div className="bg-white rounded-xl shadow-2xl border border-slate-200 w-72 overflow-hidden">
+              {/* Header */}
+              <div className="flex items-center justify-between px-3 py-2 bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
+                <span className="text-xs font-bold text-slate-700 uppercase tracking-wide">Edytuj połączenie</span>
                 <button
-                  key={style.value}
-                  onClick={() => handleStyleChange(style.value)}
-                  className="block w-full text-left px-3 py-2 text-xs hover:bg-gray-100 transition whitespace-nowrap"
-                  style={{ backgroundColor: currentStyle === style.value ? '#f3f4f6' : 'white' }}
+                  onClick={() => setOpen(false)}
+                  className="w-5 h-5 flex items-center justify-center rounded hover:bg-slate-200 text-slate-500 transition"
                 >
-                  <span className="inline-block w-3 h-3 rounded-full mr-2" style={{ backgroundColor: style.color }} />
-                  {style.label}
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
                 </button>
-              ))}
+              </div>
+
+              <div className="p-3 space-y-3">
+                {/* Style swatches */}
+                <div>
+                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Styl wizualny</p>
+                  <div className="flex gap-1.5">
+                    {CONNECTION_STYLES.map(s => (
+                      <button
+                        key={s.value}
+                        onClick={() => setDraftStyle(s.value)}
+                        title={s.label}
+                        className={`flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all ${draftStyle === s.value ? 'ring-2 ring-offset-1 ring-blue-500 scale-105' : 'opacity-70 hover:opacity-100'}`}
+                        style={{ backgroundColor: s.color, color: s.textColor }}
+                      >
+                        {s.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Connection type + Arrow direction side by side */}
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Typ</p>
+                    <select
+                      value={draftConnType}
+                      onChange={e => setDraftConnType(e.target.value as ConnectionType)}
+                      className="w-full px-2 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      {CONN_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Kierunek</p>
+                    <select
+                      value={draftArrow}
+                      onChange={e => setDraftArrow(e.target.value as ArrowDirection)}
+                      className="w-full px-2 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      {ARROW_DIRS.map(a => <option key={a.value} value={a.value}>{a.label}</option>)}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Shape marker */}
+                <div>
+                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Znacznik kształtu</p>
+                  <select
+                    value={draftShape || ''}
+                    onChange={e => setDraftShape(e.target.value ? (e.target.value as ShapeType) : undefined)}
+                    className="w-full px-2 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    {SHAPE_MARKERS.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
+                  </select>
+                </div>
+
+                {/* Description */}
+                <div>
+                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Opis (opcjonalnie)</p>
+                  <textarea
+                    value={draftDesc}
+                    onChange={e => setDraftDesc(e.target.value)}
+                    rows={2}
+                    placeholder="Opis połączenia…"
+                    className="w-full px-2 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                  />
+                </div>
+              </div>
+
+              {/* Footer actions */}
+              <div className="flex gap-2 px-3 pb-3">
+                <button
+                  onClick={handleSave}
+                  className="flex-1 flex items-center justify-center gap-1 py-1.5 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white text-xs font-semibold rounded-lg shadow transition-all"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                  </svg>
+                  Zapisz
+                </button>
+                <button
+                  onClick={handleDelete}
+                  title="Usuń połączenie"
+                  className="px-2.5 py-1.5 bg-red-50 hover:bg-red-100 text-red-500 text-xs font-semibold rounded-lg border border-red-200 transition-all"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+              </div>
             </div>
           )}
         </div>
-        {showEditDialog && (
-          <ConnectionEditDialog
-            description={currentDescription}
-            shapeType={currentShapeType}
-            arrowDirection={currentArrowDirection}
-            connectionType={currentConnectionType}
-            onSave={handleDescriptionChange}
-            onCancel={() => setShowEditDialog(false)}
-            position={{ x: labelX, y: labelY }}
-          />
-        )}
       </EdgeLabelRenderer>
     </>
   );
