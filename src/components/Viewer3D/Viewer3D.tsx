@@ -298,16 +298,11 @@ interface StepCubeProps {
 
 const StepCube = ({ step, position, isActive, hasActiveStep, onClick }: StepCubeProps) => {
   const meshRef = useRef<THREE.Group>(null);
-  const glowRef = useRef<THREE.Mesh>(null);
   const ringRef = useRef<THREE.Mesh>(null);
   
   useFrame((state) => {
     if (meshRef.current) {
       meshRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.6) * (Math.PI / 10);
-    }
-    if (glowRef.current && isActive) {
-      const scale = 1 + Math.sin(state.clock.elapsedTime * 2) * 0.12;
-      glowRef.current.scale.set(scale, scale, scale);
     }
     if (ringRef.current && isActive) {
       ringRef.current.rotation.z = state.clock.elapsedTime * 1.2;
@@ -329,21 +324,6 @@ const StepCube = ({ step, position, isActive, hasActiveStep, onClick }: StepCube
   const shapeType = step.shapeType || 'cube';
   const modelScale = step.modelScale ?? 1;
   const modelPositionY = step.modelPositionY ?? 0;
-
-  const renderGlowGeometry = () => {
-    const glowSize = 2.3 * modelScale;
-    switch (shapeType) {
-      case 'sphere':
-        return <sphereGeometry args={[glowSize / 2, 32, 32]} />;
-      case 'cylinder':
-        return <cylinderGeometry args={[glowSize / 2, glowSize / 2, glowSize, 32]} />;
-      case 'cone':
-        return <coneGeometry args={[glowSize / 2, glowSize, 32]} />;
-      case 'cube':
-      default:
-        return <boxGeometry args={[glowSize, glowSize, glowSize]} />;
-    }
-  };
 
   const dimmed = hasActiveStep && !isActive;
 
@@ -368,17 +348,6 @@ const StepCube = ({ step, position, isActive, hasActiveStep, onClick }: StepCube
           uploadedModelId={step.uploadedModelId}
         />
       </group>
-      {isActive && shapeType !== 'custom' && shapeType !== 'engravedBlock' && shapeType !== 'custom3dElement' && shapeType !== 'uploadedModel' && (
-        <mesh ref={glowRef} position={[0, modelPositionY, 0]}>
-          {renderGlowGeometry()}
-          <meshBasicMaterial 
-            color={color}
-            transparent 
-            opacity={0.45}
-            side={THREE.BackSide}
-          />
-        </mesh>
-      )}
       {isActive && (
         <mesh ref={ringRef} position={[0, modelPositionY - RING_VERTICAL_OFFSET * modelScale, 0]} rotation={[-Math.PI / 2, 0, 0]}>
           <ringGeometry args={[RING_INNER_RADIUS * modelScale, RING_OUTER_RADIUS * modelScale, 48]} />
