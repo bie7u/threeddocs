@@ -349,8 +349,8 @@ const StepCube = ({ step, position, isActive, hasActiveStep, onClick }: StepCube
         />
       </group>
       {isActive && (
-        <mesh ref={ringRef} position={[0, modelPositionY - RING_VERTICAL_OFFSET * modelScale, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-          <ringGeometry args={[RING_INNER_RADIUS * modelScale, RING_OUTER_RADIUS * modelScale, 48]} />
+        <mesh ref={ringRef} position={[0, modelPositionY - RING_VERTICAL_OFFSET, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+          <ringGeometry args={[RING_INNER_RADIUS, RING_OUTER_RADIUS, 48]} />
           <meshBasicMaterial color={color} transparent opacity={0.7} side={THREE.DoubleSide} />
         </mesh>
       )}
