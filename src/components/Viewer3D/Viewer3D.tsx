@@ -2,6 +2,7 @@ import { useRef, useEffect, useMemo, Suspense, useState, Component, type ReactNo
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera, useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
+import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import type { InstructionStep, ConnectionStyle, ShapeType, ArrowDirection, ConnectionType } from '../../types';
 import type { ProjectData } from '../../types';
 import { calculateCreatorBasedLayout } from '../../utils/layoutCalculator';
@@ -773,63 +774,84 @@ interface CameraControllerProps {
   currentStepId: string | null;
   nodePositions: Record<string, { x: number; y: number }>;
   cameraMode: 'auto' | 'free';
+  orbitControlsRef: React.RefObject<OrbitControlsImpl | null>;
 }
 
-const CameraController = ({ project, currentStepId, nodePositions, cameraMode }: CameraControllerProps) => {
+const CAMERA_DISTANCE = 30;
+const CAMERA_HEIGHT = 14;
+const LERP_FACTOR = 0.07;
+
+const CameraController = ({ project, currentStepId, nodePositions, cameraMode, orbitControlsRef }: CameraControllerProps) => {
   const { camera } = useThree();
-  const targetPos = useRef(new THREE.Vector3());
-  const targetLookAt = useRef(new THREE.Vector3());
+  // Initialise targets to match the <PerspectiveCamera> default so the first
+  // frame never snaps away from the starting position.
+  const targetPos    = useRef(new THREE.Vector3(0, 40, 70));
+  const targetLookAt = useRef(new THREE.Vector3(0, 0, 0));
   const previousStepId = useRef<string | null>(null);
+  const isFirstAutoMove = useRef(true);
 
   const layout = useMemo(() => {
     return calculateCreatorBasedLayout(project.steps, nodePositions);
   }, [project.steps, nodePositions]);
 
   useEffect(() => {
-    if (cameraMode === 'auto' && currentStepId !== previousStepId.current) {
-      previousStepId.current = currentStepId;
-      
-      if (!currentStepId || !project) {
-        targetPos.current.set(0, 20, 35);
-        targetLookAt.current.set(0, 0, 0);
-        return;
-      }
+    if (cameraMode !== 'auto') return;
+    if (currentStepId === previousStepId.current) return;
+    previousStepId.current = currentStepId;
 
-      const currentStep = project.steps.find(s => s.id === currentStepId);
-      if (!currentStep) {
-        targetPos.current.set(0, 20, 35);
-        targetLookAt.current.set(0, 0, 0);
-        return;
-      }
-
-      const stepPos = layout.get(currentStepId);
-      
-      if (!stepPos) {
-        targetPos.current.set(0, 20, 35);
-        targetLookAt.current.set(0, 0, 0);
-        return;
-      }
-      
-      const cameraDistance = 35;
-      const cameraHeight = 15;
-      
-      targetPos.current.set(stepPos.x, cameraHeight, stepPos.z + cameraDistance);
-      targetLookAt.current.set(stepPos.x, stepPos.y, stepPos.z);
+    if (!currentStepId) {
+      targetPos.current.set(0, 20, 35);
+      targetLookAt.current.set(0, 0, 0);
+      isFirstAutoMove.current = true;
+      return;
     }
-  }, [currentStepId, project, layout, cameraMode]);
+
+    const stepPos = layout.get(currentStepId);
+    if (!stepPos) {
+      targetPos.current.set(0, 20, 35);
+      targetLookAt.current.set(0, 0, 0);
+      isFirstAutoMove.current = true;
+      return;
+    }
+
+    targetPos.current.set(stepPos.x, stepPos.y + CAMERA_HEIGHT, stepPos.z + CAMERA_DISTANCE);
+    targetLookAt.current.set(stepPos.x, stepPos.y, stepPos.z);
+
+    // Snap camera immediately on the very first auto-move so users see the
+    // correct element right away instead of a long crawl from (0,40,70).
+    if (isFirstAutoMove.current) {
+      isFirstAutoMove.current = false;
+      camera.position.copy(targetPos.current);
+      if (orbitControlsRef.current) {
+        orbitControlsRef.current.target.copy(targetLookAt.current);
+        orbitControlsRef.current.update();
+      }
+    }
+  }, [currentStepId, project, layout, cameraMode, camera, orbitControlsRef]);
+
+  // Also reset isFirstAutoMove when cameraMode switches to auto
+  useEffect(() => {
+    if (cameraMode === 'auto') {
+      isFirstAutoMove.current = true;
+      previousStepId.current = null;
+    }
+  }, [cameraMode]);
 
   useFrame(() => {
     if (cameraMode === 'free') return;
-    
-    camera.position.lerp(targetPos.current, 0.05);
-    
-    const currentLookAt = new THREE.Vector3();
-    camera.getWorldDirection(currentLookAt);
-    currentLookAt.multiplyScalar(10);
-    currentLookAt.add(camera.position);
-    
-    currentLookAt.lerp(targetLookAt.current, 0.05);
-    camera.lookAt(currentLookAt);
+
+    // Lerp camera position
+    camera.position.lerp(targetPos.current, LERP_FACTOR);
+
+    // Lerp OrbitControls target (look-at point) and update the controls.
+    // This keeps OrbitControls' internal state in sync so it doesn't fight
+    // against our manual position changes.
+    if (orbitControlsRef.current) {
+      orbitControlsRef.current.target.lerp(targetLookAt.current, LERP_FACTOR);
+      orbitControlsRef.current.update();
+    } else {
+      camera.lookAt(targetLookAt.current);
+    }
   });
 
   return null;
@@ -847,6 +869,7 @@ interface Viewer3DProps {
 export const Viewer3D = ({ project, currentStepId, nodePositions = {}, cameraMode = 'free', showStepOverlay = true, onStepSelect }: Viewer3DProps) => {
   const currentStep = project?.steps.find(s => s.id === currentStepId);
   const [selectedConnectionDesc, setSelectedConnectionDesc] = useState<string | null>(null);
+  const orbitControlsRef = useRef<OrbitControlsImpl | null>(null);
   
   const handleConnectionClick = (description: string) => {
     setSelectedConnectionDesc(description);
@@ -862,6 +885,7 @@ export const Viewer3D = ({ project, currentStepId, nodePositions = {}, cameraMod
             currentStepId={currentStepId}
             nodePositions={nodePositions}
             cameraMode={cameraMode}
+            orbitControlsRef={orbitControlsRef}
           />
         )}
         
@@ -917,7 +941,7 @@ export const Viewer3D = ({ project, currentStepId, nodePositions = {}, cameraMod
         )}
         
         {showStepOverlay && <gridHelper args={[20, 20]} />}
-        <OrbitControls enableDamping dampingFactor={0.05} />
+        <OrbitControls ref={orbitControlsRef} enableDamping dampingFactor={0.05} />
       </Canvas>
       
       {showStepOverlay && currentStep && (
