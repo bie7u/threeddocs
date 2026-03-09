@@ -294,10 +294,11 @@ interface StepCubeProps {
   position: [number, number, number];
   isActive: boolean;
   hasActiveStep?: boolean;
+  allowDimming?: boolean;
   onClick?: () => void;
 }
 
-const StepCube = ({ step, position, isActive, hasActiveStep, onClick }: StepCubeProps) => {
+const StepCube = ({ step, position, isActive, hasActiveStep, allowDimming = true, onClick }: StepCubeProps) => {
   const meshRef = useRef<THREE.Group>(null);
   const ringRef = useRef<THREE.Mesh>(null);
   
@@ -326,7 +327,7 @@ const StepCube = ({ step, position, isActive, hasActiveStep, onClick }: StepCube
   const modelScale = step.modelScale ?? 1;
   const modelPositionY = step.modelPositionY ?? 0;
 
-  const dimmed = hasActiveStep && !isActive;
+  const dimmed = allowDimming && hasActiveStep && !isActive;
 
   const RING_VERTICAL_OFFSET = 1.2;
   const RING_INNER_RADIUS = 1.4;
@@ -694,9 +695,10 @@ interface UnifiedModelProps {
   nodePositions: Record<string, { x: number; y: number }>;
   onConnectionClick?: (description: string) => void;
   onStepClick?: (stepId: string) => void;
+  allowDimming?: boolean;
 }
 
-const UnifiedModel = ({ project, currentStepId, nodePositions, onConnectionClick, onStepClick }: UnifiedModelProps) => {
+const UnifiedModel = ({ project, currentStepId, nodePositions, onConnectionClick, onStepClick, allowDimming = true }: UnifiedModelProps) => {
   const steps = project.steps;
   
   const layout = useMemo(() => {
@@ -748,6 +750,7 @@ const UnifiedModel = ({ project, currentStepId, nodePositions, onConnectionClick
           position={positions[index]}
           isActive={step.id === currentStepId}
           hasActiveStep={!!currentStepId}
+          allowDimming={allowDimming}
           onClick={onStepClick ? () => onStepClick(step.id) : undefined}
         />
       ))}
@@ -937,6 +940,7 @@ export const Viewer3D = ({ project, currentStepId, nodePositions = {}, cameraMod
             nodePositions={nodePositions}
             onConnectionClick={handleConnectionClick}
             onStepClick={onStepSelect}
+            allowDimming={showStepOverlay}
           />
         )}
         
