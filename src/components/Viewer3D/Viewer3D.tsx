@@ -940,7 +940,7 @@ export const Viewer3D = ({ project, currentStepId, nodePositions = {}, cameraMod
             nodePositions={nodePositions}
             onConnectionClick={handleConnectionClick}
             onStepClick={onStepSelect}
-            allowDimming={showStepOverlay}
+            allowDimming={false}
           />
         )}
         
