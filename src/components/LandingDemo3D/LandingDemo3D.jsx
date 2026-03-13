@@ -52,149 +52,288 @@ function inactive() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// SCENE A – "Zbuduj model" (Builder path)
-// Shows 4 geometric shapes laid out like the actual Viewer3D builder:
-//   cube → sphere → cylinder → cone, each step highlighting one shape
+// SCENE A – "Zbuduj model 3D" (IT system architecture)
+//
+// Demonstrates ALL key builder features:
+//  • 5 distinct shape types: sphere, cylinder, cube, cone, DB-stack (engravedBlock)
+//  • 4 connection styles:   standard · glow · glass · neon
+//  • Arrow directions:      forward (→) and bidirectional (↔)
+//  • Animated pulse rings on the active node
+//  • Per-step highlight + active-connection pulse
+//
+// Layout (top view):
+//
+//  [🌐 User]──standard──►[⚖ LB]──glow──►[⚡ API]──glass──►[⚡ Cache]
+//                                          ↕ bidirectional         │neon
+//                                        [🔐 Auth]              [🗄 DB]
 // ═══════════════════════════════════════════════════════════════════════════════
 
 const BUILDER_STEPS = [
   {
-    id: 0,
-    shape: 'cube',
-    title: 'Krok 1 – Korpus (sześcian)',
-    desc: 'Prostopadłościenny korpus urządzenia. W kroku tym dodajesz główny element i ustawiasz jego wymiary.',
-    color: '#3b82f6',
-    emissive: '#1e40af',
-    badge: '■ Korpus',
+    id: 0, nodeId: 'user',
+    title: 'Krok 1 – Klient (Przeglądarka)',
+    desc: 'Użytkownik otwiera aplikację w przeglądarce. Żądanie HTTPS trafia do infrastruktury. W 3D Docs użyj sfery jako węzła klienta.',
+    color: '#3b82f6', emissive: '#1e40af',
+    badge: '🌐 Klient',
   },
   {
-    id: 1,
-    shape: 'sphere',
-    title: 'Krok 2 – Głowica (sfera)',
-    desc: 'Sferyczna głowica czujnika. Obróć i ustaw dokładną pozycję na osi Y, by wyrównać z korpusem.',
-    color: '#10b981',
-    emissive: '#064e3b',
-    badge: '● Głowica',
+    id: 1, nodeId: 'lb',
+    title: 'Krok 2 – Load Balancer',
+    desc: 'Ruch jest równoważony między instancjami serwera. Strzałka Glow (→) wyróżnia główną ścieżkę przepływu danych.',
+    color: '#10b981', emissive: '#064e3b',
+    badge: '⚖️ Load Balancer',
   },
   {
-    id: 2,
-    shape: 'cylinder',
-    title: 'Krok 3 – Wał (cylinder)',
-    desc: 'Walcowy wał napędowy łączy głowicę z podstawą. Ustaw wysokość i promień zgodnie z projektem.',
-    color: '#a855f7',
-    emissive: '#581c87',
-    badge: '⬤ Wał',
+    id: 2, nodeId: 'api',
+    title: 'Krok 3 – API Server (Node.js)',
+    desc: 'Serwer aplikacji przetwarza żądania REST. Połączony z Auth (↔ dwukierunkowa strzałka) i Cache (styl Glass).',
+    color: '#a855f7', emissive: '#581c87',
+    badge: '⚡ API Server',
   },
   {
-    id: 3,
-    shape: 'cone',
-    title: 'Krok 4 – Dysza (stożek)',
-    desc: 'Stożkowa dysza wylotowa. Zmień kolor, by wizualnie wyróżnić ten element w instrukcji.',
-    color: '#f59e0b',
-    emissive: '#78350f',
-    badge: '▲ Dysza',
+    id: 3, nodeId: 'auth',
+    title: 'Krok 4 – Auth Service (JWT)',
+    desc: 'Usługa uwierzytelniania weryfikuje token JWT. Strzałka ↔ (bidirectional) pokazuje że API wysyła żądanie i odbiera odpowiedź.',
+    color: '#ef4444', emissive: '#991b1b',
+    badge: '🔐 Auth Service',
+  },
+  {
+    id: 4, nodeId: 'cache',
+    title: 'Krok 5 – Cache (Redis)',
+    desc: 'Warstwa cache przyspiesza odczyt danych. Styl Neon podkreśla szybkość. Możesz użyć dowolnego kształtu jako węzła.',
+    color: '#f59e0b', emissive: '#78350f',
+    badge: '⚡ Cache (Redis)',
+  },
+  {
+    id: 5, nodeId: 'db',
+    title: 'Krok 6 – Baza Danych (PostgreSQL)',
+    desc: '🔲 Grawerowany Klocek — wpisz "DB" a 3D Docs wygeneruje tekst jako model 3D! Tu: styl Glass z neonową strzałką z Cache.',
+    color: '#06b6d4', emissive: '#0e7490',
+    badge: '🗄️ PostgreSQL',
   },
 ];
 
-// Each shape sits at a different position so all 4 are always visible,
-// matching how Viewer3D places nodes across the canvas.
-const BUILDER_POSITIONS = [
-  [-4.5, 0, 0],
-  [-1.5, 0, 0],
-  [1.5,  0, 0],
-  [4.5,  0, 0],
+// IT system nodes – each maps to a BUILDER_STEPS entry (same index order)
+const IT_NODES = [
+  { id: 'user',  shape: 'sphere',   pos: [-5,   1.5,  0], color: '#3b82f6', emissive: '#1e40af' },
+  { id: 'lb',    shape: 'cylinder', pos: [-1.5, 1.5,  0], color: '#10b981', emissive: '#064e3b' },
+  { id: 'api',   shape: 'cube',     pos: [2,    1.5,  0], color: '#a855f7', emissive: '#581c87' },
+  { id: 'auth',  shape: 'cone',     pos: [2,    -2.2, 0], color: '#ef4444', emissive: '#991b1b' },
+  { id: 'cache', shape: 'sphere',   pos: [5.5,  1.5,  0], color: '#f59e0b', emissive: '#78350f' },
+  { id: 'db',    shape: 'dbstack',  pos: [5.5,  -2.2, 0], color: '#06b6d4', emissive: '#0e7490' },
 ];
 
-// Connection wire between adjacent shapes
-function Wire({ from, to, active }) {
+// Connections between nodes — each carries style + arrow direction
+const IT_CONNECTIONS = [
+  {
+    // User → Load Balancer (standard tube + forward arrow)
+    from: [-3.9, 1.5, 0], to: [-2.5, 1.5, 0],
+    nodes: ['user', 'lb'], style: 'standard', dir: 'forward',
+  },
+  {
+    // Load Balancer → API (glow tube + forward arrow)
+    from: [-0.6, 1.5, 0], to: [1.0, 1.5, 0],
+    nodes: ['lb', 'api'], style: 'glow', dir: 'forward',
+  },
+  {
+    // API ↔ Auth (standard tube + bidirectional arrows)
+    from: [2, 0.55, 0], to: [2, -1.2, 0],
+    nodes: ['api', 'auth'], style: 'standard', dir: 'bidirectional',
+  },
+  {
+    // API → Cache (glass tube + forward arrow)
+    from: [3.0, 1.5, 0], to: [4.4, 1.5, 0],
+    nodes: ['api', 'cache'], style: 'glass', dir: 'forward',
+  },
+  {
+    // Cache → DB (neon tube + forward arrow)
+    from: [5.5, 0.4, 0], to: [5.5, -1.2, 0],
+    nodes: ['cache', 'db'], style: 'neon', dir: 'forward',
+  },
+];
+
+const CONN_COLORS = {
+  standard: { active: '#60a5fa', inactive: '#1e3a5f' },
+  glow:     { active: '#fbbf24', inactive: '#3b2b00' },
+  glass:    { active: '#c4b5fd', inactive: '#2d1b69' },
+  neon:     { active: '#f472b6', inactive: '#4a0d2a' },
+};
+
+// ── Arrow connection (tube + cone arrowhead(s)) ───────────────────────────────
+
+function ArrowConnection({ from, to, active, style = 'standard', dir = 'forward' }) {
+  const tubeRef = useRef();
+
   const path = new THREE.CatmullRomCurve3([
     new THREE.Vector3(...from),
     new THREE.Vector3(...to),
   ]);
-  const tubeRef = useRef();
+
+  const cols  = CONN_COLORS[style] || CONN_COLORS.standard;
+  const color = active ? cols.active : cols.inactive;
+
   useFrame(({ clock }) => {
     if (!tubeRef.current) return;
-    tubeRef.current.material.opacity = active
-      ? 0.55 + 0.35 * Math.sin(clock.getElapsedTime() * 2.5)
-      : 0.18;
+    const t = clock.getElapsedTime();
+    if (active && (style === 'glow' || style === 'neon')) {
+      tubeRef.current.material.opacity = 0.5 + 0.4 * Math.sin(t * 3.5);
+    } else {
+      tubeRef.current.material.opacity = active ? 0.8 : 0.14;
+    }
   });
-  return (
-    <mesh ref={tubeRef}>
-      <tubeGeometry args={[path, 8, 0.07, 8, false]} />
-      <meshBasicMaterial color={active ? '#60a5fa' : '#334155'} transparent opacity={0.3} />
-    </mesh>
+
+  // Cone geometry: default axis is +Y. Rotate so +Y aligns with travel direction.
+  const start = new THREE.Vector3(...from);
+  const end   = new THREE.Vector3(...to);
+  const fwdDir = new THREE.Vector3().subVectors(end, start).normalize();
+  const bwdDir = fwdDir.clone().negate();
+
+  const rotFor = new THREE.Euler().setFromQuaternion(
+    new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), fwdDir)
   );
-}
+  const rotBwd = new THREE.Euler().setFromQuaternion(
+    new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), bwdDir)
+  );
 
-function BuilderShape({ shape, position, isActive, color, emissive }) {
-  const groupRef = useRef();
-  const ringRef  = useRef();
+  // Place arrowhead with tip at 90 % of the tube, half-cone poking out
+  const fwdTip = new THREE.Vector3().lerpVectors(start, end, 0.90);
+  const bwdTip = new THREE.Vector3().lerpVectors(start, end, 0.10);
 
-  useFrame(({ clock }) => {
-    if (groupRef.current) {
-      groupRef.current.rotation.y = Math.sin(clock.getElapsedTime() * 0.5 + position[0]) * 0.35;
-    }
-    if (ringRef.current && isActive) {
-      ringRef.current.rotation.z = clock.getElapsedTime() * 1.1;
-      ringRef.current.scale.setScalar(1 + Math.sin(clock.getElapsedTime() * 1.5) * 0.07);
-    }
-  });
-
-  const props = isActive
-    ? mat(color, emissive, 0.75, 0.6, 0.3)
-    : inactive();
-
-  const geometry = () => {
-    switch (shape) {
-      case 'sphere':   return <sphereGeometry args={[1, 32, 32]} />;
-      case 'cylinder': return <cylinderGeometry args={[0.7, 0.7, 2, 32]} />;
-      case 'cone':     return <coneGeometry args={[0.85, 2, 32]} />;
-      default:         return <boxGeometry args={[1.8, 1.8, 1.8]} />;
-    }
-  };
+  const ao = active ? 0.95 : 0.14;
 
   return (
-    <group position={position}>
-      <group ref={groupRef}>
-        <mesh>
-          {geometry()}
-          <meshStandardMaterial {...props} />
+    <group>
+      {/* Tube */}
+      <mesh ref={tubeRef}>
+        <tubeGeometry args={[path, 12, 0.055, 8, false]} />
+        <meshBasicMaterial color={color} transparent opacity={active ? 0.8 : 0.14} />
+      </mesh>
+
+      {/* Forward arrowhead */}
+      {(dir === 'forward' || dir === 'bidirectional') && (
+        <mesh position={fwdTip.toArray()} rotation={[rotFor.x, rotFor.y, rotFor.z]}>
+          <coneGeometry args={[0.18, 0.44, 8]} />
+          <meshBasicMaterial color={color} transparent opacity={ao} />
         </mesh>
-      </group>
-      {isActive && (
-        <mesh ref={ringRef} position={[0, -1.35, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-          <ringGeometry args={[1.3, 2.0, 48]} />
-          <meshBasicMaterial color={color} transparent opacity={0.65} side={THREE.DoubleSide} />
+      )}
+
+      {/* Backward arrowhead */}
+      {dir === 'bidirectional' && (
+        <mesh position={bwdTip.toArray()} rotation={[rotBwd.x, rotBwd.y, rotBwd.z]}>
+          <coneGeometry args={[0.18, 0.44, 8]} />
+          <meshBasicMaterial color={color} transparent opacity={ao} />
         </mesh>
       )}
     </group>
   );
 }
 
+// ── IT node (different 3D shape per type) ─────────────────────────────────────
+
+function ITNode({ node, isActive }) {
+  const groupRef = useRef();
+  const ringRef  = useRef();
+
+  useFrame(({ clock }) => {
+    if (groupRef.current) {
+      // gentle sway — each node offset by its X position for variety
+      groupRef.current.rotation.y =
+        Math.sin(clock.getElapsedTime() * 0.45 + node.pos[0] * 0.4) * 0.28;
+    }
+    if (ringRef.current && isActive) {
+      ringRef.current.rotation.z = clock.getElapsedTime() * 1.0;
+      ringRef.current.scale.setScalar(1 + Math.sin(clock.getElapsedTime() * 1.5) * 0.07);
+    }
+  });
+
+  const p = isActive
+    ? mat(node.color, node.emissive, 0.72, 0.6, 0.3)
+    : inactive();
+
+  const renderMesh = () => {
+    switch (node.shape) {
+      case 'sphere':
+        return (
+          <mesh>
+            <sphereGeometry args={[1, 32, 32]} />
+            <meshStandardMaterial {...p} />
+          </mesh>
+        );
+      case 'cylinder':
+        return (
+          <mesh>
+            <cylinderGeometry args={[0.75, 0.75, 2, 32]} />
+            <meshStandardMaterial {...p} />
+          </mesh>
+        );
+      case 'cone':
+        return (
+          <mesh>
+            <coneGeometry args={[0.92, 2.3, 32]} />
+            <meshStandardMaterial {...p} />
+          </mesh>
+        );
+      case 'dbstack':
+        // Three stacked flat discs — classic database icon.
+        // Represents the "Grawerowany Klocek (engravedBlock)" feature where
+        // you type text (e.g. "DB") and 3D Docs renders it as a 3D solid.
+        return (
+          <group>
+            {[-0.6, 0, 0.6].map((yOff, i) => (
+              <mesh key={i} position={[0, yOff, 0]}>
+                <cylinderGeometry args={[1.0, 1.0, 0.38, 32]} />
+                <meshStandardMaterial {...p} />
+              </mesh>
+            ))}
+          </group>
+        );
+      default: // cube / API server
+        return (
+          <mesh>
+            <boxGeometry args={[1.8, 1.8, 1.8]} />
+            <meshStandardMaterial {...p} />
+          </mesh>
+        );
+    }
+  };
+
+  return (
+    <group position={node.pos}>
+      <group ref={groupRef}>
+        {renderMesh()}
+      </group>
+      {isActive && (
+        <mesh ref={ringRef} position={[0, -1.5, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+          <ringGeometry args={[1.4, 2.1, 48]} />
+          <meshBasicMaterial color={node.color} transparent opacity={0.65} side={THREE.DoubleSide} />
+        </mesh>
+      )}
+    </group>
+  );
+}
+
+// ── IT system scene ───────────────────────────────────────────────────────────
+
 function BuilderScene({ stepIdx }) {
+  const activeNodeId = BUILDER_STEPS[stepIdx]?.nodeId;
   return (
     <group>
-      {BUILDER_STEPS.map((s, i) => (
-        <BuilderShape
-          key={s.id}
-          shape={s.shape}
-          position={BUILDER_POSITIONS[i]}
-          isActive={i === stepIdx}
-          color={s.color}
-          emissive={s.emissive}
-        />
+      {IT_NODES.map((node, i) => (
+        <ITNode key={node.id} node={node} isActive={i === stepIdx} />
       ))}
-      {/* Wires between shapes */}
-      {BUILDER_POSITIONS.slice(0, -1).map((pos, i) => (
-        <Wire
+
+      {IT_CONNECTIONS.map((conn, i) => (
+        <ArrowConnection
           key={i}
-          from={[pos[0] + 1.0, 0, 0]}
-          to={[BUILDER_POSITIONS[i + 1][0] - 1.0, 0, 0]}
-          active={i === stepIdx || i + 1 === stepIdx}
+          from={conn.from}
+          to={conn.to}
+          active={conn.nodes.includes(activeNodeId)}
+          style={conn.style}
+          dir={conn.dir}
         />
       ))}
-      {/* Subtle grid floor */}
-      <gridHelper args={[20, 20, '#1e293b', '#1e293b']} position={[0, -2, 0]} />
+
+      <gridHelper args={[22, 22, '#1e293b', '#1e293b']} position={[0, -3.0, 0]} />
     </group>
   );
 }
@@ -317,7 +456,9 @@ function UploadScene({ stepIdx }) {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 const TABS = [
-  { id: 'builder', label: 'Zbuduj model 3D', icon: '■●▲', steps: BUILDER_STEPS, camera: [0, 3, 14] },
+  // The builder IT-system scene spans X: -5..5.5 and Y: -2.2..1.5 —
+  // camera pulled back to [0, 2, 18] to fit all 6 nodes in view.
+  { id: 'builder', label: 'Zbuduj model 3D', icon: '■●▲', steps: BUILDER_STEPS, camera: [0, 2, 18] },
   { id: 'upload',  label: 'Wgraj model 3D',  icon: '⬆',   steps: UPLOAD_STEPS,  camera: [6, 5, 11] },
 ];
 
