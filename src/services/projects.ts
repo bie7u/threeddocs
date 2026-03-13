@@ -95,6 +95,43 @@ export const fetchPublicProject = async (shareToken: string): Promise<SavedProje
 };
 
 /**
+ * POST /api/projects/guest — creates a guest project without authentication.
+ * The server returns the project together with an immediate share token.
+ */
+export const createGuestProject = async (
+  data: SavedProject,
+): Promise<{ savedProject: SavedProject; shareToken: string }> => {
+  const res = await fetch(`${API_BASE}/projects/guest`, {
+    method: 'POST',
+    credentials: 'omit',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(toApiProjectBody(data)),
+  });
+  if (!res.ok) throw new Error('Failed to create guest project');
+  const responseData = await res.json() as ApiProject & { shareToken: string };
+  const { shareToken } = responseData;
+  return { savedProject: fromApiProject(responseData), shareToken };
+};
+
+/**
+ * PUT /api/projects/guest/:shareToken — updates a guest project.
+ * The share token acts as the sole authentication credential.
+ */
+export const updateGuestProject = async (
+  shareToken: string,
+  data: SavedProject,
+): Promise<SavedProject> => {
+  const res = await fetch(`${API_BASE}/projects/guest/${shareToken}`, {
+    method: 'PUT',
+    credentials: 'omit',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(toApiProjectBody(data)),
+  });
+  if (!res.ok) throw new Error('Failed to update guest project');
+  return fromApiProject(await res.json() as ApiProject);
+};
+
+/**
  * POST /api/projects — creates a new project.
  * The server assigns `id` and `lastModified`; the client must NOT send them.
  */

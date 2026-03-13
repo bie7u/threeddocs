@@ -14,7 +14,9 @@ export const PreviewMode = ({ onGoToEditorPanel, isPublic }: { onGoToEditorPanel
     nodePositions,
     cameraMode,
     setCameraMode,
-    viewMode
+    viewMode,
+    isGuestMode,
+    guestShareToken,
   } = useAppStore();
   const [showCopyNotification, setShowCopyNotification] = useState(false);
   const [isGeneratingLink, setIsGeneratingLink] = useState(false);
@@ -44,23 +46,27 @@ export const PreviewMode = ({ onGoToEditorPanel, isPublic }: { onGoToEditorPanel
   const canGoNext = currentPreviewStepIndex < guideSteps.length - 1;
 
   const handleShareLink = async () => {
-    if (project) {
-      setIsGeneratingLink(true);
-      try {
+    if (!project) return;
+    setIsGeneratingLink(true);
+    try {
+      let shareUrl: string;
+      if (isGuestMode && guestShareToken) {
+        shareUrl = `${window.location.origin}/view/${guestShareToken}`;
+      } else {
         const token = await generateShareToken(project.id);
-        const shareUrl = `${window.location.origin}/view/${token}`;
-        try {
-          await navigator.clipboard.writeText(shareUrl);
-          setShowCopyNotification(true);
-          setTimeout(() => setShowCopyNotification(false), 3000);
-        } catch {
-          alert(`Share this link: ${shareUrl}`);
-        }
-      } catch {
-        alert('Failed to generate share link. Please try again.');
-      } finally {
-        setIsGeneratingLink(false);
+        shareUrl = `${window.location.origin}/view/${token}`;
       }
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        setShowCopyNotification(true);
+        setTimeout(() => setShowCopyNotification(false), 3000);
+      } catch {
+        alert(`Share this link: ${shareUrl}`);
+      }
+    } catch {
+      alert('Failed to generate share link. Please try again.');
+    } finally {
+      setIsGeneratingLink(false);
     }
   };
 

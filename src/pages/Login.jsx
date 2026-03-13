@@ -124,6 +124,28 @@ const Login = () => {
             </button>
           </div>
         </form>
+
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-gray-200" />
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="px-3 bg-white text-gray-400">lub</span>
+          </div>
+        </div>
+
+        <div>
+          <button
+            type="button"
+            onClick={() => navigate('/guest')}
+            className="w-full flex justify-center py-3 px-4 border-2 border-dashed border-gray-300 text-sm font-medium rounded-lg text-gray-600 hover:border-purple-400 hover:text-purple-600 hover:bg-purple-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-400 transition duration-150"
+          >
+            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+            </svg>
+            Wypróbuj bez rejestracji
+          </button>
+        </div>
       </div>
     </div>
   );
