@@ -202,8 +202,8 @@ const LandingPage = () => {
               Przekonaj się sam, jak to działa
             </h2>
             <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-              Poniżej widzisz prawdziwy model 3D z instrukcją krok po kroku — dokładnie tak jak
-              wygląda dokumentacja wygenerowana przez 3D Docs. Obróć model, kliknij kroki.
+              Oba tryby pracy 3D Docs w jednym miejscu. Przełącz zakładkę by zobaczyć budowanie
+              modelu z kształtów geometrycznych lub pracę z wgranym modelem 3D — krok po kroku.
             </p>
           </div>
 
