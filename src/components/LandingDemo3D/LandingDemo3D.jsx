@@ -235,7 +235,7 @@ export default function LandingDemo3D() {
   const step = DEMO_STEPS[stepIdx];
 
   const startTimer = useCallback(() => {
-    if (timerRef.current) clearInterval(timerRef.current);
+    clearInterval(timerRef.current);
     timerRef.current = setInterval(() => {
       setStepIdx((i) => (i + 1) % DEMO_STEPS.length);
     }, 3500);
