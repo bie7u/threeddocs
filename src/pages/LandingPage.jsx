@@ -8,23 +8,23 @@ const features = [
     icon: (
       <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8}
-          d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+          d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18" />
       </svg>
     ),
     gradient: 'from-blue-500 to-indigo-600',
-    title: 'Builder modeli 3D',
-    desc: 'Buduj interaktywne modele z gotowych kształtów 3D – sześcianów, sfer, cylindrów i stożków. Bez znajomości oprogramowania CAD.',
+    title: 'Diagramy architektury IT',
+    desc: 'Wizualizuj infrastrukturę, mikroserwisy i przepływy danych w interaktywnych diagramach 3D. Bez Visio, bez rysowania od zera.',
   },
   {
     icon: (
       <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8}
-          d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+          d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
       </svg>
     ),
     gradient: 'from-green-500 to-emerald-600',
-    title: 'Import własnych modeli',
-    desc: 'Wgrywaj rzeczywiste modele produktów w formatach GLTF/GLB i twórz dokumentację klikając bezpośrednio na elementy modelu.',
+    title: 'Onboarding nowych pracowników',
+    desc: 'Twórz interaktywne przewodniki wdrożeniowe krok po kroku. Nowy developer pozna stos technologiczny już pierwszego dnia.',
   },
   {
     icon: (
@@ -34,8 +34,8 @@ const features = [
       </svg>
     ),
     gradient: 'from-purple-500 to-violet-600',
-    title: 'Instrukcje krok po kroku',
-    desc: 'Twórz sekwencyjne przewodniki montażu z podświetlaniem elementów, opisami i wskazówkami – idealne do manualów obsługi.',
+    title: 'Runbooki i procedury',
+    desc: 'Dokumentuj procesy deploy, incident response i maintenance w formie czytelnych kroków z podświetlaniem węzłów — koniec z wiedzą tylko w głowach senior devów.',
   },
   {
     icon: (
@@ -46,31 +46,31 @@ const features = [
     ),
     gradient: 'from-pink-500 to-rose-600',
     title: 'Udostępnij jednym kliknięciem',
-    desc: 'Wygeneruj unikalny link do dokumentacji i udostępnij go klientom, partnerom lub pracownikom – bez logowania po ich stronie.',
+    desc: 'Wygeneruj unikalny link do dokumentacji i wyślij go nowemu pracownikowi lub całemu zespołowi — bez logowania po ich stronie.',
   },
 ];
 
 const steps = [
   {
     num: '01',
-    title: 'Wgraj lub zbuduj model',
-    desc: 'Zaimportuj plik GLTF/GLB swojego produktu albo zbuduj model 3D z gotowych kształtów geometrycznych.',
+    title: 'Zbuduj diagram systemu',
+    desc: 'Stwórz interaktywny diagram swojej architektury IT — serwerów, mikroserwisów, baz danych i połączeń między nimi — używając gotowych węzłów 3D.',
     color: 'text-blue-600',
     bg: 'bg-blue-50',
     border: 'border-blue-200',
   },
   {
     num: '02',
-    title: 'Dodaj kroki i opisy',
-    desc: 'Kliknij na elementy modelu, dodaj podświetlenia, tytuły kroków i szczegółowe opisy. Układaj je w logiczną sekwencję.',
+    title: 'Dodaj kroki onboardingu',
+    desc: 'Przypisz do każdego węzła opisy, linki i instrukcje. Ułóż je w sekwencję, którą nowy pracownik przejdzie krok po kroku — od środowiska dev po produkcję.',
     color: 'text-purple-600',
     bg: 'bg-purple-50',
     border: 'border-purple-200',
   },
   {
     num: '03',
-    title: 'Udostępnij link',
-    desc: 'Jednym kliknięciem wygeneruj publiczny link do instrukcji. Odbiorca otwiera ją w przeglądarce – bez instalacji i logowania.',
+    title: 'Wyślij link nowemu pracownikowi',
+    desc: 'Jednym kliknięciem wygeneruj publiczny link. Nowy developer otwiera go w przeglądarce — bez instalacji, bez logowania, bez pytań do seniora.',
     color: 'text-green-600',
     bg: 'bg-green-50',
     border: 'border-green-200',
@@ -78,12 +78,14 @@ const steps = [
 ];
 
 const useCases = [
-  { emoji: '🔧', label: 'Instrukcje montażu' },
-  { emoji: '📦', label: 'Dokumentacja produktów' },
-  { emoji: '🎓', label: 'Szkolenia techniczne' },
-  { emoji: '🏭', label: 'Procesy produkcyjne' },
-  { emoji: '🛠️', label: 'Konserwacja maszyn' },
-  { emoji: '🖥️', label: 'Prezentacje sprzedażowe' },
+  { emoji: '🖥️', label: 'Architektura systemów' },
+  { emoji: '🚀', label: 'Onboarding deweloperów' },
+  { emoji: '📋', label: 'Runbooki i playbooki' },
+  { emoji: '🔐', label: 'Dokumentacja bezpieczeństwa' },
+  { emoji: '🔄', label: 'Procesy CI/CD' },
+  { emoji: '📊', label: 'Monitoring i alerty' },
+  { emoji: '🧩', label: 'Mapa mikroserwisów' },
+  { emoji: '📖', label: 'Wiki techniczna zespołu' },
 ];
 
 const LandingPage = () => {
@@ -133,18 +135,18 @@ const LandingPage = () => {
 
         <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <span className="inline-block mb-4 px-4 py-1.5 bg-blue-100 text-blue-700 text-sm font-semibold rounded-full">
-            🚀 Dokumentacja techniczna nowej generacji
+            🚀 Dokumentacja IT i onboarding nowej generacji
           </span>
           <h1 className="text-5xl sm:text-6xl font-extrabold text-gray-900 leading-tight mb-6">
-            Twórz interaktywną{' '}
+            Onboarduj zespół szybciej{' '}
             <span className="bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
-              dokumentację 3D
+              z dokumentacją 3D
             </span>
           </h1>
           <p className="text-xl text-gray-600 mb-10 max-w-2xl mx-auto leading-relaxed">
-            3D Docs to platforma dla inżynierów, techników i producentów. Wizualizuj produkty,
-            twórz instrukcje krok po kroku i udostępniaj je błyskawicznie — bez instalacji
-            i bez kodu.
+            3D Docs to platforma dla zespołów IT. Wizualizuj architekturę systemów,
+            twórz interaktywne przewodniki onboardingowe i udostępniaj je błyskawicznie —
+            bez instalacji i bez kodu.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button
@@ -173,7 +175,7 @@ const LandingPage = () => {
               <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
               </svg>
-              Obsługa GLTF / GLB
+              Gotowe szablony IT
             </div>
             <div className="flex items-center gap-2">
               <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
@@ -202,8 +204,8 @@ const LandingPage = () => {
               Przekonaj się sam, jak to działa
             </h2>
             <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-              Oba tryby pracy 3D Docs w jednym miejscu. Przełącz zakładkę by zobaczyć budowanie
-              modelu z kształtów geometrycznych lub pracę z wgranym modelem 3D — krok po kroku.
+              Interaktywne demo architektury IT. Przełącz zakładkę by zobaczyć jak 3D Docs
+              wizualizuje systemy i przepływy danych — krok po kroku.
             </p>
           </div>
 
@@ -231,10 +233,10 @@ const LandingPage = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-extrabold text-gray-900 mb-4">
-              Wszystko czego potrzebujesz
+              Wszystko czego potrzebuje Twój zespół IT
             </h2>
             <p className="text-xl text-gray-500 max-w-2xl mx-auto">
-              Od importu modelu po gotowy link z instrukcją — w kilka minut.
+              Od diagramu architektury po gotowy link z przewodnikiem onboardingowym — w kilka minut.
             </p>
           </div>
 
@@ -263,7 +265,7 @@ const LandingPage = () => {
               Jak to działa?
             </h2>
             <p className="text-xl text-gray-500">
-              Trzy kroki od modelu do gotowej instrukcji.
+              Trzy kroki od diagramu do gotowego onboardingu.
             </p>
           </div>
 
@@ -287,7 +289,7 @@ const LandingPage = () => {
               Dla kogo jest 3D Docs?
             </h2>
             <p className="text-xl text-gray-500 max-w-2xl mx-auto">
-              Wszędzie tam, gdzie złożone rzeczy trzeba wytłumaczyć prosto i wizualnie.
+              Wszędzie tam, gdzie złożone systemy IT trzeba wytłumaczyć szybko i przejrzyście.
             </p>
           </div>
 
@@ -306,10 +308,10 @@ const LandingPage = () => {
           {/* Testimonial-style highlight */}
           <div className="mt-16 bg-gradient-to-r from-blue-600 to-purple-700 rounded-3xl p-10 text-center text-white shadow-2xl">
             <p className="text-2xl font-semibold mb-2 leading-snug">
-              „Zamiast 20-stronicowego PDF-a z rysunkami technicznymi,<br />
-              teraz wysyłamy klientom jeden link."
+              „Nowy developer rozumie całą naszą architekturę<br />
+              jeszcze przed końcem pierwszego tygodnia."
             </p>
-            <p className="text-blue-200 text-sm mt-4">— Przykładowe zastosowanie w branży przemysłowej</p>
+            <p className="text-blue-200 text-sm mt-4">— Przykładowe zastosowanie w zespole produktowym SaaS</p>
           </div>
         </div>
       </section>
@@ -324,10 +326,10 @@ const LandingPage = () => {
             </svg>
           </div>
           <h2 className="text-4xl font-extrabold text-gray-900 mb-4">
-            Gotowy do działania?
+            Gotowy przyspieszyć onboarding?
           </h2>
           <p className="text-xl text-gray-600 mb-8">
-            Wypróbuj 3D Docs za darmo — bez rejestracji i bez ograniczeń czasowych.
+            Wypróbuj 3D Docs za darmo — bez rejestracji. Stwórz pierwszy diagram IT w 5 minut.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button
@@ -359,7 +361,7 @@ const LandingPage = () => {
             <span className="font-bold">3D Docs</span>
           </div>
           <p className="text-sm">
-            © {new Date().getFullYear()} 3D Docs — interaktywna dokumentacja 3D
+            © {new Date().getFullYear()} 3D Docs — interaktywna dokumentacja IT
           </p>
         </div>
       </footer>
