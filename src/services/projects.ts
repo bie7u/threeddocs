@@ -1,161 +1,177 @@
+// ─── Mock implementation — no real API, data lives in localStorage ───────────
+//
+// Storage layout (`3ddocs_projects` key):
+//   Array of StoredEntry objects, where each entry holds the full project data
+//   plus metadata (userId, optional shareToken).
+//
+// Auth user id is read from `3ddocs_auth` (set by the auth mock).
+
 import type { SavedProject } from '../store';
-import type { InstructionStep, ConnectionData } from '../types';
-import type { Edge } from 'reactflow';
-import { apiRequest } from './api';
 
-const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? '/api';
+// ─── Types ────────────────────────────────────────────────────────────────────
 
-// ─── Server-side flat project shape ──────────────────────────────────────────
-
-interface ApiProject {
-  id: number;
-  name: string;
-  projectType: 'builder' | 'upload';
-  projectModelUrl: string | null;
-  steps: InstructionStep[];
-  connections: Edge<ConnectionData>[];
-  /** Server guide format — no client-only `id` field */
-  guide: Array<{ stepId: string; label?: string }>;
-  nodePositions: Record<string, { x: number; y: number }>;
-  /** Server-assigned Unix timestamp in ms (read-only) */
-  lastModified: number;
+interface StoredEntry extends SavedProject {
+  /** Matches project.id */
+  id: string;
+  /** Owner id. 'guest' for anonymous guest projects. */
+  userId: string;
+  /** Set when the project has been shared. */
+  shareToken?: string;
 }
 
-/** Fields sent on POST/PUT — server assigns `id` and `lastModified` */
-type ApiProjectBody = Omit<ApiProject, 'id' | 'lastModified'>;
+// ─── Storage helpers ──────────────────────────────────────────────────────────
 
-// ─── Converters ───────────────────────────────────────────────────────────────
+const STORE_KEY = '3ddocs_projects';
+const AUTH_KEY  = '3ddocs_auth';
 
-/** Convert server flat format → internal SavedProject wrapper */
-const fromApiProject = (ap: ApiProject): SavedProject => ({
-  project: {
-    id: String(ap.id),
-    name: ap.name,
-    projectType: ap.projectType,
-    projectModelUrl: ap.projectModelUrl ?? undefined,
-    steps: ap.steps,
-    connections: ap.connections,
-    // Add client-side `id` derived from stepId (used as React key and for removal)
-    guide: ap.guide.map((gs) => ({ id: gs.stepId, stepId: gs.stepId, label: gs.label })),
-  },
-  nodePositions: ap.nodePositions,
-  lastModified: ap.lastModified,
-});
-
-/** Convert internal SavedProject → server body (omit client-only fields) */
-const toApiProjectBody = (sp: SavedProject): ApiProjectBody => ({
-  name: sp.project.name,
-  projectType: sp.project.projectType ?? 'builder',
-  projectModelUrl: sp.project.projectModelUrl ?? null,
-  steps: sp.project.steps,
-  connections: sp.project.connections,
-  // Strip client-only `id` field from each guide step before sending to server
-  guide: (sp.project.guide ?? []).map(({ stepId, label }) => ({ stepId, ...(label !== undefined && { label }) })),
-  nodePositions: sp.nodePositions,
-});
-
-// ─── API functions ────────────────────────────────────────────────────────────
-
-/** GET /api/projects — returns all projects owned by the authenticated user. */
-export const fetchProjects = async (): Promise<SavedProject[]> => {
-  const res = await apiRequest('/projects');
-  if (!res.ok) throw new Error('Failed to fetch projects');
-  const data = await res.json() as ApiProject[];
-  return data.map(fromApiProject);
+const loadAll = (): StoredEntry[] => {
+  try {
+    return JSON.parse(localStorage.getItem(STORE_KEY) ?? '[]') as StoredEntry[];
+  } catch {
+    return [];
+  }
 };
 
-/** GET /api/projects/:id — returns a single project (auth required). */
+const saveAll = (entries: StoredEntry[]): void => {
+  localStorage.setItem(STORE_KEY, JSON.stringify(entries));
+};
+
+const currentUserId = (): string => {
+  try {
+    const raw = localStorage.getItem(AUTH_KEY);
+    if (!raw) return '';
+    return (JSON.parse(raw) as { id: string }).id;
+  } catch {
+    return '';
+  }
+};
+
+/** Generate a short unique id / share token. */
+const uid = (): string =>
+  `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 11)}`;
+
+/** Strip internal fields before returning to the store. */
+const toSavedProject = (e: StoredEntry): SavedProject => ({
+  project: e.project,
+  nodePositions: e.nodePositions,
+  lastModified: e.lastModified,
+});
+
+// ─── API-like functions ────────────────────────────────────────────────────────
+
+/** Returns all projects owned by the currently logged-in user. */
+export const fetchProjects = async (): Promise<SavedProject[]> => {
+  const userId = currentUserId();
+  return loadAll()
+    .filter((e) => e.userId === userId)
+    .map(toSavedProject);
+};
+
+/** Returns a single project by id (auth required). */
 export const fetchProject = async (id: string): Promise<SavedProject> => {
-  const res = await apiRequest(`/projects/${id}`);
-  if (!res.ok) throw new Error('Project not found');
-  return fromApiProject(await res.json() as ApiProject);
+  const entry = loadAll().find((e) => e.id === id);
+  if (!entry) throw new Error('Project not found');
+  return toSavedProject(entry);
 };
 
 /**
- * POST /api/projects/:id/share — generates a unique share token for the project.
- * Returns the token string.
+ * Generates (or reuses) a share token for the project and returns it.
+ * The project stays accessible via fetchPublicProject(token).
  */
 export const generateShareToken = async (id: string): Promise<string> => {
-  const res = await apiRequest(`/projects/${id}/share`, { method: 'POST' });
-  if (!res.ok) throw new Error('Failed to generate share link');
-  const data = await res.json() as { shareToken: string };
-  return data.shareToken;
+  const entries = loadAll();
+  const idx = entries.findIndex((e) => e.id === id);
+  if (idx < 0) throw new Error('Project not found');
+  if (!entries[idx].shareToken) {
+    entries[idx].shareToken = uid();
+    saveAll(entries);
+  }
+  return entries[idx].shareToken as string;
 };
 
 /**
- * GET /api/projects/shared/:shareToken — returns a project without authentication.
- * Used by the SharedView page for publicly shared links.
+ * Returns a project by its share token without authentication.
+ * Used by the /view/:shareToken public page.
  */
 export const fetchPublicProject = async (shareToken: string): Promise<SavedProject> => {
-  const res = await fetch(`${API_BASE}/projects/shared/${shareToken}`, {
-    credentials: 'omit',
-  });
-  if (!res.ok) throw new Error('Project not found');
-  return fromApiProject(await res.json() as ApiProject);
+  const entry = loadAll().find((e) => e.shareToken === shareToken);
+  if (!entry) throw new Error('Project not found');
+  return toSavedProject(entry);
 };
 
 /**
- * POST /api/projects/guest — creates a guest project without authentication.
- * The server returns the project together with an immediate share token.
+ * Creates a guest project (no auth) and immediately assigns a share token.
+ * The project is stored under userId 'guest'.
  */
 export const createGuestProject = async (
   data: SavedProject,
 ): Promise<{ savedProject: SavedProject; shareToken: string }> => {
-  const res = await fetch(`${API_BASE}/projects/guest`, {
-    method: 'POST',
-    credentials: 'omit',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(toApiProjectBody(data)),
-  });
-  if (!res.ok) throw new Error('Failed to create guest project');
-  const responseData = await res.json() as ApiProject & { shareToken: string };
-  const { shareToken } = responseData;
-  return { savedProject: fromApiProject(responseData), shareToken };
+  const id = uid();
+  const shareToken = uid();
+  const entry: StoredEntry = {
+    id,
+    userId: 'guest',
+    shareToken,
+    project: { ...data.project, id },
+    nodePositions: data.nodePositions,
+    lastModified: Date.now(),
+  };
+  saveAll([...loadAll(), entry]);
+  return { savedProject: toSavedProject(entry), shareToken };
 };
 
 /**
- * PUT /api/projects/guest/:shareToken — updates a guest project.
- * The share token acts as the sole authentication credential.
+ * Updates a guest project identified by its share token.
+ * The token acts as the sole credential.
  */
 export const updateGuestProject = async (
   shareToken: string,
   data: SavedProject,
 ): Promise<SavedProject> => {
-  const res = await fetch(`${API_BASE}/projects/guest/${shareToken}`, {
-    method: 'PUT',
-    credentials: 'omit',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(toApiProjectBody(data)),
-  });
-  if (!res.ok) throw new Error('Failed to update guest project');
-  return fromApiProject(await res.json() as ApiProject);
+  const entries = loadAll();
+  const idx = entries.findIndex((e) => e.shareToken === shareToken);
+  if (idx < 0) throw new Error('Project not found');
+  entries[idx] = {
+    ...entries[idx],
+    project: { ...data.project, id: entries[idx].id },
+    nodePositions: data.nodePositions,
+    lastModified: Date.now(),
+  };
+  saveAll(entries);
+  return toSavedProject(entries[idx]);
 };
 
-/**
- * POST /api/projects — creates a new project.
- * The server assigns `id` and `lastModified`; the client must NOT send them.
- */
+/** Creates a new project for the logged-in user. */
 export const createProject = async (data: SavedProject): Promise<SavedProject> => {
-  const res = await apiRequest('/projects', {
-    method: 'POST',
-    body: JSON.stringify(toApiProjectBody(data)),
-  });
-  if (!res.ok) throw new Error('Failed to create project');
-  return fromApiProject(await res.json() as ApiProject);
+  const id = uid();
+  const userId = currentUserId();
+  const entry: StoredEntry = {
+    id,
+    userId,
+    project: { ...data.project, id },
+    nodePositions: data.nodePositions,
+    lastModified: Date.now(),
+  };
+  saveAll([...loadAll(), entry]);
+  return toSavedProject(entry);
 };
 
-/** PUT /api/projects/:id — fully replaces the project and returns it. */
+/** Fully replaces an existing project and returns it. */
 export const updateProject = async (id: string, data: SavedProject): Promise<SavedProject> => {
-  const res = await apiRequest(`/projects/${id}`, {
-    method: 'PUT',
-    body: JSON.stringify(toApiProjectBody(data)),
-  });
-  if (!res.ok) throw new Error('Failed to update project');
-  return fromApiProject(await res.json() as ApiProject);
+  const entries = loadAll();
+  const idx = entries.findIndex((e) => e.id === id);
+  if (idx < 0) throw new Error('Project not found');
+  entries[idx] = {
+    ...entries[idx],
+    project: { ...data.project, id },
+    nodePositions: data.nodePositions,
+    lastModified: Date.now(),
+  };
+  saveAll(entries);
+  return toSavedProject(entries[idx]);
 };
 
-/** DELETE /api/projects/:id — deletes the project. */
+/** Deletes a project by id. */
 export const deleteProjectRequest = async (id: string): Promise<void> => {
-  const res = await apiRequest(`/projects/${id}`, { method: 'DELETE' });
-  if (!res.ok) throw new Error('Failed to delete project');
+  saveAll(loadAll().filter((e) => e.id !== id));
 };

@@ -27,13 +27,13 @@ const Dashboard = () => {
         return loadProjects();
       })
       .catch(() => {
-        navigate('/');
+        navigate('/login');
       });
   }, [navigate, loadProjects]);
 
   const handleLogout = async () => {
     await logout().catch(() => {});
-    navigate('/');
+    navigate('/login');
   };
 
   const handleCreateProject = async (name, type, modelUrl) => {

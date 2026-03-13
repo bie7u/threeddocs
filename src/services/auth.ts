@@ -1,4 +1,4 @@
-import { apiRequest } from './api';
+// ─── Mock implementation — no real API, data lives in localStorage ───────────
 
 export interface AuthUser {
   id: string;
@@ -6,27 +6,32 @@ export interface AuthUser {
   name?: string;
 }
 
-/** POST /api/auth/login — returns user info; server sets httpOnly cookies. */
+const AUTH_KEY = '3ddocs_auth';
+
+/** Mock login — accepts any non-empty email + password combination. */
 export const login = async (email: string, password: string): Promise<AuthUser> => {
-  const res = await apiRequest('/auth/login', {
-    method: 'POST',
-    body: JSON.stringify({ email, password }),
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ message: 'Login failed' }));
-    throw new Error((err as { message?: string }).message ?? 'Login failed');
+  // Simulate a short network delay so the UI spinner is visible.
+  await new Promise<void>((r) => setTimeout(r, 400));
+  if (!email.trim() || !password.trim()) {
+    throw new Error('Email i hasło są wymagane');
   }
-  return res.json() as Promise<AuthUser>;
+  const user: AuthUser = {
+    id: `user-${btoa(email).replace(/[^a-zA-Z0-9]/g, '').slice(0, 12)}`,
+    email,
+    name: email.split('@')[0],
+  };
+  localStorage.setItem(AUTH_KEY, JSON.stringify(user));
+  return user;
 };
 
-/** POST /api/auth/logout — clears httpOnly cookies on the server. */
+/** Mock logout — removes the stored user. */
 export const logout = async (): Promise<void> => {
-  await apiRequest('/auth/logout', { method: 'POST' });
+  localStorage.removeItem(AUTH_KEY);
 };
 
-/** GET /api/auth/me — returns the currently authenticated user or throws on 401. */
+/** Mock getMe — reads the stored user or throws if not logged in. */
 export const getMe = async (): Promise<AuthUser> => {
-  const res = await apiRequest('/auth/me');
-  if (!res.ok) throw new Error('Not authenticated');
-  return res.json() as Promise<AuthUser>;
+  const raw = localStorage.getItem(AUTH_KEY);
+  if (!raw) throw new Error('Not authenticated');
+  return JSON.parse(raw) as AuthUser;
 };

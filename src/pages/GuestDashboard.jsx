@@ -39,7 +39,7 @@ const GuestDashboard = () => {
 
   const handleGoToLogin = () => {
     clearGuestMode();
-    navigate('/');
+    navigate('/login');
   };
 
   const handleCopyLink = async () => {
