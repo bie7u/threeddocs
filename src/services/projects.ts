@@ -47,7 +47,7 @@ const currentUserId = (): string => {
 };
 
 /** Generate a short unique id / share token. */
-const uid = (): string =>
+const generateId = (): string =>
   `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 11)}`;
 
 /** Strip internal fields before returning to the store. */
@@ -83,7 +83,7 @@ export const generateShareToken = async (id: string): Promise<string> => {
   const idx = entries.findIndex((e) => e.id === id);
   if (idx < 0) throw new Error('Project not found');
   if (!entries[idx].shareToken) {
-    entries[idx].shareToken = uid();
+    entries[idx].shareToken = generateId();
     saveAll(entries);
   }
   return entries[idx].shareToken as string;
@@ -106,8 +106,8 @@ export const fetchPublicProject = async (shareToken: string): Promise<SavedProje
 export const createGuestProject = async (
   data: SavedProject,
 ): Promise<{ savedProject: SavedProject; shareToken: string }> => {
-  const id = uid();
-  const shareToken = uid();
+  const id = generateId();
+  const shareToken = generateId();
   const entry: StoredEntry = {
     id,
     userId: 'guest',
@@ -143,7 +143,7 @@ export const updateGuestProject = async (
 
 /** Creates a new project for the logged-in user. */
 export const createProject = async (data: SavedProject): Promise<SavedProject> => {
-  const id = uid();
+  const id = generateId();
   const userId = currentUserId();
   const entry: StoredEntry = {
     id,

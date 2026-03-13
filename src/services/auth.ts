@@ -15,8 +15,10 @@ export const login = async (email: string, password: string): Promise<AuthUser> 
   if (!email.trim() || !password.trim()) {
     throw new Error('Email i hasło są wymagane');
   }
+  // Derive a stable id from the email without using btoa (avoid non-Latin1 issues).
+  const id = `user-${email.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 12)}-${email.length}`;
   const user: AuthUser = {
-    id: `user-${btoa(email).replace(/[^a-zA-Z0-9]/g, '').slice(0, 12)}`,
+    id,
     email,
     name: email.split('@')[0],
   };

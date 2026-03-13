@@ -172,11 +172,11 @@ const GuestDashboard = () => {
               </div>
 
               <p className="text-xs text-gray-400">
-                Pamiętaj, że link do modelu może zostać dezaktywowany, jeśli projekt gościa wygaśnie.{' '}
+                Twój model jest zapisany lokalnie w tej przeglądarce.{' '}
                 <button onClick={handleGoToLogin} className="text-blue-500 hover:underline">
                   Zaloguj się
                 </button>{' '}
-                aby zachować model na stałe.
+                aby móc zarządzać swoimi modelami z dowolnego urządzenia.
               </p>
             </div>
           ) : (
