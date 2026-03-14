@@ -2,8 +2,8 @@
  * LandingDemo3D
  *
  * Two-tab interactive 3D demo for the landing page:
- *  • "Zbuduj model" – geometric-shapes assembly (mirrors the Builder path)
- *  • "Wgraj model"  – mechanical robot-arm assembly (mirrors the Upload path)
+ *  • "Diagram Architektury" – IT system architecture (API, LB, Auth, Cache, DB)
+ *  • "Szafa Serwerowa"      – 19" server rack (network switch, app servers, storage)
  *
  * A single <Canvas> is kept alive for both tabs to avoid exhausting the
  * browser's WebGL context budget. `Environment` is intentionally omitted
@@ -52,7 +52,7 @@ function inactive() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// SCENE A – "Zbuduj model 3D" (IT system architecture)
+// SCENE A – "Diagram Architektury" (IT system architecture)
 //
 // Demonstrates ALL key builder features:
 //  • 5 distinct shape types: sphere, cylinder, cube, cone, DB-stack (engravedBlock)
@@ -72,42 +72,42 @@ const BUILDER_STEPS = [
   {
     id: 0, nodeId: 'user',
     title: 'Krok 1 – Klient (Przeglądarka)',
-    desc: 'Użytkownik otwiera aplikację w przeglądarce. Żądanie HTTPS trafia do infrastruktury. W 3D Docs użyj sfery jako węzła klienta.',
+    desc: 'Dzień 1 onboardingu: tu zaczyna się każde żądanie. Nowy developer widzi dokładnie skąd pochodzi ruch — jeden węzeł, jedna informacja.',
     color: '#3b82f6', emissive: '#1e40af',
     badge: '🌐 Klient',
   },
   {
     id: 1, nodeId: 'lb',
     title: 'Krok 2 – Load Balancer',
-    desc: 'Ruch jest równoważony między instancjami serwera. Strzałka Glow (→) wyróżnia główną ścieżkę przepływu danych.',
+    desc: 'Ruch HTTP jest równoważony między instancjami serwera. Zamiast tłumaczyć słowami — nowy dev widzi przepływ danych na własne oczy.',
     color: '#10b981', emissive: '#064e3b',
     badge: '⚖️ Load Balancer',
   },
   {
     id: 2, nodeId: 'api',
     title: 'Krok 3 – API Server (Node.js)',
-    desc: 'Serwer aplikacji przetwarza żądania REST. Połączony z Auth (↔ dwukierunkowa strzałka) i Cache (styl Glass).',
+    desc: 'Centralny węzeł architektury. Interaktywna mapa zamiast 30-stronicowego wiki — developer zapamiętuje strukturę 2× szybciej.',
     color: '#a855f7', emissive: '#581c87',
     badge: '⚡ API Server',
   },
   {
     id: 3, nodeId: 'auth',
     title: 'Krok 4 – Auth Service (JWT)',
-    desc: 'Usługa uwierzytelniania weryfikuje token JWT. Strzałka ↔ (bidirectional) pokazuje że API wysyła żądanie i odbiera odpowiedź.',
+    desc: 'Usługa weryfikacji tokenów JWT. Strzałka ↔ pokazuje dwukierunkową komunikację. Mała porcja wiedzy = zero przeciążenia nowego pracownika.',
     color: '#ef4444', emissive: '#991b1b',
     badge: '🔐 Auth Service',
   },
   {
     id: 4, nodeId: 'cache',
     title: 'Krok 5 – Cache (Redis)',
-    desc: 'Warstwa cache przyspiesza odczyt danych. Styl Neon podkreśla szybkość. Możesz użyć dowolnego kształtu jako węzła.',
+    desc: 'Warstwa cache przyspiesza odczyt danych. Każdy krok zawiera tylko to co ważne — nowy developer poznaje system w logicznej kolejności.',
     color: '#f59e0b', emissive: '#78350f',
     badge: '⚡ Cache (Redis)',
   },
   {
     id: 5, nodeId: 'db',
     title: 'Krok 6 – Baza Danych (PostgreSQL)',
-    desc: '🔲 Grawerowany Klocek — wpisz "DB" a 3D Docs wygeneruje tekst jako model 3D! Tu: styl Glass z neonową strzałką z Cache.',
+    desc: 'Ostatni węzeł architektury. Po 6 krokach nowy developer rozumie cały stos technologiczny — bez pytania seniorów o podstawy.',
     color: '#06b6d4', emissive: '#0e7490',
     badge: '🗄️ PostgreSQL',
   },
@@ -343,110 +343,171 @@ function BuilderScene({ stepIdx }) {
 // Mimics an uploaded GLTF model: multi-part robot arm assembly
 // ═══════════════════════════════════════════════════════════════════════════════
 
+// ═══════════════════════════════════════════════════════════════════════════════
+// SCENE B – "Szafa Serwerowa" (Upload path)
+// Mimics an uploaded GLTF model: a 19" server rack assembly
+//
+// Parts (4 steps):
+//   rack      – outer enclosure (frame pillars + rails)
+//   switch    – top-of-rack network switch with port indicators
+//   appserver – three 1U application servers with LED / drive indicators
+//   storage   – bottom NAS storage array with disc drives
+// ═══════════════════════════════════════════════════════════════════════════════
+
 const UPLOAD_STEPS = [
   {
     id: 0,
-    part: 'base',
-    title: 'Krok 1 – Podstawa',
-    desc: 'Solidna podstawa montażowa. Kliknij ten element w modelu, by przypisać do niego ten krok instrukcji.',
+    part: 'rack',
+    title: 'Krok 1 – Szafa Serwerowa 19"',
+    desc: 'Obudowa rack 19"/42U — fundament każdej serwerowni. Na onboardingu: zacznij od ogólnego obrazu infrastruktury zanim przejdziesz do szczegółów.',
     color: '#3b82f6',
     emissive: '#1d4ed8',
-    badge: '🔩 Podstawa',
+    badge: '🗄️ Rack 19"',
   },
   {
     id: 1,
-    part: 'column',
-    title: 'Krok 2 – Kolumna',
-    desc: 'Pionowa kolumna nośna. Zintegrowany kanał kablowy biegnie wzdłuż całej jej wysokości.',
+    part: 'switch',
+    title: 'Krok 2 – Switch Sieciowy (ToR)',
+    desc: 'Top-of-Rack switch, 48× 10GbE. Nowy sysadmin widzi od razu jak urządzenia są połączone — zamiast studiować diagram Visio.',
     color: '#10b981',
     emissive: '#065f46',
-    badge: '📐 Kolumna',
+    badge: '🌐 Network Switch',
   },
   {
     id: 2,
-    part: 'arm',
-    title: 'Krok 3 – Ramię',
-    desc: 'Poziome ramię obrotowe — zakres ruchu 270°. Regulowany docisk ustawia kąt z dokładnością ±0,5°.',
+    part: 'appserver',
+    title: 'Krok 3 – Serwery Aplikacyjne',
+    desc: 'Trzy węzły obliczeniowe w klastrze Kubernetes. Interaktywna mapa zamiast suchej dokumentacji — developer od razu wie co gdzie działa.',
     color: '#a855f7',
     emissive: '#6b21a8',
-    badge: '🦾 Ramię',
+    badge: '⚙️ App Cluster',
   },
   {
     id: 3,
-    part: 'head',
-    title: 'Krok 4 – Głowica',
-    desc: 'Wymienna głowica robocza (adapter ISO-50). Czas wymiany ~30 s. Kliknij głowicę, by zaznaczyć ten element.',
+    part: 'storage',
+    title: 'Krok 4 – Macierz Dyskowa (NAS)',
+    desc: '12× NVMe 4 TB w RAID 10 — współdzielone zasoby dla całego klastra. Jeden krok = jedna rzecz do zapamiętania. Tak działa skuteczny onboarding.',
     color: '#f59e0b',
     emissive: '#92400e',
-    badge: '⚙️ Głowica',
+    badge: '💾 Storage Array',
   },
 ];
 
 function partMat(partName, activePart, step) {
   if (partName === activePart) return mat(step.color, step.emissive, 0.6, 0.7, 0.3);
-  return mat('#64748b', '#0f172a', 0.06, 0.7, 0.35);
+  return mat('#334155', '#0f172a', 0.04, 0.72, 0.38);
 }
 
 function UploadScene({ stepIdx }) {
   const step = UPLOAD_STEPS[stepIdx];
-  const baseM   = partMat('base',   step.part, step);
-  const colM    = partMat('column', step.part, step);
-  const armM    = partMat('arm',    step.part, step);
-  const headM   = partMat('head',   step.part, step);
+
+  const rackM    = partMat('rack',      step.part, step);
+  const switchM  = partMat('switch',    step.part, step);
+  const serverM  = partMat('appserver', step.part, step);
+  const storageM = partMat('storage',   step.part, step);
+
+  const isSwitch = step.part === 'switch';
+  const isServer = step.part === 'appserver';
+  const isStorage = step.part === 'storage';
 
   return (
     <group>
-      {/* Base platform */}
-      <mesh position={[0, -2.8, 0]}>
-        <cylinderGeometry args={[2.4, 2.8, 0.65, 32]} />
-        <meshStandardMaterial {...baseM} />
+      {/* ── Rack frame (2 pillars + top/bottom rails) ─── */}
+      <mesh position={[-1.65, 0, 0]}>
+        <boxGeometry args={[0.24, 7.4, 1.1]} />
+        <meshStandardMaterial {...rackM} />
       </mesh>
-      {/* Bolts */}
-      {[0, 90, 180, 270].map((deg) => {
-        const r = (deg * Math.PI) / 180;
-        return (
-          <mesh key={deg} position={[2.0 * Math.cos(r), -2.55, 2.0 * Math.sin(r)]}>
-            <cylinderGeometry args={[0.12, 0.12, 0.32, 8]} />
-            <meshStandardMaterial {...baseM} />
+      <mesh position={[1.65, 0, 0]}>
+        <boxGeometry args={[0.24, 7.4, 1.1]} />
+        <meshStandardMaterial {...rackM} />
+      </mesh>
+      <mesh position={[0, 3.7, 0]}>
+        <boxGeometry args={[3.54, 0.26, 1.1]} />
+        <meshStandardMaterial {...rackM} />
+      </mesh>
+      <mesh position={[0, -3.7, 0]}>
+        <boxGeometry args={[3.54, 0.26, 1.1]} />
+        <meshStandardMaterial {...rackM} />
+      </mesh>
+      {/* Rear backplane */}
+      <mesh position={[0, 0, -0.55]}>
+        <boxGeometry args={[3.3, 7.1, 0.06]} />
+        <meshStandardMaterial {...rackM} />
+      </mesh>
+      {step.part === 'rack' && <PulseRing position={[0, 0, 0]} color={step.color} radius={2.8} />}
+
+      {/* ── Network switch (top slot) ─── */}
+      <mesh position={[0, 2.85, 0]}>
+        <boxGeometry args={[3.0, 0.46, 0.9]} />
+        <meshStandardMaterial {...switchM} />
+      </mesh>
+      {/* Port indicators (8 tiny squares) */}
+      {Array.from({ length: 8 }, (_, i) => (
+        <mesh key={i} position={[-1.05 + i * 0.30, 2.85, 0.48]}>
+          <boxGeometry args={[0.19, 0.14, 0.06]} />
+          <meshStandardMaterial
+            color={isSwitch ? '#00ffaa' : '#0d1f0d'}
+            emissive={isSwitch ? '#00cc88' : '#000000'}
+            emissiveIntensity={isSwitch ? 0.9 : 0}
+          />
+        </mesh>
+      ))}
+      {isSwitch && <PulseRing position={[0, 2.85, 0]} color={step.color} radius={1.8} />}
+
+      {/* ── Application servers (3 × 1U) ─── */}
+      {[1.7, 0.8, -0.1].map((y, i) => (
+        <group key={i}>
+          <mesh position={[0, y, 0]}>
+            <boxGeometry args={[3.0, 0.62, 0.9]} />
+            <meshStandardMaterial {...serverM} />
           </mesh>
-        );
-      })}
-      {step.part === 'base' && <PulseRing position={[0, -2.8, 0]} color={step.color} radius={2.1} />}
+          {/* Status LED (green when active) */}
+          <mesh position={[1.15, y, 0.47]}>
+            <sphereGeometry args={[0.07, 8, 8]} />
+            <meshStandardMaterial
+              color={isServer ? '#00ff88' : '#0a1a0a'}
+              emissive={isServer ? '#00ff44' : '#000000'}
+              emissiveIntensity={isServer ? 1.1 : 0}
+            />
+          </mesh>
+          {/* Drive activity bar */}
+          <mesh position={[-0.1, y, 0.47]}>
+            <boxGeometry args={[1.6, 0.2, 0.05]} />
+            <meshStandardMaterial
+              color={isServer ? '#a78bfa' : '#1e293b'}
+              emissive={isServer ? '#7c3aed' : '#000000'}
+              emissiveIntensity={isServer ? 0.4 : 0}
+            />
+          </mesh>
+        </group>
+      ))}
+      {isServer && <PulseRing position={[0, 0.8, 0]} color={step.color} radius={1.9} />}
 
-      {/* Column */}
-      <mesh position={[0, 0.15, 0]}>
-        <cylinderGeometry args={[0.52, 0.62, 5.8, 24]} />
-        <meshStandardMaterial {...colM} />
+      {/* ── Storage array (bottom 2 slots) ─── */}
+      {/* Drive discs (4 horizontal NVMe cylinders) */}
+      {Array.from({ length: 4 }, (_, i) => (
+        <mesh key={i} position={[-1.1 + i * 0.72, -1.65, 0]} rotation={[Math.PI / 2, 0, 0]}>
+          <cylinderGeometry args={[0.27, 0.27, 0.82, 20]} />
+          <meshStandardMaterial {...storageM} />
+        </mesh>
+      ))}
+      {/* Storage controller unit */}
+      <mesh position={[0, -2.45, 0]}>
+        <boxGeometry args={[3.0, 0.68, 0.9]} />
+        <meshStandardMaterial {...storageM} />
       </mesh>
-      <mesh position={[0.53, 0.15, 0.08]}>
-        <boxGeometry args={[0.07, 5.3, 0.26]} />
-        <meshStandardMaterial {...colM} />
+      {/* Capacity bar indicator */}
+      <mesh position={[-0.1, -2.45, 0.47]}>
+        <boxGeometry args={[2.0, 0.2, 0.05]} />
+        <meshStandardMaterial
+          color={isStorage ? '#fbbf24' : '#1e293b'}
+          emissive={isStorage ? '#f59e0b' : '#000000'}
+          emissiveIntensity={isStorage ? 0.55 : 0}
+        />
       </mesh>
-      {step.part === 'column' && <PulseRing position={[0, 0.15, 0]} color={step.color} radius={1.6} />}
+      {isStorage && <PulseRing position={[0, -2.0, 0]} color={step.color} radius={1.8} />}
 
-      {/* Arm collar + beam */}
-      <mesh position={[0, 2.2, 0]}>
-        <cylinderGeometry args={[0.82, 0.82, 0.52, 24]} />
-        <meshStandardMaterial {...armM} />
-      </mesh>
-      <mesh position={[1.6, 2.38, 0]} rotation={[0, 0, Math.PI / 2]}>
-        <cylinderGeometry args={[0.28, 0.23, 3.2, 20]} />
-        <meshStandardMaterial {...armM} />
-      </mesh>
-      {step.part === 'arm' && <PulseRing position={[0, 2.2, 0]} color={step.color} radius={1.5} />}
-
-      {/* Head sphere + nozzle */}
-      <mesh position={[3.2, 2.38, 0]}>
-        <sphereGeometry args={[0.6, 32, 32]} />
-        <meshStandardMaterial {...headM} />
-      </mesh>
-      <mesh position={[3.2, 1.58, 0]}>
-        <cylinderGeometry args={[0.17, 0.27, 0.52, 16]} />
-        <meshStandardMaterial {...headM} />
-      </mesh>
-      {step.part === 'head' && <PulseRing position={[3.2, 2.38, 0]} color={step.color} radius={1.1} />}
-
-      <gridHelper args={[20, 20, '#1e293b', '#1e293b']} position={[0, -3.2, 0]} />
+      <gridHelper args={[20, 20, '#1e293b', '#1e293b']} position={[0, -4.0, 0]} />
     </group>
   );
 }
@@ -456,10 +517,10 @@ function UploadScene({ stepIdx }) {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 const TABS = [
-  // The builder IT-system scene spans X: -5..5.5 and Y: -2.2..1.5 —
-  // camera pulled back to [0, 2, 18] to fit all 6 nodes in view.
-  { id: 'builder', label: 'Zbuduj model 3D', icon: '■●▲', steps: BUILDER_STEPS, camera: [0, 2, 18] },
-  { id: 'upload',  label: 'Wgraj model 3D',  icon: '⬆',   steps: UPLOAD_STEPS,  camera: [6, 5, 11] },
+  // Builder: IT-system architecture spans X: -5..5.5, Y: -2.2..1.5
+  { id: 'builder', label: 'Diagram Architektury', icon: '🏗️', steps: BUILDER_STEPS, camera: [0, 2, 18] },
+  // Upload: server rack is centred at [0,0,0], height ~8 units → camera at z≈12
+  { id: 'upload',  label: 'Szafa Serwerowa',      icon: '🖥️', steps: UPLOAD_STEPS,  camera: [2, 0, 12] },
 ];
 
 const STEP_INTERVAL_MS = 3800;

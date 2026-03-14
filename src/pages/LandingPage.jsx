@@ -135,18 +135,18 @@ const LandingPage = () => {
 
         <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <span className="inline-block mb-4 px-4 py-1.5 bg-blue-100 text-blue-700 text-sm font-semibold rounded-full">
-            🚀 Dokumentacja IT i onboarding nowej generacji
+            🚀 Onboarding IT nowej generacji — interaktywny i skuteczny
           </span>
           <h1 className="text-5xl sm:text-6xl font-extrabold text-gray-900 leading-tight mb-6">
-            Onboarduj zespół szybciej{' '}
+            Nowy developer pozna Twój{' '}
             <span className="bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
-              z dokumentacją 3D
+              system w&nbsp;jeden dzień
             </span>
           </h1>
           <p className="text-xl text-gray-600 mb-10 max-w-2xl mx-auto leading-relaxed">
-            3D Docs to platforma dla zespołów IT. Wizualizuj architekturę systemów,
-            twórz interaktywne przewodniki onboardingowe i udostępniaj je błyskawicznie —
-            bez instalacji i bez kodu.
+            Zamiast suchych PDF-ów z architekturą — interaktywna mapa systemu, którą nowy
+            pracownik przechodzi krok&nbsp;po&nbsp;kroku. Jedna rzecz na raz,
+            zero przeciążenia informacyjnego.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button
@@ -189,6 +189,12 @@ const LandingPage = () => {
               </svg>
               Działa w przeglądarce
             </div>
+            <div className="flex items-center gap-2">
+              <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+              </svg>
+              🧠 Interaktywna nauka
+            </div>
           </div>
         </div>
       </section>
@@ -225,6 +231,70 @@ const LandingPage = () => {
           <p className="text-center text-gray-600 text-sm mt-6">
             Model obraca się automatycznie · Przeciągnij aby zmienić kąt widzenia · Kliknij krok aby przejść do niego
           </p>
+        </div>
+      </section>
+
+      {/* ── Why interactive learning works ───────────────────────── */}
+      <section className="py-24 bg-gradient-to-br from-slate-900 to-gray-900">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <span className="inline-block mb-3 px-4 py-1.5 bg-purple-900/50 text-purple-300 text-sm font-semibold rounded-full">
+              🧠 Nauka przez działanie
+            </span>
+            <h2 className="text-4xl font-extrabold text-white mb-4">
+              Dlaczego interaktywny onboarding działa lepiej?
+            </h2>
+            <p className="text-gray-400 text-lg max-w-2xl mx-auto">
+              Pasywne czytanie dokumentacji jest nieefektywne. 3D Docs angażuje nowego pracownika,
+              dzieli wiedzę na małe kroki i sprawia, że sam odkrywa architekturę systemu.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-8 hover:bg-white/10 transition-colors">
+              <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center text-2xl mb-5 shadow-lg">
+                🧠
+              </div>
+              <h3 className="text-white font-bold text-xl mb-3">Aktywna eksploracja</h3>
+              <p className="text-gray-400 text-sm leading-relaxed">
+                Klikanie węzłów, obracanie modelu i nawigacja krok po kroku angażuje pamięć
+                motoryczną i przestrzenną.{' '}
+                <span className="text-blue-400 font-semibold">
+                  Aktywna nauka poprawia retencję nawet 4× vs pasywne czytanie.
+                </span>
+              </p>
+            </div>
+
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-8 hover:bg-white/10 transition-colors">
+              <div className="w-14 h-14 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center text-2xl mb-5 shadow-lg">
+                📌
+              </div>
+              <h3 className="text-white font-bold text-xl mb-3">Mała porcja na raz</h3>
+              <p className="text-gray-400 text-sm leading-relaxed">
+                Każdy krok zawiera dokładnie jedną informację. Nowy developer nie jest
+                przytłoczony —{' '}
+                <span className="text-green-400 font-semibold">
+                  żadnej ściany tekstu,
+                </span>{' '}
+                tylko konkretny węzeł i jego rola w systemie.
+              </p>
+            </div>
+
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-8 hover:bg-white/10 transition-colors">
+              <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-violet-600 rounded-xl flex items-center justify-center text-2xl mb-5 shadow-lg">
+                🎯
+              </div>
+              <h3 className="text-white font-bold text-xl mb-3">Logiczna sekwencja</h3>
+              <p className="text-gray-400 text-sm leading-relaxed">
+                Przepływ od ogółu do szczegółu: architektura → serwisy → konfiguracja.
+                Nowy pracownik buduje{' '}
+                <span className="text-purple-400 font-semibold">
+                  mentalną mapę systemu
+                </span>{' '}
+                zamiast zapamiętywać losowe fragmenty wiki.
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 
