@@ -1,31 +1,23 @@
 /**
  * LandingDemo3D
  *
- * Two-tab interactive 3D demo for the landing page:
+ * Two-tab interactive 3D demo for the landing page, styled to match the real
+ * PreviewMode UI (top bar with Camera Auto/Free, "Preview Mode" badge, step
+ * info card top-left, Previous/Next navigation bottom-center).
+ *
  *  • "Diagram Architektury" – IT system architecture (API, LB, Auth, Cache, DB)
  *  • "Szafa Serwerowa"      – 19" server rack (network switch, app servers, storage)
  *
- * A single <Canvas> is kept alive for both tabs to avoid exhausting the
- * browser's WebGL context budget. `Environment` is intentionally omitted
- * (pure lights only) to prevent context loss on mid-range hardware.
- * Shadow maps are also disabled to avoid the PCFSoftShadowMap deprecation
- * warning in Three.js ≥ 0.168.
+ * Camera auto-focuses on each active node when in Auto mode (matches the
+ * CameraController behaviour from Viewer3D.tsx).
  */
 
 import { useRef, useEffect, useState, useCallback } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import * as THREE from 'three';
 
 // ─── Shared helpers ───────────────────────────────────────────────────────────
-
-function AutoRotate({ children, paused }) {
-  const ref = useRef();
-  useFrame((_, delta) => {
-    if (!paused && ref.current) ref.current.rotation.y += delta * 0.22;
-  });
-  return <group ref={ref}>{children}</group>;
-}
 
 function PulseRing({ position, color, radius = 1.6, tube = 0.055 }) {
   const ref = useRef();
@@ -513,31 +505,91 @@ function UploadScene({ stepIdx }) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
+// AutoCamera – lerps camera to the active step's target position
+// (mirrors CameraController from Viewer3D.tsx)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// [cameraPos, lookAtPos] for each step in each tab
+const CAM = {
+  builder: [
+    { pos: [-5,   5, 14], la: [-5,   1.5,  0] },
+    { pos: [-1.5, 5, 14], la: [-1.5, 1.5,  0] },
+    { pos: [2,    5, 14], la: [2,    1.5,  0] },
+    { pos: [2,    2, 14], la: [2,   -2.2,  0] },
+    { pos: [5.5,  5, 14], la: [5.5,  1.5,  0] },
+    { pos: [5.5,  2, 14], la: [5.5, -2.2,  0] },
+  ],
+  upload: [
+    { pos: [0,  0,   14], la: [0,  0,    0] },
+    { pos: [0,  3.5,  9], la: [0,  2.85, 0] },
+    { pos: [0,  1.5,  9], la: [0,  0.8,  0] },
+    { pos: [0, -1,    9], la: [0, -2,    0] },
+  ],
+};
+
+function AutoCamera({ stepIdx, tabId, cameraMode, orbitRef, snapOnChange }) {
+  const { camera } = useThree();
+  const targetPos    = useRef(new THREE.Vector3(...CAM.builder[0].pos));
+  const targetLookAt = useRef(new THREE.Vector3(...CAM.builder[0].la));
+
+  useEffect(() => {
+    const targets = CAM[tabId] ?? CAM.builder;
+    const t = targets[stepIdx] ?? targets[0];
+    targetPos.current.set(...t.pos);
+    targetLookAt.current.set(...t.la);
+
+    // Tab switches → snap instantly instead of lerping from old position
+    if (snapOnChange.current) {
+      snapOnChange.current = false;
+      camera.position.copy(targetPos.current);
+      if (orbitRef.current) {
+        orbitRef.current.target.copy(targetLookAt.current);
+        orbitRef.current.update();
+      }
+    }
+  }, [stepIdx, tabId, cameraMode, camera, orbitRef, snapOnChange]);
+
+  useFrame(() => {
+    if (cameraMode === 'free') return;
+    camera.position.lerp(targetPos.current, 0.06);
+    if (orbitRef.current) {
+      orbitRef.current.target.lerp(targetLookAt.current, 0.06);
+      orbitRef.current.update();
+    }
+  });
+
+  return null;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
 // MAIN COMPONENT
 // ═══════════════════════════════════════════════════════════════════════════════
 
 const TABS = [
-  // Builder: IT-system architecture spans X: -5..5.5, Y: -2.2..1.5
-  { id: 'builder', label: 'Diagram Architektury', icon: '🏗️', steps: BUILDER_STEPS, camera: [0, 2, 18] },
-  // Upload: server rack is centred at [0,0,0], height ~8 units → camera at z≈12
-  { id: 'upload',  label: 'Szafa Serwerowa',      icon: '🖥️', steps: UPLOAD_STEPS,  camera: [2, 0, 12] },
+  { id: 'builder', label: 'Diagram Architektury', icon: '🏗️', steps: BUILDER_STEPS },
+  { id: 'upload',  label: 'Szafa Serwerowa',      icon: '🖥️', steps: UPLOAD_STEPS  },
 ];
 
-const STEP_INTERVAL_MS = 3800;
+const STEP_INTERVAL_MS = 4000;
 
 export default function LandingDemo3D() {
-  const [tabIdx,   setTabIdx]   = useState(0);
-  const [stepIdx,  setStepIdx]  = useState(0);
-  const [paused,   setPaused]   = useState(false);
-  const timerRef = useRef(null);
+  const [tabIdx,     setTabIdx]     = useState(0);
+  const [stepIdx,    setStepIdx]    = useState(0);
+  const [cameraMode, setCameraMode] = useState('auto');
+  const timerRef     = useRef(null);
+  const orbitRef     = useRef(null);
+  const snapOnChange = useRef(false); // true → snap camera on next tab switch
 
   const tab  = TABS[tabIdx];
   const step = tab.steps[stepIdx];
 
-  const startTimer = useCallback((stepsLength) => {
+  const canGoPrev = stepIdx > 0;
+  const canGoNext = stepIdx < tab.steps.length - 1;
+
+  const startTimer = useCallback((len) => {
     clearInterval(timerRef.current);
     timerRef.current = setInterval(() => {
-      setStepIdx((i) => (i + 1) % stepsLength);
+      setStepIdx(i => (i + 1) % len);
     }, STEP_INTERVAL_MS);
   }, []);
 
@@ -546,29 +598,30 @@ export default function LandingDemo3D() {
     return () => clearInterval(timerRef.current);
   }, [tabIdx, startTimer, tab.steps.length]);
 
-  const handleSelectStep = (idx) => {
+  const goTo = (idx) => {
     setStepIdx(idx);
     startTimer(tab.steps.length);
   };
 
-  const handleSelectTab = (idx) => {
+  const handleTabChange = (idx) => {
+    snapOnChange.current = true; // snap camera to new tab's first position
     setTabIdx(idx);
     setStepIdx(0);
     startTimer(TABS[idx].steps.length);
   };
 
   return (
-    <div className="rounded-3xl overflow-hidden shadow-2xl border border-gray-800 bg-gray-950">
-      {/* ── Tab switcher ── */}
-      <div className="flex border-b border-gray-800">
+    <div className="rounded-3xl overflow-hidden shadow-2xl border border-white/10 bg-[#0d1117]">
+      {/* ── Tab bar ── */}
+      <div className="flex border-b border-white/10">
         {TABS.map((t, i) => (
           <button
             key={t.id}
-            onClick={() => handleSelectTab(i)}
+            onClick={() => handleTabChange(i)}
             className={`flex-1 flex items-center justify-center gap-2 px-4 py-3.5 text-sm font-semibold transition-all ${
               i === tabIdx
-                ? 'text-white border-b-2 border-blue-500 bg-gray-900'
-                : 'text-gray-500 hover:text-gray-300 hover:bg-gray-900/50'
+                ? 'text-white border-b-2 border-blue-500 bg-white/5'
+                : 'text-gray-500 hover:text-gray-300 hover:bg-white/5'
             }`}
           >
             <span className="text-base leading-none">{t.icon}</span>
@@ -577,115 +630,152 @@ export default function LandingDemo3D() {
         ))}
       </div>
 
-      <div className="flex flex-col lg:flex-row">
-        {/* ── 3D Canvas (single context for both tabs) ── */}
-        <div
-          className="relative w-full lg:w-2/3 h-72 sm:h-96 lg:h-[460px]"
-          onPointerEnter={() => setPaused(true)}
-          onPointerLeave={() => setPaused(false)}
-        >
-          <Canvas
-            gl={{ antialias: true, powerPreference: 'default' }}
-            camera={{ position: tab.camera, fov: 45 }}
-          >
-            <color attach="background" args={['#0a0f1a']} />
-            <fog attach="fog" color="#0a0f1a" near={20} far={45} />
+      {/* ── Canvas with overlaid PreviewMode UI ── */}
+      <div className="relative h-[480px] sm:h-[540px]">
+        {/* 3D Canvas */}
+        <Canvas gl={{ antialias: true, powerPreference: 'default' }}>
+          <color attach="background" args={['#0d1117']} />
+          <fog attach="fog" color="#0d1117" near={40} far={120} />
+          <PerspectiveCamera makeDefault position={[-5, 5, 14]} fov={45} />
 
-            <ambientLight intensity={0.55} />
-            <directionalLight position={[8, 12, 8]}  intensity={1.3} />
-            <directionalLight position={[-6, 5, -6]} intensity={0.4} />
-            <pointLight       position={[0, 8, 0]}   intensity={0.6} color="#6366f1" />
+          <hemisphereLight color="#1e3a5f" groundColor="#0a0a1a" intensity={0.6} />
+          <directionalLight position={[15, 25, 10]} intensity={1.8} />
+          <directionalLight position={[-10, 10, -8]} intensity={0.4} color="#3366cc" />
+          <pointLight position={[0, 20, 0]} intensity={0.6} color="#6699ff" />
 
-            <PerspectiveCamera makeDefault position={tab.camera} fov={45} />
+          {tabIdx === 0
+            ? <BuilderScene stepIdx={stepIdx} />
+            : <UploadScene  stepIdx={stepIdx} />
+          }
 
-            <AutoRotate paused={paused}>
-              {tabIdx === 0
-                ? <BuilderScene stepIdx={stepIdx} />
-                : <UploadScene  stepIdx={stepIdx} />
-              }
-            </AutoRotate>
+          <AutoCamera
+            stepIdx={stepIdx}
+            tabId={tab.id}
+            cameraMode={cameraMode}
+            orbitRef={orbitRef}
+            snapOnChange={snapOnChange}
+          />
 
-            <OrbitControls
-              enablePan={false}
-              minDistance={6}
-              maxDistance={24}
-              maxPolarAngle={Math.PI / 1.85}
-            />
-          </Canvas>
+          <OrbitControls
+            ref={orbitRef}
+            enablePan={false}
+            minDistance={4}
+            maxDistance={40}
+            maxPolarAngle={Math.PI / 1.6}
+          />
+        </Canvas>
 
-          {/* Hint overlay */}
-          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-black/55 backdrop-blur-sm text-white/65 text-xs px-3 py-1.5 rounded-full pointer-events-none select-none">
-            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5" />
-            </svg>
-            Przeciągnij aby obrócić · Scroll aby powiększyć
+        {/* ── Top bar: Camera toggle + Preview Mode badge ── */}
+        <div className="absolute top-0 left-0 right-0 bg-gradient-to-r from-slate-900/80 to-slate-800/80 backdrop-blur-md border-b border-white/10 z-10">
+          <div className="px-4 py-3 flex items-center justify-between">
+            {/* Camera toggle */}
+            <div className="flex items-center gap-2 bg-black/30 backdrop-blur-sm px-3 py-1.5 rounded-xl border border-white/10 shadow-xl">
+              <svg className="w-4 h-4 text-blue-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                  d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              <span className="text-xs font-semibold text-white hidden sm:inline">Camera:</span>
+              <button
+                onClick={() => setCameraMode('auto')}
+                className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all duration-200 ${
+                  cameraMode === 'auto'
+                    ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/30'
+                    : 'bg-white/10 text-slate-300 hover:bg-white/20'
+                }`}
+              >Auto</button>
+              <button
+                onClick={() => setCameraMode('free')}
+                className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all duration-200 ${
+                  cameraMode === 'free'
+                    ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/30'
+                    : 'bg-white/10 text-slate-300 hover:bg-white/20'
+                }`}
+              >Free</button>
+            </div>
+
+            {/* Preview Mode badge */}
+            <div className="flex items-center gap-2 bg-gradient-to-r from-blue-500/20 to-indigo-600/20 backdrop-blur-sm px-4 sm:px-6 py-2 rounded-xl border border-blue-400/30 shadow-xl">
+              <div className="w-2 h-2 bg-blue-400 rounded-full shadow-lg shadow-blue-400/50 motion-safe:animate-pulse" aria-hidden="true" />
+              <span className="text-xs sm:text-sm font-bold text-white">Preview Mode</span>
+            </div>
+
+            {/* Balance spacer */}
+            <div className="w-[108px] sm:w-[148px]" />
           </div>
         </div>
 
-        {/* ── Step panel ── */}
-        <div className="w-full lg:w-1/3 bg-gray-900 flex flex-col p-5 gap-3">
-          {/* Active step card */}
-          <div
-            className="flex-1 rounded-2xl p-5 flex flex-col justify-between transition-all duration-500"
-            style={{
-              background: `linear-gradient(135deg, ${step.color}1a, ${step.emissive}33)`,
-              border: `1.5px solid ${step.color}44`,
-            }}
-          >
-            <div>
-              <span
-                className="inline-block text-xs font-bold px-3 py-1 rounded-full mb-3"
-                style={{ background: `${step.color}28`, color: step.color }}
+        {/* ── Step info card (top-left, below top bar) ── */}
+        <div className="absolute top-[60px] left-3 sm:left-6 bg-black/40 backdrop-blur-md text-white px-4 sm:px-5 py-3 sm:py-4 rounded-xl shadow-2xl border border-white/10 max-w-[200px] sm:max-w-xs z-10 pointer-events-none select-none">
+          <div className="flex items-start gap-2 sm:gap-3">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center flex-shrink-0 shadow-lg">
+              <span className="text-sm sm:text-lg font-bold">{stepIdx + 1}</span>
+            </div>
+            <div className="min-w-0">
+              <h3 className="text-xs sm:text-base font-bold mb-1 leading-snug">{step.title}</h3>
+              <p className="text-[10px] sm:text-xs text-slate-300 leading-relaxed line-clamp-4">{step.desc}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Bottom navigation ── */}
+        <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-10">
+          <div className="bg-black/50 backdrop-blur-md text-white px-4 sm:px-8 py-3 sm:py-5 rounded-2xl shadow-2xl border border-white/10">
+            <div className="flex items-center gap-3 sm:gap-6">
+              <button
+                onClick={() => canGoPrev && goTo(stepIdx - 1)}
+                disabled={!canGoPrev}
+                className={`flex items-center gap-1.5 px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
+                  canGoPrev
+                    ? 'bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 shadow-lg shadow-blue-500/30'
+                    : 'bg-white/10 cursor-not-allowed opacity-50'
+                }`}
               >
-                {step.badge}
-              </span>
-              <h3 className="text-white font-bold text-lg leading-snug mb-2">{step.title}</h3>
-              <p className="text-gray-300 text-sm leading-relaxed">{step.desc}</p>
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                <span className="hidden sm:inline">Previous</span>
+              </button>
+
+              <div className="text-center min-w-[80px] sm:min-w-[120px] px-2">
+                <div className="text-[10px] sm:text-xs text-slate-400 uppercase tracking-wider mb-0.5">Step</div>
+                <div className="text-xl sm:text-2xl font-bold text-blue-300" aria-label={`Step ${stepIdx + 1} of ${tab.steps.length}`}>
+                  {stepIdx + 1} / {tab.steps.length}
+                </div>
+              </div>
+
+              <button
+                onClick={() => canGoNext && goTo(stepIdx + 1)}
+                disabled={!canGoNext}
+                className={`flex items-center gap-1.5 px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
+                  canGoNext
+                    ? 'bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 shadow-lg shadow-blue-500/30'
+                    : 'bg-white/10 cursor-not-allowed opacity-50'
+                }`}
+              >
+                <span className="hidden sm:inline">Next</span>
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
             </div>
 
             {/* Progress dots */}
-            <div className="flex items-center gap-2 mt-4">
+            <div className="mt-3 sm:mt-5 flex gap-1.5 sm:gap-2 justify-center pt-3 sm:pt-4 border-t border-white/10">
               {tab.steps.map((s, i) => (
                 <button
                   key={s.id}
-                  onClick={() => handleSelectStep(i)}
-                  className="rounded-full transition-all duration-300 focus:outline-none"
-                  style={{
-                    width: i === stepIdx ? 24 : 8,
-                    height: 8,
-                    background: i === stepIdx ? step.color : '#374151',
-                  }}
-                  aria-label={s.title}
+                  onClick={() => goTo(i)}
+                  className={`rounded-full transition-all duration-200 ${
+                    i === stepIdx
+                      ? 'h-2 sm:h-3 bg-gradient-to-r from-blue-400 to-indigo-500 shadow-lg shadow-blue-400/50'
+                      : 'w-2 sm:w-3 h-2 sm:h-3 bg-white/30 hover:bg-white/50 hover:scale-110'
+                  }`}
+                  style={i === stepIdx ? { width: '24px' } : {}}
+                  title={s.title}
                 />
               ))}
             </div>
-          </div>
-
-          {/* Step list */}
-          <div className="flex flex-col gap-2">
-            {tab.steps.map((s, i) => (
-              <button
-                key={s.id}
-                onClick={() => handleSelectStep(i)}
-                className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-left transition-all duration-200 ${
-                  i === stepIdx ? 'bg-white/10' : 'hover:bg-white/5'
-                }`}
-              >
-                <span
-                  className="w-7 h-7 flex items-center justify-center rounded-lg text-xs font-bold flex-shrink-0"
-                  style={{
-                    background: i === stepIdx ? step.color : '#1f2937',
-                    color:      i === stepIdx ? '#fff'      : '#9ca3af',
-                  }}
-                >
-                  {i + 1}
-                </span>
-                <span className={`text-sm font-medium ${i === stepIdx ? 'text-white' : 'text-gray-400'}`}>
-                  {s.title.replace(/^Krok \d+ – /, '')}
-                </span>
-              </button>
-            ))}
           </div>
         </div>
       </div>
