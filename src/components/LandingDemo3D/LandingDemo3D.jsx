@@ -12,7 +12,7 @@
  * CameraController behaviour from Viewer3D.tsx).
  */
 
-import { useRef, useEffect, useState, useCallback } from 'react';
+import { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import * as THREE from 'three';
@@ -32,6 +32,52 @@ function PulseRing({ position, color, radius = 1.6, tube = 0.055 }) {
       <torusGeometry args={[radius, tube, 12, 64]} />
       <meshBasicMaterial color={color} transparent opacity={0.45} side={THREE.DoubleSide} />
     </mesh>
+  );
+}
+
+// ─── Data packet – glowing cube flying along an arrow connection ─────────────
+function DataPacket({ from, to, color, active, speed = 0.26, offset = 0 }) {
+  const ref = useRef();
+  const curve = useMemo(
+    () => new THREE.CatmullRomCurve3([new THREE.Vector3(...from), new THREE.Vector3(...to)]),
+    [from, to]
+  );
+  useFrame(({ clock }) => {
+    if (!ref.current) return;
+    if (!active) { ref.current.visible = false; return; }
+    ref.current.visible = true;
+    const t = ((clock.getElapsedTime() * speed + offset) % 1 + 1) % 1;
+    curve.getPoint(t, ref.current.position);
+  });
+  return (
+    <mesh ref={ref}>
+      <boxGeometry args={[0.13, 0.13, 0.13]} />
+      <meshBasicMaterial color={color} />
+    </mesh>
+  );
+}
+
+// ─── Background star field ────────────────────────────────────────────────────
+function Stars({ count = 260, spread = 55 }) {
+  const positions = useMemo(() => {
+    const arr = new Float32Array(count * 3);
+    for (let i = 0; i < count; i++) {
+      const theta = Math.random() * Math.PI * 2;
+      const phi   = Math.acos(2 * Math.random() - 1);
+      const r     = spread * 0.5 + Math.random() * spread * 0.5;
+      arr[i * 3]     = r * Math.sin(phi) * Math.cos(theta);
+      arr[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+      arr[i * 3 + 2] = r * Math.cos(phi);
+    }
+    return arr;
+  }, [count, spread]);
+  return (
+    <points>
+      <bufferGeometry>
+        <bufferAttribute attach="attributes-position" args={[positions, 3]} />
+      </bufferGeometry>
+      <pointsMaterial color="#3b5fc0" size={0.16} transparent opacity={0.5} sizeAttenuation />
+    </points>
   );
 }
 
@@ -310,20 +356,38 @@ function BuilderScene({ stepIdx }) {
   const activeNodeId = BUILDER_STEPS[stepIdx]?.nodeId;
   return (
     <group>
+      <Stars count={180} spread={42} />
       {IT_NODES.map((node, i) => (
         <ITNode key={node.id} node={node} isActive={i === stepIdx} />
       ))}
 
-      {IT_CONNECTIONS.map((conn, i) => (
-        <ArrowConnection
-          key={i}
-          from={conn.from}
-          to={conn.to}
-          active={conn.nodes.includes(activeNodeId)}
-          style={conn.style}
-          dir={conn.dir}
-        />
-      ))}
+      {IT_CONNECTIONS.map((conn, i) => {
+        const isActive = conn.nodes.includes(activeNodeId);
+        const cols = CONN_COLORS[conn.style] || CONN_COLORS.standard;
+        const packetColor = isActive ? cols.active : cols.inactive;
+        return (
+          <group key={i}>
+            <ArrowConnection
+              from={conn.from}
+              to={conn.to}
+              active={isActive}
+              style={conn.style}
+              dir={conn.dir}
+            />
+            {[0, 0.38, 0.72].map((offset) => (
+              <DataPacket
+                key={offset}
+                from={conn.from}
+                to={conn.to}
+                color={packetColor}
+                active={isActive}
+                speed={0.2 + offset * 0.06}
+                offset={offset}
+              />
+            ))}
+          </group>
+        );
+      })}
 
       <gridHelper args={[22, 22, '#1e293b', '#1e293b']} position={[0, -3.0, 0]} />
     </group>
@@ -404,6 +468,7 @@ function UploadScene({ stepIdx }) {
 
   return (
     <group>
+      <Stars count={160} spread={36} />
       {/* ── Rack frame (2 pillars + top/bottom rails) ─── */}
       <mesh position={[-1.65, 0, 0]}>
         <boxGeometry args={[0.24, 7.4, 1.1]} />
@@ -505,7 +570,232 @@ function UploadScene({ stepIdx }) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// AutoCamera – lerps camera to the active step's target position
+// SCENE C – "Chmura Mikroserwisów" – 5-tier microservices cloud
+//
+// Tiers (front-to-back in Z):
+//   Frontend   (z ≈ +5)  – React SPA, Angular, Mobile       → octahedra
+//   Gateway    (z =  0)  – API Gateway                      → sphere + orbit ring
+//   Backend    (z ≈ -3)  – User, Order, Payment, Inventory  → cubes
+//   Queue      (z ≈ -0.5)– Kafka message queue              → torus (spinning)
+//   Database   (z ≈ -6.5)– PostgreSQL, MongoDB, Redis       → dbstack / sphere / cylinder
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const CLOUD_STEPS = [
+  {
+    id: 0, group: 'frontend',
+    title: 'Krok 1 – Warstwa Frontendowa',
+    desc: 'React SPA, Angular i klient mobilny wysyłają żądania do API Gateway. Trzy interfejsy, jeden punkt wejścia do systemu.',
+    color: '#06b6d4', emissive: '#0e7490',
+  },
+  {
+    id: 1, group: 'gateway',
+    title: 'Krok 2 – API Gateway',
+    desc: 'Centralny router: uwierzytelnianie, rate limiting i load balancing. Jeden interfejs dla wszystkich serwisów — zero bezpośrednich połączeń.',
+    color: '#6366f1', emissive: '#3730a3',
+  },
+  {
+    id: 2, group: 'backend',
+    title: 'Krok 3 – Mikroserwisy',
+    desc: 'Cztery niezależne serwisy (User, Order, Payment, Inventory) — skalowane i wdrażane osobno, każdy z własną bazą.',
+    color: '#a855f7', emissive: '#6b21a8',
+  },
+  {
+    id: 3, group: 'queue',
+    title: 'Krok 4 – Message Queue (Kafka)',
+    desc: 'Asynchroniczna kolejka odsprzęga serwisy. Zdarzenia domenowe płyną bez bezpośrednich zależności między komponentami.',
+    color: '#f97316', emissive: '#9a3412',
+  },
+  {
+    id: 4, group: 'database',
+    title: 'Krok 5 – Warstwa Danych',
+    desc: 'PostgreSQL (relacyjne), MongoDB (dokumenty), Redis (cache) — każdy serwis dobiera silnik do swoich potrzeb.',
+    color: '#10b981', emissive: '#065f46',
+  },
+];
+
+const CLOUD_NODES = [
+  // Frontend
+  { id: 'react',      group: 'frontend', shape: 'octahedron', pos: [-4,   1.5,  5   ], color: '#06b6d4', emissive: '#0e7490' },
+  { id: 'angular',    group: 'frontend', shape: 'octahedron', pos: [ 0,   2.2,  5.5 ], color: '#06b6d4', emissive: '#0e7490' },
+  { id: 'mobile',     group: 'frontend', shape: 'octahedron', pos: [ 4,   1.5,  5   ], color: '#06b6d4', emissive: '#0e7490' },
+  // Gateway
+  { id: 'gateway',    group: 'gateway',  shape: 'sphere',     pos: [ 0,   0,    0   ], color: '#6366f1', emissive: '#3730a3' },
+  // Backend
+  { id: 'usersvc',    group: 'backend',  shape: 'cube',       pos: [-5,   1,   -3   ], color: '#a855f7', emissive: '#6b21a8' },
+  { id: 'ordersvc',   group: 'backend',  shape: 'cube',       pos: [-1.7, 1,   -3.5 ], color: '#a855f7', emissive: '#6b21a8' },
+  { id: 'paymentsvc', group: 'backend',  shape: 'cube',       pos: [ 1.7, 1,   -3   ], color: '#a855f7', emissive: '#6b21a8' },
+  { id: 'invsvc',     group: 'backend',  shape: 'cube',       pos: [ 5,   1,   -3.5 ], color: '#a855f7', emissive: '#6b21a8' },
+  // Queue
+  { id: 'queue',      group: 'queue',    shape: 'torus',      pos: [ 0,  -2.5, -0.5 ], color: '#f97316', emissive: '#9a3412' },
+  // Database
+  { id: 'postgres',   group: 'database', shape: 'dbstack',    pos: [-3.5,-0.5, -6.5 ], color: '#10b981', emissive: '#065f46' },
+  { id: 'mongodb',    group: 'database', shape: 'sphere',     pos: [ 0,  -0.5, -7   ], color: '#10b981', emissive: '#065f46' },
+  { id: 'redis',      group: 'database', shape: 'cylinder',   pos: [ 3.5,-0.5, -6.5 ], color: '#10b981', emissive: '#065f46' },
+];
+
+const CLOUD_GROUP_COLORS = {
+  frontend: '#06b6d4',
+  gateway:  '#6366f1',
+  backend:  '#a855f7',
+  queue:    '#f97316',
+  database: '#10b981',
+};
+
+const CLOUD_CONNECTIONS = [
+  // Frontend → Gateway
+  { from: [-4, 1.5, 5], to: [0, 0, 0], fromGroup: 'frontend', toGroup: 'gateway' },
+  { from: [0, 2.2, 5.5], to: [0, 0, 0], fromGroup: 'frontend', toGroup: 'gateway' },
+  { from: [4, 1.5, 5], to: [0, 0, 0], fromGroup: 'frontend', toGroup: 'gateway' },
+  // Gateway → Backend
+  { from: [0, 0, 0], to: [-5, 1, -3], fromGroup: 'gateway', toGroup: 'backend' },
+  { from: [0, 0, 0], to: [-1.7, 1, -3.5], fromGroup: 'gateway', toGroup: 'backend' },
+  { from: [0, 0, 0], to: [1.7, 1, -3], fromGroup: 'gateway', toGroup: 'backend' },
+  { from: [0, 0, 0], to: [5, 1, -3.5], fromGroup: 'gateway', toGroup: 'backend' },
+  // Gateway → Queue
+  { from: [0, 0, 0], to: [0, -2.5, -0.5], fromGroup: 'gateway', toGroup: 'queue' },
+  // Queue → Database
+  { from: [0, -2.5, -0.5], to: [-3.5, -0.5, -6.5], fromGroup: 'queue', toGroup: 'database' },
+  { from: [0, -2.5, -0.5], to: [0, -0.5, -7], fromGroup: 'queue', toGroup: 'database' },
+  { from: [0, -2.5, -0.5], to: [3.5, -0.5, -6.5], fromGroup: 'queue', toGroup: 'database' },
+];
+
+// ── Cloud connection tube + data packets ──────────────────────────────────────
+
+function CloudConnection({ conn, activeGroup }) {
+  const isActive = conn.fromGroup === activeGroup || conn.toGroup === activeGroup;
+  const color = isActive ? (CLOUD_GROUP_COLORS[activeGroup] || '#60a5fa') : '#1a2744';
+  const curve = useMemo(
+    () => new THREE.CatmullRomCurve3([new THREE.Vector3(...conn.from), new THREE.Vector3(...conn.to)]),
+    [conn.from, conn.to]
+  );
+  return (
+    <group>
+      <mesh>
+        <tubeGeometry args={[curve, 12, 0.045, 6, false]} />
+        <meshBasicMaterial color={color} transparent opacity={isActive ? 0.65 : 0.1} />
+      </mesh>
+      {[0, 0.38, 0.73].map((offset) => (
+        <DataPacket
+          key={offset}
+          from={conn.from}
+          to={conn.to}
+          color={color}
+          active={isActive}
+          speed={0.18 + offset * 0.07}
+          offset={offset}
+        />
+      ))}
+    </group>
+  );
+}
+
+// ── Cloud node ────────────────────────────────────────────────────────────────
+
+function CloudNode({ node, isActive }) {
+  const groupRef  = useRef();
+  const orbRingRef = useRef();
+
+  useFrame(({ clock }) => {
+    if (!groupRef.current) return;
+    const t = clock.getElapsedTime();
+    if (node.shape === 'torus') {
+      groupRef.current.rotation.x = t * 0.55;
+      groupRef.current.rotation.z = t * 0.35;
+    } else {
+      groupRef.current.rotation.y = t * (isActive ? 0.65 : 0.22) + node.pos[0] * 0.18;
+    }
+    if (orbRingRef.current) {
+      orbRingRef.current.rotation.z = t * 1.1;
+    }
+  });
+
+  const p = isActive
+    ? mat(node.color, node.emissive, 0.85, 0.5, 0.22)
+    : mat('#2d3f55', '#0d1520', 0.05, 0.72, 0.4);
+
+  const renderMesh = () => {
+    switch (node.shape) {
+      case 'octahedron':
+        return (
+          <mesh>
+            <octahedronGeometry args={[1.0, 0]} />
+            <meshStandardMaterial {...p} />
+          </mesh>
+        );
+      case 'torus':
+        return (
+          <mesh>
+            <torusGeometry args={[1.0, 0.38, 16, 48]} />
+            <meshStandardMaterial {...p} />
+          </mesh>
+        );
+      case 'cylinder':
+        return (
+          <mesh>
+            <cylinderGeometry args={[0.7, 0.7, 1.9, 32]} />
+            <meshStandardMaterial {...p} />
+          </mesh>
+        );
+      case 'dbstack':
+        return (
+          <group>
+            {[-0.5, 0.1, 0.7].map((yOff, i) => (
+              <mesh key={i} position={[0, yOff, 0]}>
+                <cylinderGeometry args={[0.88, 0.88, 0.34, 32]} />
+                <meshStandardMaterial {...p} />
+              </mesh>
+            ))}
+          </group>
+        );
+      case 'sphere':
+      default:
+        return (
+          <>
+            <mesh>
+              <sphereGeometry args={[1.05, 32, 32]} />
+              <meshStandardMaterial {...p} />
+            </mesh>
+            {isActive && (
+              <mesh ref={orbRingRef} rotation={[Math.PI / 3, 0.4, 0]}>
+                <torusGeometry args={[1.75, 0.055, 8, 64]} />
+                <meshBasicMaterial color={node.color} transparent opacity={0.7} />
+              </mesh>
+            )}
+          </>
+        );
+    }
+  };
+
+  return (
+    <group position={node.pos}>
+      <group ref={groupRef}>{renderMesh()}</group>
+      {isActive && (
+        <mesh position={[0, -1.5, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+          <ringGeometry args={[1.3, 2.0, 48]} />
+          <meshBasicMaterial color={node.color} transparent opacity={0.45} side={THREE.DoubleSide} />
+        </mesh>
+      )}
+    </group>
+  );
+}
+
+// ── Cloud scene ───────────────────────────────────────────────────────────────
+
+function CloudScene({ stepIdx }) {
+  const activeGroup = CLOUD_STEPS[stepIdx]?.group ?? 'frontend';
+  return (
+    <group>
+      <Stars count={300} spread={65} />
+      {CLOUD_NODES.map((node) => (
+        <CloudNode key={node.id} node={node} isActive={node.group === activeGroup} />
+      ))}
+      {CLOUD_CONNECTIONS.map((conn, i) => (
+        <CloudConnection key={i} conn={conn} activeGroup={activeGroup} />
+      ))}
+      <gridHelper args={[30, 30, '#1a2744', '#1a2744']} position={[0, -5, -1]} />
+    </group>
+  );
+}
 // (mirrors CameraController from Viewer3D.tsx)
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -524,6 +814,13 @@ const CAM = {
     { pos: [0,  3.5,  9], la: [0,  2.85, 0] },
     { pos: [0,  1.5,  9], la: [0,  0.8,  0] },
     { pos: [0, -1,    9], la: [0, -2,    0] },
+  ],
+  cloud: [
+    { pos: [ 0,  5, 15], la: [ 0,  1.5,  5   ] },  // frontend
+    { pos: [ 8,  8, 16], la: [ 0,  0,    0   ] },  // gateway (wide)
+    { pos: [ 0,  4,  7], la: [ 0,  1,   -3.5 ] },  // backend
+    { pos: [ 6,  2,  7], la: [ 0, -2.5, -0.5 ] },  // queue
+    { pos: [ 0,  3,  1], la: [ 0, -0.5, -6.5 ] },  // database
   ],
 };
 
@@ -568,6 +865,7 @@ function AutoCamera({ stepIdx, tabId, cameraMode, orbitRef, snapOnChange }) {
 const TABS = [
   { id: 'builder', label: 'Diagram Architektury', icon: '🏗️', steps: BUILDER_STEPS },
   { id: 'upload',  label: 'Szafa Serwerowa',      icon: '🖥️', steps: UPLOAD_STEPS  },
+  { id: 'cloud',   label: 'Chmura Mikroserwisów', icon: '☁️', steps: CLOUD_STEPS   },
 ];
 
 const STEP_INTERVAL_MS = 4000;
@@ -645,7 +943,9 @@ export default function LandingDemo3D() {
 
           {tabIdx === 0
             ? <BuilderScene stepIdx={stepIdx} />
-            : <UploadScene  stepIdx={stepIdx} />
+            : tabIdx === 1
+              ? <UploadScene  stepIdx={stepIdx} />
+              : <CloudScene   stepIdx={stepIdx} />
           }
 
           <AutoCamera
