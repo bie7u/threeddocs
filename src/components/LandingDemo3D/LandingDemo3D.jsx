@@ -276,7 +276,7 @@ function ITNode({ node, isActive }) {
       case 'dbstack':
         // Three stacked flat discs — classic database icon.
         // Represents the "Grawerowany Klocek (engravedBlock)" feature where
-        // you type text (e.g. "DB") and 3D Docs renders it as a 3D solid.
+        // you type text (e.g. "DB") and ThreeDocsy renders it as a 3D solid.
         return (
           <group>
             {[-0.6, 0, 0.6].map((yOff, i) => (

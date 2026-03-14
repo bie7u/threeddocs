@@ -114,7 +114,7 @@ const Dashboard = () => {
                   />
                 </svg>
               </div>
-              <span className="ml-3 text-xl font-bold text-gray-900">3D Docs</span>
+              <span className="ml-3 text-xl font-bold text-gray-900">ThreeDocsy</span>
             </div>
             <div>
               <button
@@ -132,7 +132,7 @@ const Dashboard = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Welcome to 3D Docs Dashboard
+            Welcome to ThreeDocsy Dashboard
           </h1>
           <p className="text-xl text-gray-600 mb-8">
             Your workspace is ready

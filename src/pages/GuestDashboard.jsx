@@ -86,7 +86,7 @@ const GuestDashboard = () => {
                   />
                 </svg>
               </div>
-              <span className="ml-1 text-xl font-bold text-gray-900">3D Docs</span>
+              <span className="ml-1 text-xl font-bold text-gray-900">ThreeDocsy</span>
               <span className="px-2 py-0.5 text-xs font-medium text-yellow-700 bg-yellow-100 border border-yellow-200 rounded-full">
                 Tryb gościa
               </span>
@@ -105,7 +105,7 @@ const GuestDashboard = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Wypróbuj 3D Docs bez rejestracji
+            Wypróbuj ThreeDocsy bez rejestracji
           </h1>
           <p className="text-xl text-gray-600 mb-2">
             Stwórz jeden model 3D i wygeneruj link do udostępnienia

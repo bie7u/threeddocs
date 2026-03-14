@@ -105,7 +105,7 @@ const LandingPage = () => {
                     d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                 </svg>
               </div>
-              <span className="text-xl font-bold text-gray-900">3D Docs</span>
+              <span className="text-xl font-bold text-gray-900">ThreeDocsy</span>
             </div>
 
             {/* CTA buttons */}
@@ -210,7 +210,7 @@ const LandingPage = () => {
               Przekonaj się sam, jak to działa
             </h2>
             <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-              Interaktywne demo architektury IT. Przełącz zakładkę by zobaczyć jak 3D Docs
+              Interaktywne demo architektury IT. Przełącz zakładkę by zobaczyć jak ThreeDocsy
               wizualizuje systemy i przepływy danych — krok po kroku.
             </p>
           </div>
@@ -245,7 +245,7 @@ const LandingPage = () => {
               Dlaczego interaktywny onboarding działa lepiej?
             </h2>
             <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-              Pasywne czytanie dokumentacji jest nieefektywne. 3D Docs angażuje nowego pracownika,
+              Pasywne czytanie dokumentacji jest nieefektywne. ThreeDocsy angażuje nowego pracownika,
               dzieli wiedzę na małe kroki i sprawia, że sam odkrywa architekturę systemu.
             </p>
           </div>
@@ -356,7 +356,7 @@ const LandingPage = () => {
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-extrabold text-gray-900 mb-4">
-              Dla kogo jest 3D Docs?
+              Dla kogo jest ThreeDocsy?
             </h2>
             <p className="text-xl text-gray-500 max-w-2xl mx-auto">
               Wszędzie tam, gdzie złożone systemy IT trzeba wytłumaczyć szybko i przejrzyście.
@@ -399,7 +399,7 @@ const LandingPage = () => {
             Gotowy przyspieszyć onboarding?
           </h2>
           <p className="text-xl text-gray-600 mb-8">
-            Wypróbuj 3D Docs za darmo — bez rejestracji. Stwórz pierwszy diagram IT w 5 minut.
+            Wypróbuj ThreeDocsy za darmo — bez rejestracji. Stwórz pierwszy diagram IT w 5 minut.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button
@@ -428,10 +428,10 @@ const LandingPage = () => {
                   d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
               </svg>
             </div>
-            <span className="font-bold">3D Docs</span>
+            <span className="font-bold">ThreeDocsy</span>
           </div>
           <p className="text-sm">
-            © {new Date().getFullYear()} 3D Docs — interaktywna dokumentacja IT
+            © {new Date().getFullYear()} ThreeDocsy — interaktywna dokumentacja IT
           </p>
         </div>
       </footer>
