@@ -3,6 +3,8 @@ import { lazy, Suspense } from 'react';
 
 const LandingDemo3D = lazy(() => import('../components/LandingDemo3D/LandingDemo3D'));
 
+const LOGO_SRC = '/logo.svg';
+
 const features = [
   {
     icon: (
@@ -99,12 +101,7 @@ const LandingPage = () => {
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
             <div className="flex items-center gap-2">
-              <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center transform rotate-12 shadow-md">
-                <svg className="w-5 h-5 text-white transform -rotate-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                    d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                </svg>
-              </div>
+              <img src={LOGO_SRC} alt="ThreeDocsy logo" className="h-9 w-auto" />
               <span className="text-xl font-bold text-gray-900">ThreeDocsy</span>
             </div>
 
@@ -392,12 +389,7 @@ const LandingPage = () => {
       {/* ── Final CTA ────────────────────────────────────────────────────── */}
       <section className="py-24 bg-gradient-to-br from-blue-50 via-white to-purple-50">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-3xl flex items-center justify-center mx-auto mb-6 transform rotate-12 shadow-xl">
-            <svg className="w-12 h-12 text-white transform -rotate-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-            </svg>
-          </div>
+          <img src={LOGO_SRC} alt="ThreeDocsy logo" className="w-20 h-20 mx-auto mb-6" />
           <h2 className="text-4xl font-extrabold text-gray-900 mb-4">
             Gotowy pokazać swój system?
           </h2>
@@ -425,12 +417,7 @@ const LandingPage = () => {
       <footer className="bg-slate-900 text-slate-400 py-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2 text-white">
-            <div className="w-7 h-7 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center transform rotate-12">
-              <svg className="w-4 h-4 text-white transform -rotate-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                  d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-              </svg>
-            </div>
+            <img src={LOGO_SRC} alt="ThreeDocsy logo" className="h-7 w-auto brightness-0 invert" />
             <span className="font-bold">ThreeDocsy</span>
           </div>
           <p className="text-sm">

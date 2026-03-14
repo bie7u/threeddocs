@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 265 240" fill="none">
+  <!-- ── 3-D isometric box (right side) ─────────────────────────────── -->
+  <!-- top face -->
+  <polygon fill="#000" points="205,22 262,56 205,90 148,56"/>
+  <!-- right face -->
+  <polygon fill="#000" points="262,56 262,168 205,202 205,90"/>
+  <!-- left face -->
+  <polygon fill="#000" points="148,56 205,90 205,202 148,168"/>
+
+  <!-- white wireframe edges -->
+  <!-- top face edges -->
+  <line x1="205" y1="22" x2="262" y2="56"  stroke="white" stroke-width="3.5"/>
+  <line x1="205" y1="22" x2="148" y2="56"  stroke="white" stroke-width="3.5"/>
+  <line x1="148" y1="56" x2="262" y2="56"  stroke="white" stroke-width="3.5"/>
+  <!-- front apex down to three faces -->
+  <line x1="205" y1="22" x2="205" y2="90"  stroke="white" stroke-width="3.5"/>
+  <!-- vertical pillar edges -->
+  <line x1="148" y1="56"  x2="148" y2="168" stroke="white" stroke-width="3.5"/>
+  <line x1="205" y1="90"  x2="205" y2="202" stroke="white" stroke-width="3.5"/>
+  <line x1="262" y1="56"  x2="262" y2="168" stroke="white" stroke-width="3.5"/>
+  <!-- bottom face edges -->
+  <line x1="148" y1="168" x2="262" y2="168" stroke="white" stroke-width="3.5"/>
+  <line x1="148" y1="168" x2="205" y2="202" stroke="white" stroke-width="3.5"/>
+  <line x1="262" y1="168" x2="205" y2="202" stroke="white" stroke-width="3.5"/>
+
+  <!-- ── Stylised "3" (left side) ────────────────────────────────────── -->
+  <!-- upper arm – thick diagonal going upper-right toward cube top -->
+  <polygon fill="#000" points="22,60 30,38 148,56 140,78"/>
+  <!-- upper-left spine segment -->
+  <polygon fill="#000" points="12,38 38,38 38,110 12,110"/>
+  <!-- middle crossbar -->
+  <polygon fill="#000" points="38,100 148,90 148,108 38,118"/>
+  <!-- lower-left spine segment -->
+  <polygon fill="#000" points="12,118 38,118 38,185 12,185"/>
+  <!-- lower arm – thick diagonal going lower-right toward cube bottom -->
+  <polygon fill="#000" points="22,165 140,168 148,188 30,188"/>
+
+  <!-- ── Speed / motion lines (lower-left) ──────────────────────────── -->
+  <polygon fill="#000" points="0,160 70,138 67,152 0,178"/>
+  <polygon fill="#000" points="0,180 70,160 67,174 0,200"/>
+  <polygon fill="#000" points="0,202 70,183 67,197 0,222"/>
+</svg>
