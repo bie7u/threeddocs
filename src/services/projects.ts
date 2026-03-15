@@ -56,12 +56,39 @@ const toApiProjectBody = (sp: SavedProject): ApiProjectBody => ({
 
 // ─── API functions ────────────────────────────────────────────────────────────
 
-/** GET /api/projects — returns all projects owned by the authenticated user. */
-export const fetchProjects = async (): Promise<SavedProject[]> => {
-  const res = await apiRequest('/projects');
+// ─── Paginated response envelope ─────────────────────────────────────────────
+
+interface PaginatedProjects {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: ApiProject[];
+}
+
+export interface ProjectsPage {
+  count: number;
+  results: SavedProject[];
+  hasNext: boolean;
+  hasPrevious: boolean;
+}
+
+/** GET /api/projects?page=N — returns one page (10 items) of the user's projects. */
+export const fetchProjectsPage = async (page: number = 1): Promise<ProjectsPage> => {
+  const res = await apiRequest(`/projects?page=${page}`);
   if (!res.ok) throw new Error('Failed to fetch projects');
-  const data = await res.json() as ApiProject[];
-  return data.map(fromApiProject);
+  const data = await res.json() as PaginatedProjects;
+  return {
+    count: data.count,
+    results: data.results.map(fromApiProject),
+    hasNext: data.next !== null,
+    hasPrevious: data.previous !== null,
+  };
+};
+
+/** GET /api/projects — returns the first page of projects (used for store bootstrapping). */
+export const fetchProjects = async (): Promise<SavedProject[]> => {
+  const page = await fetchProjectsPage(1);
+  return page.results;
 };
 
 /** GET /api/projects/:id — returns a single project (auth required). */

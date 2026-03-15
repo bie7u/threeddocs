@@ -1,16 +1,43 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAppStore } from '../../store';
-import { generateShareToken } from '../../services/projects';
+import { generateShareToken, fetchProjectsPage } from '../../services/projects';
+
+const PAGE_SIZE = 10;
 
 export const MyModels = ({ onOpenEditor, onClose }) => {
-  const { projects, deleteProject, loadProjects, setProject, setPreviewMode } = useAppStore();
+  const { deleteProject, setProject, setPreviewMode } = useAppStore();
   const [copiedId, setCopiedId] = useState(null);
   const [shareError, setShareError] = useState(null);
   const [sharingId, setSharingId] = useState(null);
 
+  // Pagination state
+  const [page, setPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const [hasNext, setHasNext] = useState(false);
+  const [hasPrevious, setHasPrevious] = useState(false);
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
+
+  const loadPage = useCallback(async (p) => {
+    setLoading(true);
+    setLoadError(null);
+    try {
+      const result = await fetchProjectsPage(p);
+      setProjects(result.results);
+      setTotalCount(result.count);
+      setHasNext(result.hasNext);
+      setHasPrevious(result.hasPrevious);
+    } catch {
+      setLoadError('Nie udało się załadować modeli. Spróbuj ponownie.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
-    loadProjects();
-  }, [loadProjects]);
+    loadPage(page);
+  }, [page, loadPage]);
 
   const handleOpenEditor = (savedProject) => {
     setProject(savedProject.project, savedProject.nodePositions);
@@ -46,6 +73,12 @@ export const MyModels = ({ onOpenEditor, onClose }) => {
   const handleDelete = async (projectId) => {
     if (window.confirm('Czy na pewno chcesz usunąć ten model?')) {
       await deleteProject(projectId);
+      // If we just removed the only item on a non-first page, go back
+      if (projects.length === 1 && page > 1) {
+        setPage((p) => p - 1);
+      } else {
+        loadPage(page);
+      }
     }
   };
 
@@ -96,9 +129,11 @@ export const MyModels = ({ onOpenEditor, onClose }) => {
               </div>
             </div>
             <div className="text-sm text-gray-500">
-              {projects.length === 0
-                ? 'Brak modeli'
-                : `${projects.length} ${projects.length === 1 ? 'model' : projects.length < 5 ? 'modele' : 'modeli'}`}
+              {loading
+                ? 'Ładowanie…'
+                : totalCount === 0
+                  ? 'Brak modeli'
+                  : `${totalCount} ${totalCount === 1 ? 'model' : totalCount < 5 ? 'modele' : 'modeli'}`}
             </div>
           </div>
         </div>
@@ -124,7 +159,29 @@ export const MyModels = ({ onOpenEditor, onClose }) => {
             </button>
           </div>
         )}
-        {projects.length === 0 ? (
+
+        {/* Load error */}
+        {loadError && (
+          <div className="mb-6 px-5 py-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
+            {loadError}
+          </div>
+        )}
+
+        {/* Loading skeleton */}
+        {loading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="bg-white rounded-2xl shadow border border-gray-100 overflow-hidden animate-pulse">
+                <div className="h-3 bg-gray-200" />
+                <div className="p-5 space-y-3">
+                  <div className="h-4 bg-gray-200 rounded w-3/4" />
+                  <div className="h-3 bg-gray-100 rounded w-1/2" />
+                  <div className="h-8 bg-gray-100 rounded" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : projects.length === 0 ? (
           <div className="text-center py-24">
             <div className="w-20 h-20 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
               <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -146,10 +203,11 @@ export const MyModels = ({ onOpenEditor, onClose }) => {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...projects]
-              .sort((a, b) => b.lastModified - a.lastModified)
-              .map((saved) => (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[...projects]
+                .sort((a, b) => b.lastModified - a.lastModified)
+                .map((saved) => (
                 <div
                   key={saved.project.id}
                   className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-shadow group"
@@ -294,7 +352,40 @@ export const MyModels = ({ onOpenEditor, onClose }) => {
                   </div>
                 </div>
               ))}
-          </div>
+            </div>
+
+            {/* Pagination controls */}
+            {(hasPrevious || hasNext) && (
+              <div className="mt-10 flex items-center justify-center gap-3">
+                <button
+                  onClick={() => setPage((p) => p - 1)}
+                  disabled={!hasPrevious}
+                  className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-xl border border-gray-200 text-gray-700 hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50 transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:hover:text-gray-700 disabled:hover:bg-transparent"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                  Poprzednia
+                </button>
+
+                <span className="px-4 py-2 text-sm text-gray-500">
+                  Strona <span className="font-semibold text-gray-800">{page}</span>{' '}
+                  z <span className="font-semibold text-gray-800">{Math.ceil(totalCount / PAGE_SIZE)}</span>
+                </span>
+
+                <button
+                  onClick={() => setPage((p) => p + 1)}
+                  disabled={!hasNext}
+                  className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-xl border border-gray-200 text-gray-700 hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50 transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:hover:text-gray-700 disabled:hover:bg-transparent"
+                >
+                  Następna
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
