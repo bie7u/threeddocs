@@ -269,6 +269,47 @@ publicly only if a share token exists for it.
 
 ---
 
+#### `POST /api/projects/guest`
+
+Creates a **guest project** without authentication. The server immediately
+assigns a unique share token and returns it alongside the project. Guest
+projects are publicly readable via the standard
+`GET /api/projects/shared/:shareToken` endpoint.
+
+**Auth:** none  
+**Request body** – same shape as `POST /api/projects`.
+
+**Response `201 Created`**
+```json
+{
+  "id": 99,
+  "name": "My 3D Model",
+  "projectType": "upload",
+  "projectModelUrl": "data:...",
+  "steps": [],
+  "connections": [],
+  "guide": [],
+  "nodePositions": {},
+  "lastModified": 1700000000000,
+  "shareToken": "550e8400-e29b-41d4-a716-446655440000"
+}
+```
+
+---
+
+#### `PUT /api/projects/guest/:shareToken`
+
+Updates a guest project. The share token acts as the sole authentication
+credential — anyone who knows the token can update the project.
+
+**Auth:** none (token in URL)  
+**Request body** – same shape as `POST /api/projects`.
+
+**Response `200 OK`** – the updated document (without `shareToken`).  
+**Response `404 Not Found`** – token is invalid or project has been deleted.
+
+---
+
 ## Data Schemas
 
 ### `ProjectData` (internal frontend type)

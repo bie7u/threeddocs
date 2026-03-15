@@ -56,12 +56,42 @@ const toApiProjectBody = (sp: SavedProject): ApiProjectBody => ({
 
 // ─── API functions ────────────────────────────────────────────────────────────
 
-/** GET /api/projects — returns all projects owned by the authenticated user. */
-export const fetchProjects = async (): Promise<SavedProject[]> => {
-  const res = await apiRequest('/projects');
+// ─── Paginated response envelope ─────────────────────────────────────────────
+
+interface PaginatedProjects {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: ApiProject[];
+}
+
+export interface ProjectsPage {
+  count: number;
+  results: SavedProject[];
+  hasNext: boolean;
+  hasPrevious: boolean;
+}
+
+/**
+ * GET /api/projects?page=N — returns one page of the user's projects.
+ * Pages are 1-indexed; the server uses a fixed page size of 10.
+ */
+export const fetchProjectsPage = async (page: number = 1): Promise<ProjectsPage> => {
+  const res = await apiRequest(`/projects?page=${page}`);
   if (!res.ok) throw new Error('Failed to fetch projects');
-  const data = await res.json() as ApiProject[];
-  return data.map(fromApiProject);
+  const data = await res.json() as PaginatedProjects;
+  return {
+    count: data.count,
+    results: data.results.map(fromApiProject),
+    hasNext: data.next !== null,
+    hasPrevious: data.previous !== null,
+  };
+};
+
+/** GET /api/projects — returns the first page of projects (used for store bootstrapping). */
+export const fetchProjects = async (): Promise<SavedProject[]> => {
+  const page = await fetchProjectsPage(1);
+  return page.results;
 };
 
 /** GET /api/projects/:id — returns a single project (auth required). */
@@ -91,6 +121,43 @@ export const fetchPublicProject = async (shareToken: string): Promise<SavedProje
     credentials: 'omit',
   });
   if (!res.ok) throw new Error('Project not found');
+  return fromApiProject(await res.json() as ApiProject);
+};
+
+/**
+ * POST /api/projects/guest — creates a guest project without authentication.
+ * The server returns the project together with an immediate share token.
+ */
+export const createGuestProject = async (
+  data: SavedProject,
+): Promise<{ savedProject: SavedProject; shareToken: string }> => {
+  const res = await fetch(`${API_BASE}/projects/guest`, {
+    method: 'POST',
+    credentials: 'omit',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(toApiProjectBody(data)),
+  });
+  if (!res.ok) throw new Error('Failed to create guest project');
+  const responseData = await res.json() as ApiProject & { shareToken: string };
+  const { shareToken } = responseData;
+  return { savedProject: fromApiProject(responseData), shareToken };
+};
+
+/**
+ * PUT /api/projects/guest/:shareToken — updates a guest project.
+ * The share token acts as the sole authentication credential.
+ */
+export const updateGuestProject = async (
+  shareToken: string,
+  data: SavedProject,
+): Promise<SavedProject> => {
+  const res = await fetch(`${API_BASE}/projects/guest/${shareToken}`, {
+    method: 'PUT',
+    credentials: 'omit',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(toApiProjectBody(data)),
+  });
+  if (!res.ok) throw new Error('Failed to update guest project');
   return fromApiProject(await res.json() as ApiProject);
 };
 

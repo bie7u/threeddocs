@@ -6,6 +6,8 @@ import {
   createProject,
   updateProject,
   deleteProjectRequest,
+  createGuestProject,
+  updateGuestProject,
 } from '../services/projects';
 
 export interface SavedProject {
@@ -39,6 +41,10 @@ interface AppStore {
   
   // Node positions for React Flow
   nodePositions: Record<string, { x: number; y: number }>;
+
+  // Guest mode (unauthenticated user)
+  isGuestMode: boolean;
+  guestShareToken: string | null;
   
   // Actions
   setProject: (project: ProjectData, nodePositions?: Record<string, { x: number; y: number }>, persist?: boolean) => void;
@@ -63,6 +69,10 @@ interface AppStore {
   getAllProjects: () => SavedProject[];
   deleteProject: (projectId: string) => Promise<void>;
   createNewProject: (projectName: string, projectType?: 'builder' | 'upload', projectModelUrl?: string) => Promise<ProjectData>;
+  /** Creates a guest project (no auth required) and stores the share token. */
+  createNewGuestProject: (projectName: string, projectType?: 'builder' | 'upload', projectModelUrl?: string) => Promise<ProjectData>;
+  /** Clears guest mode state (e.g., on logout or navigation to login). */
+  clearGuestMode: () => void;
 }
 
 export const useAppStore = create<AppStore>((set, get) => ({
@@ -75,6 +85,8 @@ export const useAppStore = create<AppStore>((set, get) => ({
   editorMode: 'model',
   cameraMode: 'free',
   nodePositions: {},
+  isGuestMode: false,
+  guestShareToken: null,
 
   setProject: (project, nodePositions, persist = true) => {
     set({ 
@@ -215,7 +227,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
   },
 
   saveToApi: () => {
-    const { project, nodePositions } = get();
+    const { project, nodePositions, isGuestMode, guestShareToken } = get();
     if (!project) return;
 
     const savedProject: SavedProject = {
@@ -226,6 +238,15 @@ export const useAppStore = create<AppStore>((set, get) => ({
 
     const persist = async () => {
       try {
+        if (isGuestMode) {
+          // Guest mode: update via shareToken (no auth). Skip if token not yet set
+          // (creation is handled by createNewGuestProject).
+          if (guestShareToken) {
+            await updateGuestProject(guestShareToken, savedProject);
+          }
+          return;
+        }
+
         const existsInCache = get().projects.some(p => p.project.id === project.id);
         let updated: SavedProject;
         if (existsInCache) {
@@ -291,5 +312,42 @@ export const useAppStore = create<AppStore>((set, get) => ({
     set({ project: created.project, nodePositions: created.nodePositions, selectedStepId: null });
     set(state => ({ projects: [...state.projects, created] }));
     return created.project;
+  },
+
+  createNewGuestProject: async (projectName: string, projectType?: 'builder' | 'upload', projectModelUrl?: string) => {
+    const provisional: SavedProject = {
+      project: {
+        id: '',
+        name: projectName,
+        projectType: projectType ?? 'builder',
+        projectModelUrl: projectModelUrl,
+        steps: [],
+        connections: [],
+        guide: [],
+      },
+      nodePositions: {},
+      lastModified: Date.now(),
+    };
+    const { savedProject, shareToken } = await createGuestProject(provisional);
+    set({
+      project: savedProject.project,
+      nodePositions: savedProject.nodePositions,
+      selectedStepId: null,
+      isGuestMode: true,
+      guestShareToken: shareToken,
+      isPreviewMode: false,
+    });
+    return savedProject.project;
+  },
+
+  clearGuestMode: () => {
+    set({
+      isGuestMode: false,
+      guestShareToken: null,
+      project: null,
+      nodePositions: {},
+      selectedStepId: null,
+      isPreviewMode: false,
+    });
   },
 }));

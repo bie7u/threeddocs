@@ -11,6 +11,8 @@ export const UploadPreviewMode = ({ onGoToEditorPanel, isPublic }: { onGoToEdito
     setCurrentPreviewStepIndex,
     setPreviewMode,
     viewMode,
+    isGuestMode,
+    guestShareToken,
   } = useAppStore();
   const [showCopyNotification, setShowCopyNotification] = useState(false);
   const [isGeneratingLink, setIsGeneratingLink] = useState(false);
@@ -67,23 +69,27 @@ export const UploadPreviewMode = ({ onGoToEditorPanel, isPublic }: { onGoToEdito
   const focusedMeshName = currentStep.focusMeshName;
 
   const handleShareLink = async () => {
-    if (project) {
-      setIsGeneratingLink(true);
-      try {
+    if (!project) return;
+    setIsGeneratingLink(true);
+    try {
+      let shareUrl: string;
+      if (isGuestMode && guestShareToken) {
+        shareUrl = `${window.location.origin}/view/${guestShareToken}`;
+      } else {
         const token = await generateShareToken(project.id);
-        const shareUrl = `${window.location.origin}/view/${token}`;
-        try {
-          await navigator.clipboard.writeText(shareUrl);
-          setShowCopyNotification(true);
-          setTimeout(() => setShowCopyNotification(false), 3000);
-        } catch {
-          alert(`Skopiuj ten link: ${shareUrl}`);
-        }
-      } catch {
-        alert('Nie udało się wygenerować linku. Spróbuj ponownie.');
-      } finally {
-        setIsGeneratingLink(false);
+        shareUrl = `${window.location.origin}/view/${token}`;
       }
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        setShowCopyNotification(true);
+        setTimeout(() => setShowCopyNotification(false), 3000);
+      } catch {
+        alert(`Skopiuj ten link: ${shareUrl}`);
+      }
+    } catch {
+      alert('Nie udało się wygenerować linku. Spróbuj ponownie.');
+    } finally {
+      setIsGeneratingLink(false);
     }
   };
 
