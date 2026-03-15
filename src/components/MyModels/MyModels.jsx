@@ -72,11 +72,16 @@ export const MyModels = ({ onOpenEditor, onClose }) => {
 
   const handleDelete = async (projectId) => {
     if (window.confirm('Czy na pewno chcesz usunąć ten model?')) {
-      await deleteProject(projectId);
-      // If we just removed the only item on a non-first page, go back
-      if (projects.length === 1 && page > 1) {
-        setPage((p) => p - 1);
-      } else {
+      try {
+        await deleteProject(projectId);
+        // If we just removed the only item on a non-first page, go back
+        if (projects.length === 1 && page > 1) {
+          setPage((p) => p - 1);
+        } else {
+          loadPage(page);
+        }
+      } catch {
+        // deletion failed — reload page to restore the list
         loadPage(page);
       }
     }

@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { login } from '../services/auth';
+import { login, getMe } from '../services/auth';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -8,7 +8,16 @@ const Login = () => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [googleInfo, setGoogleInfo] = useState(false);
+  const [checking, setChecking] = useState(true);
   const navigate = useNavigate();
+
+  // If the user already has a valid session, skip the login form.
+  // getMe is a stable module-level import, so it's safe to omit from deps.
+  useEffect(() => {
+    getMe()
+      .then(() => navigate('/dashboard', { replace: true }))
+      .catch(() => setChecking(false));
+  }, [navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -32,8 +41,15 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      <div className="max-w-md w-full space-y-6 p-10 bg-white rounded-2xl shadow-2xl">
-        <div>
+      {checking ? (
+        <div className="flex flex-col items-center gap-3 text-gray-400">
+          <svg className="w-8 h-8 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          <span className="text-sm">Sprawdzanie sesji…</span>
+        </div>
+      ) : (
+        <div className="max-w-md w-full space-y-6 p-10 bg-white rounded-2xl shadow-2xl">
           <div className="flex justify-center">
             <img src="/logo.svg" alt="ThreeDocsy logo" className="h-16 w-auto" />
           </div>
@@ -43,7 +59,6 @@ const Login = () => {
           <p className="mt-2 text-center text-sm text-gray-600">
             Sign in to your account
           </p>
-        </div>
 
         {/* Google sign-in */}
         <button
@@ -190,6 +205,7 @@ const Login = () => {
           </Link>
         </p>
       </div>
+      )}
     </div>
   );
 };

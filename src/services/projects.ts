@@ -72,7 +72,10 @@ export interface ProjectsPage {
   hasPrevious: boolean;
 }
 
-/** GET /api/projects?page=N — returns one page (10 items) of the user's projects. */
+/**
+ * GET /api/projects?page=N — returns one page of the user's projects.
+ * Pages are 1-indexed; the server uses a fixed page size of 10.
+ */
 export const fetchProjectsPage = async (page: number = 1): Promise<ProjectsPage> => {
   const res = await apiRequest(`/projects?page=${page}`);
   if (!res.ok) throw new Error('Failed to fetch projects');
