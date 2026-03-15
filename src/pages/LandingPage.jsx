@@ -1,4 +1,6 @@
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { probeSession, logout } from '../services/auth';
 const LOGO_SRC = '/logo.svg';
 
 const features = [
@@ -88,6 +90,20 @@ const useCases = [
 
 const LandingPage = () => {
   const navigate = useNavigate();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    let ignore = false;
+    probeSession().then(user => {
+      if (!ignore) setIsLoggedIn(!!user);
+    });
+    return () => { ignore = true; };
+  }, []); // run once on mount
+
+  const handleLogout = async () => {
+    await logout().catch(() => {});
+    setIsLoggedIn(false);
+  };
 
   return (
     <div className="min-h-screen bg-white">
@@ -103,18 +119,37 @@ const LandingPage = () => {
 
             {/* CTA buttons */}
             <div className="flex items-center gap-3">
-              <button
-                onClick={() => navigate('/login')}
-                className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
-              >
-                Zaloguj się
-              </button>
-              <button
-                onClick={() => navigate('/guest')}
-                className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 rounded-lg shadow-md hover:shadow-lg transition-all"
-              >
-                Wypróbuj za darmo
-              </button>
+              {isLoggedIn ? (
+                <>
+                  <button
+                    onClick={() => navigate('/dashboard')}
+                    className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
+                  >
+                    Moje konto
+                  </button>
+                  <button
+                    onClick={handleLogout}
+                    className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 rounded-lg shadow-md hover:shadow-lg transition-all"
+                  >
+                    Wyloguj się
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={() => navigate('/login')}
+                    className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
+                  >
+                    Zaloguj się
+                  </button>
+                  <button
+                    onClick={() => navigate('/guest')}
+                    className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 rounded-lg shadow-md hover:shadow-lg transition-all"
+                  >
+                    Wypróbuj za darmo
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -143,18 +178,37 @@ const LandingPage = () => {
             jedna&nbsp;rzecz na raz, zero przeciążenia informacyjnego.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button
-              onClick={() => navigate('/guest')}
-              className="px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 rounded-2xl shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-0.5"
-            >
-              Utwórz model za darmo — bez rejestracji
-            </button>
-            <button
-              onClick={() => navigate('/login')}
-              className="px-8 py-4 text-lg font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:border-blue-400 hover:text-blue-600 rounded-2xl shadow-lg hover:shadow-xl transition-all"
-            >
-              Mam już konto
-            </button>
+            {isLoggedIn ? (
+              <>
+                <button
+                  onClick={() => navigate('/dashboard')}
+                  className="px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 rounded-2xl shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-0.5"
+                >
+                  Przejdź do dashboardu
+                </button>
+                <button
+                  onClick={handleLogout}
+                  className="px-8 py-4 text-lg font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:border-blue-400 hover:text-blue-600 rounded-2xl shadow-lg hover:shadow-xl transition-all"
+                >
+                  Wyloguj się
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={() => navigate('/guest')}
+                  className="px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 rounded-2xl shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-0.5"
+                >
+                  Utwórz model za darmo — bez rejestracji
+                </button>
+                <button
+                  onClick={() => navigate('/login')}
+                  className="px-8 py-4 text-lg font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:border-blue-400 hover:text-blue-600 rounded-2xl shadow-lg hover:shadow-xl transition-all"
+                >
+                  Mam już konto
+                </button>
+              </>
+            )}
           </div>
 
           {/* Trust badges */}
@@ -357,18 +411,37 @@ const LandingPage = () => {
             Stwórz pierwszy interaktywny model IT w 5 minut — za darmo, bez rejestracji.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button
-              onClick={() => navigate('/guest')}
-              className="px-10 py-4 text-lg font-bold text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 rounded-2xl shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-0.5"
-            >
-              Zacznij teraz — za darmo
-            </button>
-            <button
-              onClick={() => navigate('/login')}
-              className="px-10 py-4 text-lg font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:border-purple-400 hover:text-purple-600 rounded-2xl shadow-lg transition-all"
-            >
-              Zaloguj się
-            </button>
+            {isLoggedIn ? (
+              <>
+                <button
+                  onClick={() => navigate('/dashboard')}
+                  className="px-10 py-4 text-lg font-bold text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 rounded-2xl shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-0.5"
+                >
+                  Przejdź do dashboardu
+                </button>
+                <button
+                  onClick={handleLogout}
+                  className="px-10 py-4 text-lg font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:border-purple-400 hover:text-purple-600 rounded-2xl shadow-lg transition-all"
+                >
+                  Wyloguj się
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={() => navigate('/guest')}
+                  className="px-10 py-4 text-lg font-bold text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 rounded-2xl shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-0.5"
+                >
+                  Zacznij teraz — za darmo
+                </button>
+                <button
+                  onClick={() => navigate('/login')}
+                  className="px-10 py-4 text-lg font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:border-purple-400 hover:text-purple-600 rounded-2xl shadow-lg transition-all"
+                >
+                  Zaloguj się
+                </button>
+              </>
+            )}
           </div>
         </div>
       </section>
