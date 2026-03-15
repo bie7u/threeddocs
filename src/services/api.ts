@@ -65,7 +65,12 @@ export const apiRequest = async (
       if (!refreshRes.ok) {
         processQueue(new Error('Session expired'));
         isRefreshing = false;
-        window.location.href = '/login';
+        // Only redirect to login when not already on a public auth page to
+        // avoid an infinite reload loop (e.g. Login page calling getMe()).
+        const publicPaths = ['/login', '/register'];
+        if (!publicPaths.includes(window.location.pathname)) {
+          window.location.href = '/login';
+        }
         throw new Error('Session expired');
       }
 
