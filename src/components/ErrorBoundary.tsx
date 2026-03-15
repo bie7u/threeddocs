@@ -32,23 +32,23 @@ export class ErrorBoundary extends Component<Props, State> {
               <div className="text-red-500 text-6xl">⚠️</div>
             </div>
             <h1 className="text-2xl font-bold text-white mb-4 text-center">
-              Something went wrong
+              Coś poszło nie tak
             </h1>
             <p className="text-gray-300 mb-6 text-center">
-              The application encountered an error. This might be due to corrupted data or an invalid model.
+              Aplikacja napotkała błąd. Może to być spowodowane uszkodzonymi danymi lub nieprawidłowym modelem.
             </p>
             <div className="space-y-3">
               <button
                 onClick={() => window.location.reload()}
                 className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
               >
-                Reload
+                Przeładuj
               </button>
             </div>
             {this.state.error && (
               <details className="mt-6">
                 <summary className="text-sm text-gray-400 cursor-pointer hover:text-gray-300">
-                  Error Details
+                  Szczegóły błędu
                 </summary>
                 <pre className="mt-2 text-xs text-red-400 bg-gray-900 p-3 rounded overflow-auto max-h-40">
                   {this.state.error.toString()}

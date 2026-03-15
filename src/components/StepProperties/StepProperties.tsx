@@ -95,7 +95,7 @@ export const StepProperties = () => {
   };
 
   const handleDelete = () => {
-    if (selectedStepId && window.confirm('Are you sure you want to delete this step?')) {
+    if (selectedStepId && window.confirm('Czy na pewno chcesz usunąć ten krok?')) {
       deleteStep(selectedStepId);
     }
   };
@@ -103,8 +103,8 @@ export const StepProperties = () => {
   const handleAddNewStep = () => {
     const newStep: InstructionStep = {
       id: `step-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
-      title: 'New Step',
-      description: 'Add description here',
+      title: 'Nowy krok',
+      description: 'Dodaj opis tutaj',
       modelPath: 'box',
       cameraPosition: { x: 5, y: 5, z: 5, targetX: 0, targetY: 0, targetZ: 0 },
       highlightColor: '#4299e1',

@@ -21,7 +21,7 @@ export const NewProjectDialog = ({ onClose, onCreateProject, isCreating = false,
   const handleTypeSelect = (type: ProjectType) => {
     setSelectedType(type);
     setStep('configure');
-    setProjectName(type === 'builder' ? 'My 3D Model' : 'Mój model');
+    setProjectName(type === 'builder' ? 'Mój model 3D' : 'Mój model');
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -30,13 +30,13 @@ export const NewProjectDialog = ({ onClose, onCreateProject, isCreating = false,
 
     const maxSize = 50 * 1024 * 1024;
     if (file.size > maxSize) {
-      alert('File size exceeds 50MB limit. Please choose a smaller file.');
+      alert('Rozmiar pliku przekracza limit 50 MB. Wybierz mniejszy plik.');
       e.target.value = '';
       return;
     }
 
     if (!file.name.match(/\.(gltf|glb)$/i)) {
-      alert('Invalid file type. Please select a GLTF (.gltf) or GLB (.glb) file.');
+      alert('Nieprawidłowy typ pliku. Wybierz plik GLTF (.gltf) lub GLB (.glb).');
       e.target.value = '';
       return;
     }
@@ -52,7 +52,7 @@ export const NewProjectDialog = ({ onClose, onCreateProject, isCreating = false,
       setIsUploading(false);
     };
     reader.onerror = () => {
-      alert('Failed to read file. Please try again.');
+      alert('Nie udało się odczytać pliku. Spróbuj ponownie.');
       setIsUploading(false);
     };
     reader.readAsDataURL(file);
@@ -125,8 +125,8 @@ export const NewProjectDialog = ({ onClose, onCreateProject, isCreating = false,
                     <h3 className="font-bold text-slate-800 text-base mb-1">🧱 Zbuduj model 3D</h3>
                     <p className="text-sm text-slate-500">Twórz instrukcje krok po kroku używając kształtów 3D (sześciany, sfery, cylindry). Idealne do diagramów przepływu i instrukcji montażu.</p>
                     <div className="flex gap-2 mt-2">
-                      <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full font-medium">Flow diagrams</span>
-                      <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full font-medium">Step-by-step</span>
+                      <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full font-medium">Diagramy przepływu</span>
+                      <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full font-medium">Krok po kroku</span>
                     </div>
                   </div>
                   <svg className="w-6 h-6 text-slate-300 group-hover:text-blue-500 transition-colors flex-shrink-0 mt-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -151,7 +151,7 @@ export const NewProjectDialog = ({ onClose, onCreateProject, isCreating = false,
                     <p className="text-sm text-slate-500">Wgraj swój własny model GLTF/GLB i twórz dokumentację klikając na elementy modelu. Idealne do rzeczywistych produktów.</p>
                     <div className="flex gap-2 mt-2">
                       <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full font-medium">GLTF/GLB</span>
-                      <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full font-medium">Real models</span>
+                      <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full font-medium">Prawdziwe modele</span>
                     </div>
                   </div>
                   <svg className="w-6 h-6 text-slate-300 group-hover:text-green-500 transition-colors flex-shrink-0 mt-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

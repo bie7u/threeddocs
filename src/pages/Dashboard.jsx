@@ -107,7 +107,7 @@ const Dashboard = () => {
                 onClick={handleLogout}
                 className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 rounded-lg transition duration-150"
               >
-                Logout
+                Wyloguj się
               </button>
             </div>
           </div>
@@ -118,10 +118,10 @@ const Dashboard = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Welcome to ThreeDocsy Dashboard
+            Witaj w panelu ThreeDocsy
           </h1>
           <p className="text-xl text-gray-600 mb-8">
-            Your workspace is ready
+            Twoje środowisko jest gotowe
           </p>
           
           {/* Dashboard Tiles */}
