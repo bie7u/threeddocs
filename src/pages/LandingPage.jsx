@@ -1,8 +1,4 @@
 import { useNavigate } from 'react-router-dom';
-import { lazy, Suspense } from 'react';
-
-const LandingDemo3D = lazy(() => import('../components/LandingDemo3D/LandingDemo3D'));
-
 const LOGO_SRC = '/logo.svg';
 
 const features = [
@@ -194,42 +190,6 @@ const LandingPage = () => {
               🧠 Interaktywna nauka
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* ── Live 3D Demo ──────────────────────────────────────────────────── */}
-      <section className="py-20 bg-gradient-to-b from-gray-950 to-gray-900" id="demo">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-10">
-            <span className="inline-block mb-3 px-4 py-1.5 bg-blue-900/60 text-blue-300 text-sm font-semibold rounded-full">
-              🎮 Interaktywne demo na żywo
-            </span>
-            <h2 className="text-4xl font-extrabold text-white mb-4">
-              Tak wygląda ThreeDocsy w akcji
-            </h2>
-            <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-              Poniżej przykład prawdziwego modelu — architektura IT z krokami.
-              Przełącz zakładki, kliknij kroki nawigacji i przekonaj się,
-              że to tak samo działa jak strona, którą właśnie tworzysz.
-            </p>
-          </div>
-
-          <Suspense
-            fallback={
-              <div className="flex items-center justify-center h-72 rounded-3xl bg-gray-900 border border-gray-800">
-                <div className="flex flex-col items-center gap-3 text-gray-500">
-                  <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-                  <span className="text-sm">Ładowanie modelu 3D…</span>
-                </div>
-              </div>
-            }
-          >
-            <LandingDemo3D />
-          </Suspense>
-
-          <p className="text-center text-gray-600 text-sm mt-6">
-            Przeciągnij aby zmienić kąt widzenia · Scroll aby powiększyć · Przełącz tryb kamery Auto / Free
-          </p>
         </div>
       </section>
 
