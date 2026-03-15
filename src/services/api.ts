@@ -65,7 +65,7 @@ export const apiRequest = async (
       if (!refreshRes.ok) {
         processQueue(new Error('Session expired'));
         isRefreshing = false;
-        window.location.href = '/';
+        window.location.href = '/login';
         throw new Error('Session expired');
       }
 
