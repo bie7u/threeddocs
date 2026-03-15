@@ -1,4 +1,4 @@
-// ─── Mock implementation — no real API, data lives in localStorage ───────────
+import { apiRequest } from './api';
 
 export interface AuthUser {
   id: string;
@@ -6,53 +6,40 @@ export interface AuthUser {
   name?: string;
 }
 
-const AUTH_KEY = '3ddocs_auth';
-
-/** Mock register — accepts any non-empty email + password, stores the user. */
+/** POST /api/auth/register — creates a new account; server sets httpOnly cookies. */
 export const register = async (email: string, password: string, name?: string): Promise<AuthUser> => {
-  await new Promise<void>((r) => setTimeout(r, 400));
-  if (!email.trim() || !password.trim()) {
-    throw new Error('Email i hasło są wymagane');
+  const res = await apiRequest('/auth/register', {
+    method: 'POST',
+    body: JSON.stringify({ email, password, ...(name?.trim() ? { name: name.trim() } : {}) }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ message: 'Registration failed' }));
+    throw new Error((err as { message?: string }).message ?? 'Registration failed');
   }
-  if (password.length < 6) {
-    throw new Error('Hasło musi mieć co najmniej 6 znaków');
-  }
-  const id = `user-${email.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 12)}-${email.length}`;
-  const user: AuthUser = {
-    id,
-    email,
-    name: name?.trim() || email.split('@')[0],
-  };
-  localStorage.setItem(AUTH_KEY, JSON.stringify(user));
-  return user;
+  return res.json() as Promise<AuthUser>;
 };
 
-/** Mock login — accepts any non-empty email + password combination. */
+/** POST /api/auth/login — returns user info; server sets httpOnly cookies. */
 export const login = async (email: string, password: string): Promise<AuthUser> => {
-  // Simulate a short network delay so the UI spinner is visible.
-  await new Promise<void>((r) => setTimeout(r, 400));
-  if (!email.trim() || !password.trim()) {
-    throw new Error('Email i hasło są wymagane');
+  const res = await apiRequest('/auth/login', {
+    method: 'POST',
+    body: JSON.stringify({ email, password }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ message: 'Login failed' }));
+    throw new Error((err as { message?: string }).message ?? 'Login failed');
   }
-  // Derive a stable id from the email without using btoa (avoid non-Latin1 issues).
-  const id = `user-${email.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 12)}-${email.length}`;
-  const user: AuthUser = {
-    id,
-    email,
-    name: email.split('@')[0],
-  };
-  localStorage.setItem(AUTH_KEY, JSON.stringify(user));
-  return user;
+  return res.json() as Promise<AuthUser>;
 };
 
-/** Mock logout — removes the stored user. */
+/** POST /api/auth/logout — clears httpOnly cookies on the server. */
 export const logout = async (): Promise<void> => {
-  localStorage.removeItem(AUTH_KEY);
+  await apiRequest('/auth/logout', { method: 'POST' });
 };
 
-/** Mock getMe — reads the stored user or throws if not logged in. */
+/** GET /api/auth/me — returns the currently authenticated user or throws on 401. */
 export const getMe = async (): Promise<AuthUser> => {
-  const raw = localStorage.getItem(AUTH_KEY);
-  if (!raw) throw new Error('Not authenticated');
-  return JSON.parse(raw) as AuthUser;
+  const res = await apiRequest('/auth/me');
+  if (!res.ok) throw new Error('Not authenticated');
+  return res.json() as Promise<AuthUser>;
 };
