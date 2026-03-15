@@ -43,3 +43,15 @@ export const getMe = async (): Promise<AuthUser> => {
   if (!res.ok) throw new Error('Not authenticated');
   return res.json() as Promise<AuthUser>;
 };
+
+/** POST /api/auth/change-password — changes the password for the current user. */
+export const changePassword = async (currentPassword: string, newPassword: string): Promise<void> => {
+  const res = await apiRequest('/auth/change-password', {
+    method: 'POST',
+    body: JSON.stringify({ currentPassword, newPassword }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ message: 'Failed to change password' }));
+    throw new Error((err as { message?: string }).message ?? 'Failed to change password');
+  }
+};

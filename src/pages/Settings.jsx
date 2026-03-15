@@ -1,8 +1,161 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Create3DElementDialog } from '../components/Create3DElement/Create3DElementDialog';
 import { UploadModelDialog } from '../components/UploadModelDialog/UploadModelDialog';
 import { loadCustom3DElements, deleteCustom3DElement } from '../utils/custom3DElements';
 import { loadUploadedModels, deleteUploadedModel } from '../utils/uploadedModels';
+import { getMe, changePassword } from '../services/auth';
+
+// ─── Account Modal ────────────────────────────────────────────────────────────
+
+const AccountModal = ({ onClose }) => {
+  const [user, setUser] = useState(null);
+  const [userError, setUserError] = useState('');
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
+  const [saveSuccess, setSaveSuccess] = useState(false);
+
+  useEffect(() => {
+    getMe()
+      .then(setUser)
+      .catch(() => setUserError('Nie udało się załadować danych konta.'));
+  }, []);
+
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    setSaveError('');
+    setSaveSuccess(false);
+    if (newPassword !== confirmPassword) {
+      setSaveError('Nowe hasła nie są zgodne.');
+      return;
+    }
+    if (newPassword.length < 8) {
+      setSaveError('Nowe hasło musi mieć co najmniej 8 znaków.');
+      return;
+    }
+    setSaving(true);
+    try {
+      await changePassword(currentPassword, newPassword);
+      setSaveSuccess(true);
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    } catch (err) {
+      setSaveError(err.message ?? 'Zmiana hasła nie powiodła się.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
+              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+            </div>
+            <h2 className="text-lg font-bold text-gray-900">Moje konto</h2>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <div className="px-6 py-5 space-y-6">
+          {/* Account info */}
+          <div>
+            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Informacje o koncie</h3>
+            {userError ? (
+              <p className="text-sm text-red-500">{userError}</p>
+            ) : !user ? (
+              <p className="text-sm text-gray-400">Ładowanie…</p>
+            ) : (
+              <div className="bg-gray-50 rounded-xl p-4 space-y-2">
+                {user.name && (
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs font-medium text-gray-400 w-14 flex-shrink-0">Imię</span>
+                    <span className="text-sm font-medium text-gray-800">{user.name}</span>
+                  </div>
+                )}
+                <div className="flex items-center gap-3">
+                  <span className="text-xs font-medium text-gray-400 w-14 flex-shrink-0">Email</span>
+                  <span className="text-sm font-medium text-gray-800 break-all">{user.email}</span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Change password */}
+          <div>
+            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Zmiana hasła</h3>
+            <form onSubmit={handleChangePassword} className="space-y-3">
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">Aktualne hasło</label>
+                <input
+                  type="password"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  required
+                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent"
+                  placeholder="••••••••"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">Nowe hasło</label>
+                <input
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  required
+                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent"
+                  placeholder="min. 8 znaków"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">Powtórz nowe hasło</label>
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent"
+                  placeholder="••••••••"
+                />
+              </div>
+
+              {saveError && (
+                <p className="text-xs text-red-500 bg-red-50 px-3 py-2 rounded-lg">{saveError}</p>
+              )}
+              {saveSuccess && (
+                <p className="text-xs text-green-600 bg-green-50 px-3 py-2 rounded-lg">Hasło zostało zmienione.</p>
+              )}
+
+              <button
+                type="submit"
+                disabled={saving}
+                className="w-full py-2.5 px-4 bg-gradient-to-r from-purple-500 to-indigo-600 text-white text-sm font-medium rounded-lg hover:from-purple-600 hover:to-indigo-700 transition-all disabled:opacity-60 disabled:cursor-not-allowed shadow-md shadow-purple-500/25"
+              >
+                {saving ? 'Zapisywanie…' : 'Zmień hasło'}
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const Settings = ({ onClose }) => {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -12,6 +165,8 @@ const Settings = ({ onClose }) => {
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [editingModel, setEditingModel] = useState(null);
   const [uploadedModels, setUploadedModels] = useState(() => loadUploadedModels());
+
+  const [showAccountModal, setShowAccountModal] = useState(false);
 
   const refreshElements = () => {
     setElements(loadCustom3DElements());
@@ -139,6 +294,23 @@ const Settings = ({ onClose }) => {
               Wgraj model 3D (.gltf / .glb) i nadaj mu nazwę oraz skalę
             </p>
           </div>
+
+          {/* My Account */}
+          <div
+            onClick={() => setShowAccountModal(true)}
+            className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all cursor-pointer border border-gray-200 hover:border-purple-400 group"
+          >
+            <div className="text-purple-500 mb-4 group-hover:scale-110 transition-transform">
+              <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-semibold text-gray-800 mb-1">Moje konto</h3>
+            <p className="text-sm text-gray-600">
+              Informacje o koncie i zmiana hasła
+            </p>
+          </div>
         </div>
 
         {/* Existing custom 3D text elements */}
@@ -245,6 +417,11 @@ const Settings = ({ onClose }) => {
           onClose={() => { setShowUploadDialog(false); setEditingModel(null); }}
           onSaved={handleModelSaved}
         />
+      )}
+
+      {/* My Account modal */}
+      {showAccountModal && (
+        <AccountModal onClose={() => setShowAccountModal(false)} />
       )}
     </div>
   );
