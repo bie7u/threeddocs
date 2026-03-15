@@ -42,7 +42,7 @@ export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, useSamplePr
   const handleTogglePreview = () => { setPreviewMode(!isPreviewMode); };
   const handleToggleCameraMode = () => { setCameraMode(cameraMode === 'auto' ? 'free' : 'auto'); };
   const handleLoadSample = () => {
-    if (window.confirm('Load sample project? This will replace your current project.')) {
+    if (window.confirm('Załadować przykładowy projekt? To zastąpi bieżący projekt.')) {
       setProject(sampleProject);
     }
   };
@@ -93,7 +93,7 @@ export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, useSamplePr
                 <span className="text-xl" role="img" aria-label="Upload">📤</span>
               </div>
               <div>
-                <h1 className="text-lg font-bold">3D Model Documentation{isGuestMode && <span className="ml-2 text-xs font-normal text-yellow-300 bg-yellow-500/20 px-2 py-0.5 rounded-full">Tryb gościa</span>}</h1>
+                <h1 className="text-lg font-bold">Dokumentacja modelu 3D{isGuestMode && <span className="ml-2 text-xs font-normal text-yellow-300 bg-yellow-500/20 px-2 py-0.5 rounded-full">Tryb gościa</span>}</h1>
                 {project && <span className="text-xs text-slate-300 font-medium">{project.name}</span>}
               </div>
             </div>
@@ -113,7 +113,7 @@ export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, useSamplePr
             )}
             <div className="px-4 py-2 bg-green-500/20 backdrop-blur-sm rounded-lg border border-green-500/30 shadow-lg flex items-center gap-2">
               <div className="w-2 h-2 bg-green-400 rounded-full shadow-lg shadow-green-400/50 motion-safe:animate-pulse" aria-hidden="true"></div>
-              <span className="text-sm font-medium text-green-300">Editor Mode</span>
+              <span className="text-sm font-medium text-green-300">Tryb edytora</span>
             </div>
           </div>
         </div>
@@ -149,7 +149,7 @@ export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, useSamplePr
               <span className="text-xl" role="img" aria-label="Document">📝</span>
             </div>
             <div>
-              <h1 className="text-lg font-bold">3D Instruction Builder{isGuestMode && <span className="ml-2 text-xs font-normal text-yellow-300 bg-yellow-500/20 px-2 py-0.5 rounded-full">Tryb gościa</span>}</h1>
+              <h1 className="text-lg font-bold">Kreator instrukcji 3D{isGuestMode && <span className="ml-2 text-xs font-normal text-yellow-300 bg-yellow-500/20 px-2 py-0.5 rounded-full">Tryb gościa</span>}</h1>
               {project && <span className="text-xs text-slate-300 font-medium">{project.name}</span>}
             </div>
           </div>
@@ -170,28 +170,28 @@ export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, useSamplePr
           )}
           <div className="px-4 py-2 bg-green-500/20 backdrop-blur-sm rounded-lg border border-green-500/30 shadow-lg flex items-center gap-2">
             <div className="w-2 h-2 bg-green-400 rounded-full shadow-lg shadow-green-400/50 motion-safe:animate-pulse" aria-hidden="true"></div>
-            <span className="text-sm font-medium text-green-300">Editor Mode</span>
+            <span className="text-sm font-medium text-green-300">Tryb edytora</span>
           </div>
 
           <div className="flex items-center bg-slate-700/50 rounded-lg p-1 border border-slate-600/30">
             <button
               onClick={() => setEditorMode('model')}
               className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${editorMode === 'model' ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg' : 'text-slate-300 hover:text-white'}`}
-            >🧱 Model Builder</button>
+            >🧱 Kreator modelu</button>
             <button
               onClick={() => setEditorMode('guide')}
               className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${editorMode === 'guide' ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-lg' : 'text-slate-300 hover:text-white'}`}
-            >📋 Guide Builder</button>
+            >📋 Kreator przewodnika</button>
           </div>
 
           <button
             onClick={handleToggleCameraMode}
             className={`px-4 py-2 rounded-lg transition-all duration-200 text-sm font-medium shadow-lg ${cameraMode === 'free' ? 'bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 shadow-emerald-500/30' : 'bg-slate-700/50 backdrop-blur-sm hover:bg-slate-600/50 border border-slate-600/30'}`}
           >
-            {cameraMode === 'free' ? '📷 Free Camera' : '📷 Auto Camera'}
+            {cameraMode === 'free' ? '📷 Wolna kamera' : '📷 Auto kamera'}
           </button>
           <button onClick={handleLoadSample} className="px-4 py-2 bg-slate-700/50 backdrop-blur-sm rounded-lg hover:bg-slate-600/50 transition-all duration-200 text-sm font-medium border border-slate-600/30 shadow-lg">
-            Load Sample
+            Załaduj przykład
           </button>
           <button
             onClick={handleTogglePreview}
@@ -201,7 +201,7 @@ export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, useSamplePr
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            Preview
+            Podgląd
           </button>
         </div>
       </div>
@@ -240,7 +240,7 @@ export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, useSamplePr
                       </svg>
                     </div>
                     <div>
-                      <h2 className="font-bold text-slate-800 text-sm">Model Builder</h2>
+                      <h2 className="font-bold text-slate-800 text-sm">Kreator modelu</h2>
                       <p className="text-xs text-slate-500">
                         Projektuj przepływ modelu 3D
                         {project && project.steps.length > 0 && (
