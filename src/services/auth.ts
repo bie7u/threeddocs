@@ -8,6 +8,25 @@ export interface AuthUser {
 
 const AUTH_KEY = '3ddocs_auth';
 
+/** Mock register — accepts any non-empty email + password, stores the user. */
+export const register = async (email: string, password: string, name?: string): Promise<AuthUser> => {
+  await new Promise<void>((r) => setTimeout(r, 400));
+  if (!email.trim() || !password.trim()) {
+    throw new Error('Email i hasło są wymagane');
+  }
+  if (password.length < 6) {
+    throw new Error('Hasło musi mieć co najmniej 6 znaków');
+  }
+  const id = `user-${email.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 12)}-${email.length}`;
+  const user: AuthUser = {
+    id,
+    email,
+    name: name?.trim() || email.split('@')[0],
+  };
+  localStorage.setItem(AUTH_KEY, JSON.stringify(user));
+  return user;
+};
+
 /** Mock login — accepts any non-empty email + password combination. */
 export const login = async (email: string, password: string): Promise<AuthUser> => {
   // Simulate a short network delay so the UI spinner is visible.
