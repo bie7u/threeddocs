@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { login, getMe } from '../services/auth';
+import { login, probeSession } from '../services/auth';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -12,12 +12,20 @@ const Login = () => {
   const navigate = useNavigate();
 
   // If the user already has a valid session, skip the login form.
-  // getMe is a stable module-level import, so it's safe to omit from deps.
+  // probeSession is a plain fetch that bypasses the apiRequest refresh
+  // interceptor — it never triggers a redirect or touches isRefreshing state.
+  // Empty deps array: run once per mount.  The ignore flag prevents a
+  // stale async callback from acting after the component unmounts (e.g.
+  // React StrictMode double-invoke).
   useEffect(() => {
-    getMe()
-      .then(() => navigate('/dashboard', { replace: true }))
-      .catch(() => setChecking(false));
-  }, [navigate]);
+    let ignore = false;
+    probeSession().then(user => {
+      if (ignore) return;
+      if (user) navigate('/dashboard', { replace: true });
+      else setChecking(false);
+    });
+    return () => { ignore = true; };
+  }, []); // run once on mount — probeSession never changes
 
   const handleSubmit = async (e) => {
     e.preventDefault();

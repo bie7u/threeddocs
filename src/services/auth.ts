@@ -1,10 +1,27 @@
-import { apiRequest } from './api';
+import { apiRequest, API_BASE } from './api';
 
 export interface AuthUser {
   id: string;
   email: string;
   name?: string;
 }
+
+/**
+ * Lightweight session check for use on public pages (login, register).
+ * Uses a plain fetch so it never touches the token-refresh interceptor,
+ * never sets window.location, and never modifies the module-level
+ * isRefreshing state in api.ts.  Returns the user if a valid session
+ * exists, or null on any failure.
+ */
+export const probeSession = async (): Promise<AuthUser | null> => {
+  try {
+    const res = await fetch(`${API_BASE}/auth/me`, { credentials: 'include' });
+    if (!res.ok) return null;
+    return (await res.json()) as AuthUser;
+  } catch {
+    return null;
+  }
+};
 
 /** POST /api/auth/register — creates a new account; server sets httpOnly cookies. */
 export const register = async (email: string, password: string, name?: string): Promise<AuthUser> => {
