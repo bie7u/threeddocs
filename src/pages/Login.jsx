@@ -29,21 +29,7 @@ const Login = () => {
       <div className="max-w-md w-full space-y-8 p-10 bg-white rounded-2xl shadow-2xl">
         <div>
           <div className="flex justify-center">
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center transform rotate-12">
-              <svg
-                className="w-10 h-10 text-white transform -rotate-12"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-                />
-              </svg>
-            </div>
+            <img src="/logo.svg" alt="ThreeDocsy logo" className="h-16 w-auto" />
           </div>
           <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">
             ThreeDocsy
