@@ -1,4 +1,4 @@
-export const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? '/api';
+export const API_BASE = "http://localhost:8000/api";
 
 let isRefreshing = false;
 let failedQueue: Array<{ resolve: () => void; reject: (reason: unknown) => void }> = [];
