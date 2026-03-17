@@ -32,6 +32,8 @@ export const StepProperties = () => {
     modelPositionY: 0,
     custom3dElementId: undefined,
     uploadedModelId: undefined,
+    inlineCustom3DElement: undefined,
+    inlineUploadedModel: undefined,
     engravedBlockParams: {
       text: 'DB',
       font: 'helvetiker',
@@ -63,6 +65,8 @@ export const StepProperties = () => {
         modelPositionY: selectedStep.modelPositionY ?? 0,
         custom3dElementId: selectedStep.custom3dElementId,
         uploadedModelId: selectedStep.uploadedModelId,
+        inlineCustom3DElement: selectedStep.inlineCustom3DElement,
+        inlineUploadedModel: selectedStep.inlineUploadedModel,
         engravedBlockParams: selectedStep.engravedBlockParams || {
           text: 'DB',
           font: 'helvetiker',
@@ -179,7 +183,16 @@ export const StepProperties = () => {
               <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Typ kształtu</label>
               <select
                 value={formData.shapeType || 'cube'}
-                onChange={(e) => handleInputChange('shapeType', e.target.value as ShapeType)}
+                onChange={(e) => {
+                  const newType = e.target.value as ShapeType;
+                  setFormData((prev) => ({
+                    ...prev,
+                    shapeType: newType,
+                    // Clear model-specific selections when switching away from those types
+                    ...(newType !== 'custom3dElement' && { custom3dElementId: undefined, inlineCustom3DElement: undefined }),
+                    ...(newType !== 'uploadedModel' && { uploadedModelId: undefined, inlineUploadedModel: undefined }),
+                  }));
+                }}
                 className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="cube">📦 Sześcian (Cube)</option>
@@ -201,7 +214,15 @@ export const StepProperties = () => {
                 <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Wybierz element 3D</label>
                 <select
                   value={formData.custom3dElementId || ''}
-                  onChange={(e) => handleInputChange('custom3dElementId', e.target.value)}
+                  onChange={(e) => {
+                    const id = e.target.value;
+                    const element = custom3DElements.find((el) => el.id === id);
+                    setFormData((prev) => ({
+                      ...prev,
+                      custom3dElementId: id || undefined,
+                      inlineCustom3DElement: element,
+                    }));
+                  }}
                   className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="">-- wybierz element --</option>
@@ -222,7 +243,15 @@ export const StepProperties = () => {
                 <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Wybierz wgrany model 3D</label>
                 <select
                   value={formData.uploadedModelId || ''}
-                  onChange={(e) => handleInputChange('uploadedModelId', e.target.value)}
+                  onChange={(e) => {
+                    const id = e.target.value;
+                    const model = uploadedModels.find((m) => m.id === id);
+                    setFormData((prev) => ({
+                      ...prev,
+                      uploadedModelId: id || undefined,
+                      inlineUploadedModel: model,
+                    }));
+                  }}
                   className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="">-- wybierz model --</option>

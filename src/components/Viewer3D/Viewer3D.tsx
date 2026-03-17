@@ -171,30 +171,44 @@ interface Shape3DProps {
   modelScale?: number;
   engravedBlockParams?: InstructionStep['engravedBlockParams'];
   custom3dElementId?: string;
+  inlineCustom3DElement?: Custom3DElement;
   uploadedModelId?: string;
+  inlineUploadedModel?: UploadedModel3D;
   modelPositionY?: number;
 }
 
 // Reusable 3D shape component
-const Shape3D = ({ shapeType = 'cube', size = 2, color, emissive = '#000000', emissiveIntensity = 0, customModelUrl, modelScale = 1, engravedBlockParams, custom3dElementId, uploadedModelId, modelPositionY = 0 }: Shape3DProps) => {
-  const [uploadedModel, setUploadedModel] = useState<UploadedModel3D | null>(null);
-  const [customElement, setCustomElement] = useState<Custom3DElement | null>(null);
+const Shape3D = ({ shapeType = 'cube', size = 2, color, emissive = '#000000', emissiveIntensity = 0, customModelUrl, modelScale = 1, engravedBlockParams, custom3dElementId, inlineCustom3DElement, uploadedModelId, inlineUploadedModel, modelPositionY = 0 }: Shape3DProps) => {
+  const [uploadedModel, setUploadedModel] = useState<UploadedModel3D | null>(inlineUploadedModel ?? null);
+  const [customElement, setCustomElement] = useState<Custom3DElement | null>(inlineCustom3DElement ?? null);
 
   useEffect(() => {
+    if (inlineUploadedModel) {
+      setUploadedModel(inlineUploadedModel);
+      return;
+    }
     if (shapeType === 'uploadedModel' && uploadedModelId) {
-      getUploadedModelById(uploadedModelId).then((m) => setUploadedModel(m ?? null));
+      getUploadedModelById(uploadedModelId)
+        .then((m) => setUploadedModel(m ?? null))
+        .catch(() => setUploadedModel(null));
     } else {
       setUploadedModel(null);
     }
-  }, [shapeType, uploadedModelId]);
+  }, [shapeType, uploadedModelId, inlineUploadedModel]);
 
   useEffect(() => {
+    if (inlineCustom3DElement) {
+      setCustomElement(inlineCustom3DElement);
+      return;
+    }
     if (shapeType === 'custom3dElement' && custom3dElementId) {
-      getCustom3DElementById(custom3dElementId).then((e) => setCustomElement(e ?? null));
+      getCustom3DElementById(custom3dElementId)
+        .then((e) => setCustomElement(e ?? null))
+        .catch(() => setCustomElement(null));
     } else {
       setCustomElement(null);
     }
-  }, [shapeType, custom3dElementId]);
+  }, [shapeType, custom3dElementId, inlineCustom3DElement]);
 
   if (shapeType === 'custom' && customModelUrl) {
     return (
@@ -364,7 +378,9 @@ const StepCube = ({ step, position, isActive, hasActiveStep, allowDimming = true
           modelPositionY={modelPositionY}
           engravedBlockParams={step.engravedBlockParams}
           custom3dElementId={step.custom3dElementId}
+          inlineCustom3DElement={step.inlineCustom3DElement}
           uploadedModelId={step.uploadedModelId}
+          inlineUploadedModel={step.inlineUploadedModel}
         />
       </group>
       {isActive && (
