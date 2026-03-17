@@ -3,8 +3,6 @@ import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import type { Custom3DElement } from '../../types';
 import { saveCustom3DElement } from '../../utils/custom3DElements';
-import { exportCustom3DElementToGlb } from '../../utils/exportCustom3DElement';
-import { uploadModelRequest } from '../../services/models';
 import { Custom3DShape } from '../Viewer3D/Custom3DShape';
 
 interface Props {
@@ -89,21 +87,7 @@ export const Create3DElementDialog = ({ existing, onClose, onSaved }: Props) => 
         createdAt: existing?.createdAt ?? Date.now(),
       };
 
-      // Save element parameters to /api/elements
       const saved = await saveCustom3DElement(payload, !existing);
-
-      // Export the rendered 3D model to GLB and upload it to /api/models so the
-      // server stores the actual geometry (not just the text/color parameters).
-      try {
-        const glbFile = await exportCustom3DElementToGlb(saved);
-        // modelScale 1.0 is appropriate: the geometry is already sized to
-        // match the preview (TextGeometry size: 0.5, depth: 0.3).
-        await uploadModelRequest(glbFile, saved.name, 1);
-      } catch (exportErr) {
-        // Non-fatal: log the error but don't block the user from continuing.
-        console.error('Failed to export/upload GLB for custom 3D element:', exportErr);
-      }
-
       onSaved(saved);
     } catch (err) {
       alert((err as Error).message ?? 'Nie udało się zapisać elementu.');
