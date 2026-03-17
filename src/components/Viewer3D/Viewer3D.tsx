@@ -3,7 +3,7 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera, useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
-import type { InstructionStep, ConnectionStyle, ShapeType, ArrowDirection, ConnectionType } from '../../types';
+import type { InstructionStep, ConnectionStyle, ShapeType, ArrowDirection, ConnectionType, UploadedModel3D, Custom3DElement } from '../../types';
 import type { ProjectData } from '../../types';
 import { calculateCreatorBasedLayout } from '../../utils/layoutCalculator';
 import { EngravedBlock } from './EngravedBlock';
@@ -177,6 +177,25 @@ interface Shape3DProps {
 
 // Reusable 3D shape component
 const Shape3D = ({ shapeType = 'cube', size = 2, color, emissive = '#000000', emissiveIntensity = 0, customModelUrl, modelScale = 1, engravedBlockParams, custom3dElementId, uploadedModelId, modelPositionY = 0 }: Shape3DProps) => {
+  const [uploadedModel, setUploadedModel] = useState<UploadedModel3D | null>(null);
+  const [customElement, setCustomElement] = useState<Custom3DElement | null>(null);
+
+  useEffect(() => {
+    if (shapeType === 'uploadedModel' && uploadedModelId) {
+      getUploadedModelById(uploadedModelId).then((m) => setUploadedModel(m ?? null));
+    } else {
+      setUploadedModel(null);
+    }
+  }, [shapeType, uploadedModelId]);
+
+  useEffect(() => {
+    if (shapeType === 'custom3dElement' && custom3dElementId) {
+      getCustom3DElementById(custom3dElementId).then((e) => setCustomElement(e ?? null));
+    } else {
+      setCustomElement(null);
+    }
+  }, [shapeType, custom3dElementId]);
+
   if (shapeType === 'custom' && customModelUrl) {
     return (
       <group position={[0, modelPositionY, 0]}>
@@ -196,18 +215,17 @@ const Shape3D = ({ shapeType = 'cube', size = 2, color, emissive = '#000000', em
   }
 
   if (shapeType === 'uploadedModel' && uploadedModelId) {
-    const model = getUploadedModelById(uploadedModelId);
-    if (model) {
+    if (uploadedModel) {
       return (
         <group position={[0, modelPositionY, 0]}>
           <ModelErrorBoundary fallback={<ModelErrorFallback />}>
             <Suspense fallback={<ModelLoadingFallback />}>
               <CustomModel
-                url={model.modelDataUrl}
+                url={uploadedModel.modelUrl}
                 color={color}
                 emissive={emissive}
                 emissiveIntensity={emissiveIntensity}
-                scale={modelScale * model.modelScale}
+                scale={modelScale * uploadedModel.modelScale}
                 preserveMaterials={true}
               />
             </Suspense>
@@ -215,7 +233,7 @@ const Shape3D = ({ shapeType = 'cube', size = 2, color, emissive = '#000000', em
         </group>
       );
     }
-    // Fallback if model not found
+    // Fallback while loading or if model not found
     return (
       <group position={[0, modelPositionY, 0]} scale={[modelScale, modelScale, modelScale]}>
         <mesh castShadow>
@@ -227,15 +245,14 @@ const Shape3D = ({ shapeType = 'cube', size = 2, color, emissive = '#000000', em
   }
 
   if (shapeType === 'custom3dElement' && custom3dElementId) {
-    const element = getCustom3DElementById(custom3dElementId);
-    if (element) {
+    if (customElement) {
       return (
         <group position={[0, modelPositionY, 0]} scale={[modelScale, modelScale, modelScale]}>
-          <Custom3DShape element={element} emissive={emissive} emissiveIntensity={emissiveIntensity} />
+          <Custom3DShape element={customElement} emissive={emissive} emissiveIntensity={emissiveIntensity} />
         </group>
       );
     }
-    // Fallback if element not found
+    // Fallback while loading or if element not found
     return (
       <group position={[0, modelPositionY, 0]} scale={[modelScale, modelScale, modelScale]}>
         <mesh castShadow>

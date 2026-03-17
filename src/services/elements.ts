@@ -1,0 +1,86 @@
+import type { Custom3DElement } from '../types';
+import { apiRequest } from './api';
+
+// ─── Server shape ─────────────────────────────────────────────────────────────
+
+interface ApiElement {
+  id: string;
+  name: string;
+  text: string;
+  color: string;
+  wireframe: boolean;
+  wireframeColor: string;
+  textureDataUrl: string | null;
+  createdAt: number;
+}
+
+type ApiElementBody = Omit<ApiElement, 'id' | 'createdAt'>;
+
+// ─── Converters ───────────────────────────────────────────────────────────────
+
+const fromApi = (e: ApiElement): Custom3DElement => ({
+  id: e.id,
+  name: e.name,
+  text: e.text,
+  color: e.color,
+  wireframe: e.wireframe,
+  wireframeColor: e.wireframeColor,
+  textureDataUrl: e.textureDataUrl ?? undefined,
+  createdAt: e.createdAt,
+});
+
+const toApiElementBody = (e: Omit<Custom3DElement, 'id' | 'createdAt'>): ApiElementBody => ({
+  name: e.name,
+  text: e.text,
+  color: e.color,
+  wireframe: e.wireframe,
+  wireframeColor: e.wireframeColor,
+  textureDataUrl: e.textureDataUrl ?? null,
+});
+
+// ─── API functions ────────────────────────────────────────────────────────────
+
+/** GET /api/elements — returns all custom 3D elements owned by the user. */
+export const fetchElements = async (): Promise<Custom3DElement[]> => {
+  const res = await apiRequest('/elements');
+  if (!res.ok) throw new Error('Failed to fetch custom 3D elements');
+  return (await res.json() as ApiElement[]).map(fromApi);
+};
+
+/** GET /api/elements/:id — returns a single element. */
+export const fetchElementById = async (id: string): Promise<Custom3DElement> => {
+  const res = await apiRequest(`/elements/${id}`);
+  if (!res.ok) throw new Error('Custom 3D element not found');
+  return fromApi(await res.json() as ApiElement);
+};
+
+/** POST /api/elements — creates a new element; server assigns id and createdAt. */
+export const createElementRequest = async (
+  element: Omit<Custom3DElement, 'id' | 'createdAt'>,
+): Promise<Custom3DElement> => {
+  const res = await apiRequest('/elements', {
+    method: 'POST',
+    body: JSON.stringify(toApiElementBody(element)),
+  });
+  if (!res.ok) throw new Error('Failed to create custom 3D element');
+  return fromApi(await res.json() as ApiElement);
+};
+
+/** PUT /api/elements/:id — fully replaces the element document. */
+export const updateElementRequest = async (
+  id: string,
+  element: Omit<Custom3DElement, 'id' | 'createdAt'>,
+): Promise<Custom3DElement> => {
+  const res = await apiRequest(`/elements/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(toApiElementBody(element)),
+  });
+  if (!res.ok) throw new Error('Failed to update custom 3D element');
+  return fromApi(await res.json() as ApiElement);
+};
+
+/** DELETE /api/elements/:id — deletes the element. */
+export const deleteElementRequest = async (id: string): Promise<void> => {
+  const res = await apiRequest(`/elements/${id}`, { method: 'DELETE' });
+  if (!res.ok) throw new Error('Failed to delete custom 3D element');
+};

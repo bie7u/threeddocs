@@ -1,33 +1,52 @@
 import type { UploadedModel3D } from '../types';
+import {
+  fetchModels,
+  fetchModelById,
+  uploadModelRequest,
+  updateModelRequest,
+  deleteModelRequest,
+} from '../services/models';
 
-const STORAGE_KEY = 'uploadedModels3D';
+/** Returns all uploaded 3D models owned by the current user. */
+export async function loadUploadedModels(): Promise<UploadedModel3D[]> {
+  return fetchModels();
+}
 
-export function loadUploadedModels(): UploadedModel3D[] {
+/**
+ * Uploads a new 3D model file via multipart/form-data.
+ * Returns the saved model with the server-assigned id and modelUrl.
+ */
+export async function uploadNewModel(
+  file: File,
+  name: string,
+  modelScale: number,
+): Promise<UploadedModel3D> {
+  return uploadModelRequest(file, name, modelScale);
+}
+
+/**
+ * Updates editable metadata (name, modelScale) of an existing model.
+ * The binary file cannot be replaced; upload a new model instead.
+ */
+export async function saveUploadedModelMeta(
+  id: string,
+  name: string,
+  modelScale: number,
+): Promise<UploadedModel3D> {
+  return updateModelRequest(id, name, modelScale);
+}
+
+/** Deletes an uploaded model by id. */
+export async function deleteUploadedModel(id: string): Promise<void> {
+  return deleteModelRequest(id);
+}
+
+/** Returns a single uploaded model, or undefined if not found. */
+export async function getUploadedModelById(id: string): Promise<UploadedModel3D | undefined> {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return [];
-    return JSON.parse(raw) as UploadedModel3D[];
+    return await fetchModelById(id);
   } catch {
-    return [];
+    return undefined;
   }
 }
 
-export function saveUploadedModel(model: UploadedModel3D): void {
-  const models = loadUploadedModels();
-  const existing = models.findIndex((m) => m.id === model.id);
-  if (existing >= 0) {
-    models[existing] = model;
-  } else {
-    models.push(model);
-  }
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(models));
-}
-
-export function deleteUploadedModel(id: string): void {
-  const models = loadUploadedModels().filter((m) => m.id !== id);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(models));
-}
-
-export function getUploadedModelById(id: string): UploadedModel3D | undefined {
-  return loadUploadedModels().find((m) => m.id === id);
-}

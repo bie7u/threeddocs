@@ -160,26 +160,32 @@ const AccountModal = ({ onClose }) => {
 const Settings = ({ onClose }) => {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [editingElement, setEditingElement] = useState(null);
-  const [elements, setElements] = useState(() => loadCustom3DElements());
+  const [elements, setElements] = useState([]);
 
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [editingModel, setEditingModel] = useState(null);
-  const [uploadedModels, setUploadedModels] = useState(() => loadUploadedModels());
+  const [uploadedModels, setUploadedModels] = useState([]);
 
   const [showAccountModal, setShowAccountModal] = useState(false);
 
   const refreshElements = () => {
-    setElements(loadCustom3DElements());
+    loadCustom3DElements().then(setElements).catch(() => setElements([]));
   };
 
   const refreshModels = () => {
-    setUploadedModels(loadUploadedModels());
+    loadUploadedModels().then(setUploadedModels).catch(() => setUploadedModels([]));
   };
+
+  useEffect(() => {
+    refreshElements();
+    refreshModels();
+  }, []);
 
   const handleDelete = (id) => {
     if (!window.confirm('Czy na pewno chcesz usunąć ten element?')) return;
-    deleteCustom3DElement(id);
-    refreshElements();
+    deleteCustom3DElement(id)
+      .then(refreshElements)
+      .catch((err) => alert(err.message ?? 'Nie udało się usunąć elementu.'));
   };
 
   const handleEdit = (element) => {
@@ -210,8 +216,9 @@ const Settings = ({ onClose }) => {
 
   const handleDeleteModel = (id) => {
     if (!window.confirm('Czy na pewno chcesz usunąć ten model?')) return;
-    deleteUploadedModel(id);
-    refreshModels();
+    deleteUploadedModel(id)
+      .then(refreshModels)
+      .catch((err) => alert(err.message ?? 'Nie udało się usunąć modelu.'));
   };
 
   const handleModelSaved = () => {

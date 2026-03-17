@@ -18,8 +18,8 @@ export const StepProperties = () => {
   const [uploadedModels, setUploadedModels] = useState<UploadedModel3D[]>([]);
 
   useEffect(() => {
-    setCustom3DElements(loadCustom3DElements());
-    setUploadedModels(loadUploadedModels());
+    loadCustom3DElements().then(setCustom3DElements).catch(() => setCustom3DElements([]));
+    loadUploadedModels().then(setUploadedModels).catch(() => setUploadedModels([]));
   }, []);
   
   const [formData, setFormData] = useState<Partial<InstructionStep>>({

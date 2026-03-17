@@ -35,7 +35,7 @@ export interface Custom3DElement {
 export interface UploadedModel3D {
   id: string;
   name: string;
-  modelDataUrl: string; // base64 data URL for .gltf/.glb file
+  modelUrl: string; // HTTPS URL to the stored GLB/GLTF file (server-assigned)
   modelFileName: string;
   modelScale: number;
   createdAt: number;
