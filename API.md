@@ -448,7 +448,7 @@ All endpoints require a valid session.
 {
   "id": "uploaded3d-uuid",
   "name": "Silnik turbinowy",
-  "modelUrl": "https://cdn.example.com/models/uploaded3d-uuid.glb",
+  "modelDataUrl": "data:model/gltf-binary;base64,…",
   "modelFileName": "engine.glb",
   "modelScale": 1.0,
   "createdAt": 1700000000000
@@ -459,7 +459,7 @@ All endpoints require a valid session.
 |-------|------|--------|-------------|
 | `id` | `string` | **read-only** | Server-assigned UUID |
 | `name` | `string` | read/write | Human-readable model name |
-| `modelUrl` | `string` | **read-only** | Public HTTPS URL to download the stored GLB/GLTF file |
+| `modelDataUrl` | `string` | read/write | Base64-encoded data URL of the GLB/GLTF file |
 | `modelFileName` | `string` | **read-only** | Original filename supplied at upload |
 | `modelScale` | `number` | read/write | Default scale factor (0.1 – 5.0) applied when the model is added to a step |
 | `createdAt` | `integer` | **read-only** | Unix timestamp in ms of creation |
@@ -478,7 +478,7 @@ Returns all uploaded 3D models owned by the authenticated user.
   {
     "id": "uploaded3d-uuid",
     "name": "Silnik turbinowy",
-    "modelUrl": "https://cdn.example.com/models/uploaded3d-uuid.glb",
+    "modelDataUrl": "data:model/gltf-binary;base64,…",
     "modelFileName": "engine.glb",
     "modelScale": 1.0,
     "createdAt": 1700000000000
@@ -490,14 +490,15 @@ Returns all uploaded 3D models owned by the authenticated user.
 
 #### `POST /api/models`
 
-Uploads a new 3D model file and creates the model record.
+Saves a new 3D model (as a base64 data URL) and creates the model record.
 
 **Auth:** required
-**Content-Type:** `multipart/form-data`
+**Content-Type:** `application/json`
 
-| Form field | Type | Required | Description |
+| JSON field | Type | Required | Description |
 |------------|------|----------|-------------|
-| `file` | binary | yes | The GLB or GLTF file, **max 50 MB** |
+| `modelDataUrl` | string | yes | Base64-encoded data URL of the GLB or GLTF file, **max 50 MB** decoded |
+| `modelFileName` | string | yes | Original filename (e.g. `engine.glb`) |
 | `name` | string | yes | Human-readable model name |
 | `modelScale` | number | no | Default scale factor (0.1–5.0, default `1.0`) |
 
@@ -505,24 +506,24 @@ Uploads a new 3D model file and creates the model record.
 ```bash
 curl -X POST /api/models \
   -b "access_token=…" \
-  -F "file=@engine.glb" \
-  -F "name=Silnik turbinowy" \
-  -F "modelScale=1.0"
+  -H "Content-Type: application/json" \
+  -d '{"name":"Silnik turbinowy","modelFileName":"engine.glb","modelScale":1.0,"modelDataUrl":"data:model/gltf-binary;base64,…"}'
 ```
 
 **Validation**
-- `file` must have the extension `.glb` or `.gltf` and must not exceed **50 MB**.
+- `modelFileName` must have the extension `.glb` or `.gltf`.
+- Decoded file size must not exceed **50 MB**.
 - `name` must be non-empty after trimming.
 - `modelScale` must be between `0.1` and `5.0` (inclusive).
 
 **Response `201 Created`** – returns the model object with the server-assigned
-`id`, `modelUrl` (pointing to the stored file), `modelFileName`, and `createdAt`.
+`id`, `modelDataUrl`, `modelFileName`, and `createdAt`.
 
 ```json
 {
   "id": "uploaded3d-uuid",
   "name": "Silnik turbinowy",
-  "modelUrl": "https://cdn.example.com/models/uploaded3d-uuid.glb",
+  "modelDataUrl": "data:model/gltf-binary;base64,…",
   "modelFileName": "engine.glb",
   "modelScale": 1.0,
   "createdAt": 1700000000000
@@ -550,8 +551,7 @@ Returns a single uploaded 3D model by ID.
 
 #### `PUT /api/models/:id`
 
-Updates editable metadata of the model (`name`, `modelScale`). The binary
-file cannot be replaced; upload a new model instead.
+Updates editable metadata of the model (`name`, `modelScale`).
 
 **Auth:** required
 **Content-Type:** `application/json`
@@ -606,7 +606,7 @@ interface Custom3DElement {
 interface UploadedModel3D {
   id: string;
   name: string;
-  modelUrl: string;          // HTTPS URL to the stored GLB/GLTF file
+  modelDataUrl: string;      // base64-encoded data URL of the GLB/GLTF file
   modelFileName: string;     // original filename
   modelScale: number;        // default scale factor (0.1 – 5.0)
   createdAt: number;         // Unix timestamp in ms
