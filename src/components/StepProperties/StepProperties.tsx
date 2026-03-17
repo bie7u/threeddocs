@@ -94,7 +94,17 @@ export const StepProperties = () => {
 
   const handleSave = () => {
     if (selectedStepId && selectedStep) {
-      updateStep(selectedStepId, formData);
+      const saveData = { ...formData };
+      // Ensure inline data is always embedded, even for steps created before this feature
+      if (saveData.custom3dElementId && !saveData.inlineCustom3DElement) {
+        const element = custom3DElements.find((el) => el.id === saveData.custom3dElementId);
+        if (element) saveData.inlineCustom3DElement = element;
+      }
+      if (saveData.uploadedModelId && !saveData.inlineUploadedModel) {
+        const model = uploadedModels.find((m) => m.id === saveData.uploadedModelId);
+        if (model) saveData.inlineUploadedModel = model;
+      }
+      updateStep(selectedStepId, saveData);
     }
   };
 

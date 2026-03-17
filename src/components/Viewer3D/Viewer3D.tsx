@@ -175,40 +175,42 @@ interface Shape3DProps {
   uploadedModelId?: string;
   inlineUploadedModel?: UploadedModel3D;
   modelPositionY?: number;
+  /** When true, never makes API calls to /elements or /models (used in public share views). */
+  preventApiCalls?: boolean;
 }
 
 // Reusable 3D shape component
-const Shape3D = ({ shapeType = 'cube', size = 2, color, emissive = '#000000', emissiveIntensity = 0, customModelUrl, modelScale = 1, engravedBlockParams, custom3dElementId, inlineCustom3DElement, uploadedModelId, inlineUploadedModel, modelPositionY = 0 }: Shape3DProps) => {
-  const [uploadedModel, setUploadedModel] = useState<UploadedModel3D | null>(inlineUploadedModel ?? null);
-  const [customElement, setCustomElement] = useState<Custom3DElement | null>(inlineCustom3DElement ?? null);
+const Shape3D = ({ shapeType = 'cube', size = 2, color, emissive = '#000000', emissiveIntensity = 0, customModelUrl, modelScale = 1, engravedBlockParams, custom3dElementId, inlineCustom3DElement, uploadedModelId, inlineUploadedModel, modelPositionY = 0, preventApiCalls = false }: Shape3DProps) => {
+  const [uploadedModel, setUploadedModel] = useState<UploadedModel3D | null>(null);
+  const [customElement, setCustomElement] = useState<Custom3DElement | null>(null);
 
   useEffect(() => {
     if (inlineUploadedModel) {
       setUploadedModel(inlineUploadedModel);
       return;
     }
-    if (shapeType === 'uploadedModel' && uploadedModelId) {
+    if (!preventApiCalls && shapeType === 'uploadedModel' && uploadedModelId) {
       getUploadedModelById(uploadedModelId)
         .then((m) => setUploadedModel(m ?? null))
         .catch(() => setUploadedModel(null));
     } else {
       setUploadedModel(null);
     }
-  }, [shapeType, uploadedModelId, inlineUploadedModel]);
+  }, [shapeType, uploadedModelId, inlineUploadedModel, preventApiCalls]);
 
   useEffect(() => {
     if (inlineCustom3DElement) {
       setCustomElement(inlineCustom3DElement);
       return;
     }
-    if (shapeType === 'custom3dElement' && custom3dElementId) {
+    if (!preventApiCalls && shapeType === 'custom3dElement' && custom3dElementId) {
       getCustom3DElementById(custom3dElementId)
         .then((e) => setCustomElement(e ?? null))
         .catch(() => setCustomElement(null));
     } else {
       setCustomElement(null);
     }
-  }, [shapeType, custom3dElementId, inlineCustom3DElement]);
+  }, [shapeType, custom3dElementId, inlineCustom3DElement, preventApiCalls]);
 
   if (shapeType === 'custom' && customModelUrl) {
     return (
@@ -327,9 +329,10 @@ interface StepCubeProps {
   hasActiveStep?: boolean;
   allowDimming?: boolean;
   onClick?: () => void;
+  preventApiCalls?: boolean;
 }
 
-const StepCube = ({ step, position, isActive, hasActiveStep, allowDimming = true, onClick }: StepCubeProps) => {
+const StepCube = ({ step, position, isActive, hasActiveStep, allowDimming = true, onClick, preventApiCalls = false }: StepCubeProps) => {
   const meshRef = useRef<THREE.Group>(null);
   const ringRef = useRef<THREE.Mesh>(null);
   
@@ -381,6 +384,7 @@ const StepCube = ({ step, position, isActive, hasActiveStep, allowDimming = true
           inlineCustom3DElement={step.inlineCustom3DElement}
           uploadedModelId={step.uploadedModelId}
           inlineUploadedModel={step.inlineUploadedModel}
+          preventApiCalls={preventApiCalls}
         />
       </group>
       {isActive && (
@@ -729,9 +733,10 @@ interface UnifiedModelProps {
   onConnectionClick?: (description: string) => void;
   onStepClick?: (stepId: string) => void;
   allowDimming?: boolean;
+  preventApiCalls?: boolean;
 }
 
-const UnifiedModel = ({ project, currentStepId, nodePositions, onConnectionClick, onStepClick, allowDimming = true }: UnifiedModelProps) => {
+const UnifiedModel = ({ project, currentStepId, nodePositions, onConnectionClick, onStepClick, allowDimming = true, preventApiCalls = false }: UnifiedModelProps) => {
   const steps = project.steps;
   
   const layout = useMemo(() => {
@@ -785,6 +790,7 @@ const UnifiedModel = ({ project, currentStepId, nodePositions, onConnectionClick
           hasActiveStep={!!currentStepId}
           allowDimming={allowDimming}
           onClick={onStepClick ? () => onStepClick(step.id) : undefined}
+          preventApiCalls={preventApiCalls}
         />
       ))}
       {connections.map((conn, index) => (
@@ -900,9 +906,11 @@ interface Viewer3DProps {
   cameraMode?: 'auto' | 'free';
   showStepOverlay?: boolean;
   onStepSelect?: (stepId: string) => void;
+  /** When true, never makes API calls to /elements or /models (use in public share views). */
+  preventApiCalls?: boolean;
 }
 
-export const Viewer3D = ({ project, currentStepId, nodePositions = {}, cameraMode = 'free', showStepOverlay = true, onStepSelect }: Viewer3DProps) => {
+export const Viewer3D = ({ project, currentStepId, nodePositions = {}, cameraMode = 'free', showStepOverlay = true, onStepSelect, preventApiCalls = false }: Viewer3DProps) => {
   const currentStep = project?.steps.find(s => s.id === currentStepId);
   const [selectedConnectionDesc, setSelectedConnectionDesc] = useState<string | null>(null);
   const orbitControlsRef = useRef<OrbitControlsImpl | null>(null);
@@ -974,6 +982,7 @@ export const Viewer3D = ({ project, currentStepId, nodePositions = {}, cameraMod
             onConnectionClick={handleConnectionClick}
             onStepClick={onStepSelect}
             allowDimming={false}
+            preventApiCalls={preventApiCalls}
           />
         )}
         
