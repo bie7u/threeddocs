@@ -8,13 +8,16 @@ interface ApiElement {
   name: string;
   text: string;
   color: string;
-  wireframe: boolean;
-  wireframeColor: string;
-  textureDataUrl: string | null;
+  texture_data_url: string | null;
   createdAt: number;
 }
 
-type ApiElementBody = Omit<ApiElement, 'id' | 'createdAt'>;
+type ApiElementBody = {
+  name: string;
+  text: string;
+  color: string;
+  texture_data_url: string | null;
+};
 
 // ─── Converters ───────────────────────────────────────────────────────────────
 
@@ -23,9 +26,10 @@ const fromApi = (e: ApiElement): Custom3DElement => ({
   name: e.name,
   text: e.text,
   color: e.color,
-  wireframe: e.wireframe,
-  wireframeColor: e.wireframeColor,
-  textureDataUrl: e.textureDataUrl ?? undefined,
+  // wireframe and wireframeColor are frontend-only display properties not stored on the server
+  wireframe: false,
+  wireframeColor: '#000000',
+  textureDataUrl: e.texture_data_url ?? undefined,
   createdAt: e.createdAt,
 });
 
@@ -33,9 +37,7 @@ const toApiElementBody = (e: Omit<Custom3DElement, 'id' | 'createdAt'>): ApiElem
   name: e.name,
   text: e.text,
   color: e.color,
-  wireframe: e.wireframe,
-  wireframeColor: e.wireframeColor,
-  textureDataUrl: e.textureDataUrl ?? null,
+  texture_data_url: e.textureDataUrl ?? null,
 });
 
 // ─── API functions ────────────────────────────────────────────────────────────

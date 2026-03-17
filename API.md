@@ -324,9 +324,7 @@ All endpoints require a valid session.
   "name": "ABC",
   "text": "ABC",
   "color": "#4299e1",
-  "wireframe": false,
-  "wireframeColor": "#000000",
-  "textureDataUrl": "data:image/png;base64,…",
+  "texture_data_url": "data:image/png;base64,…",
   "createdAt": 1700000000000
 }
 ```
@@ -337,9 +335,7 @@ All endpoints require a valid session.
 | `name` | `string` | read/write | Display name (equals `text` by default) |
 | `text` | `string` | read/write | Source text for the 3D shape – **max 5 characters** |
 | `color` | `string` | read/write | Hex fill color, e.g. `"#4299e1"` |
-| `wireframe` | `boolean` | read/write | Whether to render the wireframe overlay |
-| `wireframeColor` | `string` | read/write | Hex wireframe line color |
-| `textureDataUrl` | `string \| null` | read/write | Base64 data URL of the texture image (PNG/JPG/WebP, max 5 MB); `null` if no texture |
+| `texture_data_url` | `string \| null` | read/write | Base64 data URL of the texture image (PNG/JPG/WebP, max 5 MB); `null` if no texture |
 | `createdAt` | `integer` | **read-only** | Unix timestamp in ms of creation |
 
 ---
@@ -358,9 +354,7 @@ Returns all custom 3D elements owned by the authenticated user.
     "name": "ABC",
     "text": "ABC",
     "color": "#4299e1",
-    "wireframe": false,
-    "wireframeColor": "#000000",
-    "textureDataUrl": null,
+    "texture_data_url": null,
     "createdAt": 1700000000000
   }
 ]
@@ -374,21 +368,19 @@ Creates a new custom 3D element. The server assigns `id` and `createdAt`.
 
 **Auth:** required
 
-**Request body** – JSON; `textureDataUrl` may be omitted or `null`
+**Request body** – JSON; `texture_data_url` may be omitted or `null`
 ```json
 {
   "name": "ABC",
   "text": "ABC",
   "color": "#4299e1",
-  "wireframe": false,
-  "wireframeColor": "#000000",
-  "textureDataUrl": null
+  "texture_data_url": null
 }
 ```
 
 **Validation**
 - `text` must be 1–5 characters (non-empty after trimming).
-- `textureDataUrl` is optional. When provided (not `null`), it must be a valid
+- `texture_data_url` is optional. When provided (not `null`), it must be a valid
   `data:image/…;base64,…` string whose decoded size does not exceed **5 MB**.
 
 **Response `201 Created`** – returns the saved object with server-assigned `id` and `createdAt`.
@@ -448,9 +440,9 @@ All endpoints require a valid session.
 {
   "id": "uploaded3d-uuid",
   "name": "Silnik turbinowy",
-  "modelDataUrl": "data:model/gltf-binary;base64,…",
-  "modelFileName": "engine.glb",
-  "modelScale": 1.0,
+  "model_data_url": "data:model/gltf-binary;base64,…",
+  "model_file_name": "engine.glb",
+  "model_scale": 1.0,
   "createdAt": 1700000000000
 }
 ```
@@ -459,9 +451,9 @@ All endpoints require a valid session.
 |-------|------|--------|-------------|
 | `id` | `string` | **read-only** | Server-assigned UUID |
 | `name` | `string` | read/write | Human-readable model name |
-| `modelDataUrl` | `string` | read/write | Base64-encoded data URL of the GLB/GLTF file |
-| `modelFileName` | `string` | **read-only** | Original filename supplied at upload |
-| `modelScale` | `number` | read/write | Default scale factor (0.1 – 5.0) applied when the model is added to a step |
+| `model_data_url` | `string` | read/write | Base64-encoded data URL of the GLB/GLTF file |
+| `model_file_name` | `string` | **read-only** | Original filename supplied at upload |
+| `model_scale` | `number` | read/write | Default scale factor (0.1 – 5.0) applied when the model is added to a step |
 | `createdAt` | `integer` | **read-only** | Unix timestamp in ms of creation |
 
 ---
@@ -478,9 +470,9 @@ Returns all uploaded 3D models owned by the authenticated user.
   {
     "id": "uploaded3d-uuid",
     "name": "Silnik turbinowy",
-    "modelDataUrl": "data:model/gltf-binary;base64,…",
-    "modelFileName": "engine.glb",
-    "modelScale": 1.0,
+    "model_data_url": "data:model/gltf-binary;base64,…",
+    "model_file_name": "engine.glb",
+    "model_scale": 1.0,
     "createdAt": 1700000000000
   }
 ]
@@ -497,35 +489,35 @@ Saves a new 3D model (as a base64 data URL) and creates the model record.
 
 | JSON field | Type | Required | Description |
 |------------|------|----------|-------------|
-| `modelDataUrl` | string | yes | Base64-encoded data URL of the GLB or GLTF file, **max 50 MB** decoded |
-| `modelFileName` | string | yes | Original filename (e.g. `engine.glb`) |
+| `model_data_url` | string | yes | Base64-encoded data URL of the GLB or GLTF file, **max 50 MB** decoded |
+| `model_file_name` | string | yes | Original filename (e.g. `engine.glb`) |
 | `name` | string | yes | Human-readable model name |
-| `modelScale` | number | no | Default scale factor (0.1–5.0, default `1.0`) |
+| `model_scale` | number | no | Default scale factor (0.1–5.0, default `1.0`) |
 
 **Example request (curl)**
 ```bash
 curl -X POST /api/models \
   -b "access_token=…" \
   -H "Content-Type: application/json" \
-  -d '{"name":"Silnik turbinowy","modelFileName":"engine.glb","modelScale":1.0,"modelDataUrl":"data:model/gltf-binary;base64,…"}'
+  -d '{"name":"Silnik turbinowy","model_file_name":"engine.glb","model_scale":1.0,"model_data_url":"data:model/gltf-binary;base64,…"}'
 ```
 
 **Validation**
-- `modelFileName` must have the extension `.glb` or `.gltf`.
+- `model_file_name` must have the extension `.glb` or `.gltf`.
 - Decoded file size must not exceed **50 MB**.
 - `name` must be non-empty after trimming.
-- `modelScale` must be between `0.1` and `5.0` (inclusive).
+- `model_scale` must be between `0.1` and `5.0` (inclusive).
 
 **Response `201 Created`** – returns the model object with the server-assigned
-`id`, `modelDataUrl`, `modelFileName`, and `createdAt`.
+`id`, `model_data_url`, `model_file_name`, and `createdAt`.
 
 ```json
 {
   "id": "uploaded3d-uuid",
   "name": "Silnik turbinowy",
-  "modelDataUrl": "data:model/gltf-binary;base64,…",
-  "modelFileName": "engine.glb",
-  "modelScale": 1.0,
+  "model_data_url": "data:model/gltf-binary;base64,…",
+  "model_file_name": "engine.glb",
+  "model_scale": 1.0,
   "createdAt": 1700000000000
 }
 ```
@@ -551,7 +543,7 @@ Returns a single uploaded 3D model by ID.
 
 #### `PUT /api/models/:id`
 
-Updates editable metadata of the model (`name`, `modelScale`).
+Updates editable metadata of the model (`name`, `model_scale`).
 
 **Auth:** required
 **Content-Type:** `application/json`
@@ -560,7 +552,7 @@ Updates editable metadata of the model (`name`, `modelScale`).
 ```json
 {
   "name": "Silnik turbinowy v2",
-  "modelScale": 1.5
+  "model_scale": 1.5
 }
 ```
 
