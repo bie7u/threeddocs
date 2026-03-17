@@ -6,7 +6,7 @@ import { apiRequest } from './api';
 interface ApiModel {
   id: string;
   name: string;
-  modelUrl: string;
+  modelDataUrl: string;
   modelFileName: string;
   modelScale: number;
   createdAt: number;
@@ -17,7 +17,7 @@ interface ApiModel {
 const fromApiModel = (m: ApiModel): UploadedModel3D => ({
   id: m.id,
   name: m.name,
-  modelUrl: m.modelUrl,
+  modelDataUrl: m.modelDataUrl,
   modelFileName: m.modelFileName,
   modelScale: m.modelScale,
   createdAt: m.createdAt,
@@ -40,22 +40,17 @@ export const fetchModelById = async (id: string): Promise<UploadedModel3D> => {
 };
 
 /**
- * POST /api/models — uploads a new GLB/GLTF file via multipart/form-data.
- * The browser sets the Content-Type header automatically (with boundary).
+ * POST /api/models — saves a new model as a base64 data URL in JSON.
  */
 export const uploadModelRequest = async (
-  file: File,
+  modelDataUrl: string,
+  modelFileName: string,
   name: string,
   modelScale: number,
 ): Promise<UploadedModel3D> => {
-  const formData = new FormData();
-  formData.append('file', file);
-  formData.append('name', name);
-  formData.append('modelScale', String(modelScale));
-
   const res = await apiRequest('/models', {
     method: 'POST',
-    body: formData,
+    body: JSON.stringify({ name, modelFileName, modelScale, modelDataUrl }),
   });
   if (!res.ok) throw new Error('Failed to upload model');
   return fromApiModel(await res.json() as ApiModel);

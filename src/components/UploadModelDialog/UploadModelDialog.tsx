@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect, useMemo, Suspense, Component, type ReactNode } from 'react';
+import { useState, useRef, useCallback, useMemo, useEffect, Suspense, Component, type ReactNode } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import { useGLTF } from '@react-three/drei';
@@ -24,15 +24,38 @@ class ModelErrorBoundary extends Component<
   }
 }
 
-// --- Preview model renderer (needs a proper blob URL, not a data URL) ---
-const PreviewModelRenderer = ({ blobUrl, scale }: { blobUrl: string; scale: number }) => {
-  const { scene } = useGLTF(blobUrl);
+// --- Preview model renderer ---
+// Converts a data URL to a blob URL before passing to useGLTF for compatibility.
+const PreviewModelRenderer = ({ dataUrl, scale }: { dataUrl: string; scale: number }) => {
+  const [blobUrl, setBlobUrl] = useState<string | null>(null);
+  const blobUrlRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!dataUrl) return;
+    let cancelled = false;
+    fetch(dataUrl)
+      .then((r) => r.blob())
+      .then((blob) => {
+        if (cancelled) return;
+        const url = URL.createObjectURL(blob);
+        blobUrlRef.current = url;
+        setBlobUrl(url);
+      })
+      .catch(() => {/* ignore */});
+    return () => {
+      cancelled = true;
+      if (blobUrlRef.current) {
+        URL.revokeObjectURL(blobUrlRef.current);
+        blobUrlRef.current = null;
+      }
+    };
+  }, [dataUrl]);
+
+  const { scene } = useGLTF(blobUrl ?? '');
   const cloned = useMemo(() => {
     const c = scene.clone(true);
     c.traverse((child) => {
-      if (child instanceof THREE.Mesh) {
-        child.castShadow = true;
-      }
+      if (child instanceof THREE.Mesh) child.castShadow = true;
     });
     return c;
   }, [scene]);
@@ -41,6 +64,7 @@ const PreviewModelRenderer = ({ blobUrl, scale }: { blobUrl: string; scale: numb
     cloned.scale.set(scale, scale, scale);
   }, [cloned, scale]);
 
+  if (!blobUrl) return null;
   return <primitive object={cloned} />;
 };
 
@@ -67,48 +91,13 @@ interface Props {
 
 export const UploadModelDialog = ({ existing, onClose, onSaved }: Props) => {
   const [name, setName] = useState(existing?.name ?? '');
-  // For new uploads: the raw File chosen by the user.
-  const [modelFile, setModelFile] = useState<File | null>(null);
+  const [modelDataUrl, setModelDataUrl] = useState<string | null>(existing?.modelDataUrl ?? null);
   const [modelFileName, setModelFileName] = useState(existing?.modelFileName ?? '');
   const [modelScale, setModelScale] = useState(existing?.modelScale ?? 1);
+  const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
-  // Preview URL:
-  // – editing an existing model → use the server HTTPS modelUrl directly
-  // – new file selected        → create a temporary blob URL from the File
-  const [blobUrl, setBlobUrl] = useState<string | null>(existing?.modelUrl ?? null);
-  const blobUrlRef = useRef<string | null>(null);
-
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // When a new file is selected, create/update the blob URL for the preview.
-  useEffect(() => {
-    if (!modelFile) return;
-    if (blobUrlRef.current) {
-      URL.revokeObjectURL(blobUrlRef.current);
-      blobUrlRef.current = null;
-    }
-    const url = URL.createObjectURL(modelFile);
-    blobUrlRef.current = url;
-    setBlobUrl(url);
-
-    return () => {
-      if (blobUrlRef.current) {
-        URL.revokeObjectURL(blobUrlRef.current);
-        blobUrlRef.current = null;
-      }
-    };
-  }, [modelFile]);
-
-  // Cleanup blob URLs on unmount.
-  useEffect(() => {
-    return () => {
-      if (blobUrlRef.current) {
-        URL.revokeObjectURL(blobUrlRef.current);
-        blobUrlRef.current = null;
-      }
-    };
-  }, []);
 
   const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -126,9 +115,20 @@ export const UploadModelDialog = ({ existing, onClose, onSaved }: Props) => {
       return;
     }
 
-    setModelFile(file);
+    setIsLoading(true);
     setModelFileName(file.name);
     if (!name) setName(file.name.replace(/\.(gltf|glb)$/i, ''));
+
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      setModelDataUrl(ev.target?.result as string);
+      setIsLoading(false);
+    };
+    reader.onerror = () => {
+      alert('Nie udało się wczytać pliku.');
+      setIsLoading(false);
+    };
+    reader.readAsDataURL(file);
   }, [name]);
 
   const handleSave = async () => {
@@ -137,7 +137,7 @@ export const UploadModelDialog = ({ existing, onClose, onSaved }: Props) => {
       alert('Proszę podać nazwę modelu.');
       return;
     }
-    if (!existing && !modelFile) {
+    if (!existing && !modelDataUrl) {
       alert('Proszę wybrać plik modelu 3D.');
       return;
     }
@@ -145,11 +145,9 @@ export const UploadModelDialog = ({ existing, onClose, onSaved }: Props) => {
     try {
       let saved: UploadedModel3D;
       if (existing) {
-        // Update metadata only; binary file is immutable after initial upload.
         saved = await saveUploadedModelMeta(existing.id, trimmedName, modelScale);
       } else {
-        // Upload new model file.
-        saved = await uploadNewModel(modelFile!, trimmedName, modelScale);
+        saved = await uploadNewModel(modelDataUrl!, modelFileName, trimmedName, modelScale);
       }
       onSaved(saved);
     } catch (err) {
@@ -203,7 +201,7 @@ export const UploadModelDialog = ({ existing, onClose, onSaved }: Props) => {
               <div
                 onClick={() => fileInputRef.current?.click()}
                 className={`w-full p-4 border-2 border-dashed rounded-xl cursor-pointer transition-all ${
-                  (modelFile || existing)
+                  (modelDataUrl || isLoading)
                     ? 'border-green-400 bg-green-50'
                     : 'border-gray-300 hover:border-indigo-400 hover:bg-indigo-50'
                 }`}
@@ -215,14 +213,14 @@ export const UploadModelDialog = ({ existing, onClose, onSaved }: Props) => {
                   onChange={handleFileChange}
                   className="hidden"
                 />
-                {(modelFile || existing) ? (
+                {(modelDataUrl || isLoading) ? (
                   <div className="flex items-center gap-3">
                     <svg className="w-6 h-6 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     <div>
                       <p className="text-sm font-medium text-green-700">{modelFileName}</p>
-                      <p className="text-xs text-gray-500">{existing && !modelFile ? 'Plik wgrany — kliknij, aby zamienić' : 'Kliknij, aby zmienić plik'}</p>
+                      <p className="text-xs text-gray-500">{isLoading ? 'Wczytywanie…' : 'Kliknij, aby zmienić plik'}</p>
                     </div>
                   </div>
                 ) : (
@@ -276,10 +274,10 @@ export const UploadModelDialog = ({ existing, onClose, onSaved }: Props) => {
                 <ambientLight intensity={0.7} />
                 <directionalLight position={[5, 5, 5]} intensity={1} castShadow />
                 <directionalLight position={[-3, -3, -3]} intensity={0.3} />
-                {blobUrl ? (
+                {modelDataUrl ? (
                   <ModelErrorBoundary fallback={<ErrorPlaceholder />}>
                     <Suspense fallback={<LoadingPlaceholder />}>
-                      <PreviewModelRenderer blobUrl={blobUrl} scale={modelScale} />
+                      <PreviewModelRenderer dataUrl={modelDataUrl} scale={modelScale} />
                     </Suspense>
                   </ModelErrorBoundary>
                 ) : (

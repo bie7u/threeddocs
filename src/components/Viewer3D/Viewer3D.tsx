@@ -221,7 +221,7 @@ const Shape3D = ({ shapeType = 'cube', size = 2, color, emissive = '#000000', em
           <ModelErrorBoundary fallback={<ModelErrorFallback />}>
             <Suspense fallback={<ModelLoadingFallback />}>
               <CustomModel
-                url={uploadedModel.modelUrl}
+                url={uploadedModel.modelDataUrl}
                 color={color}
                 emissive={emissive}
                 emissiveIntensity={emissiveIntensity}

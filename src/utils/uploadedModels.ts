@@ -13,15 +13,16 @@ export async function loadUploadedModels(): Promise<UploadedModel3D[]> {
 }
 
 /**
- * Uploads a new 3D model file via multipart/form-data.
- * Returns the saved model with the server-assigned id and modelUrl.
+ * Saves a new 3D model as a base64 data URL via JSON.
+ * Returns the saved model with the server-assigned id.
  */
 export async function uploadNewModel(
-  file: File,
+  modelDataUrl: string,
+  modelFileName: string,
   name: string,
   modelScale: number,
 ): Promise<UploadedModel3D> {
-  return uploadModelRequest(file, name, modelScale);
+  return uploadModelRequest(modelDataUrl, modelFileName, name, modelScale);
 }
 
 /**
