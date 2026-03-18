@@ -3,7 +3,7 @@ import type { InstructionStep, ConnectionData } from '../types';
 import type { Edge } from 'reactflow';
 import { apiRequest } from './api';
 
-const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? '/api';
+const API_BASE = "http://localhost:8000/api";
 
 // ─── Server-side flat project shape ──────────────────────────────────────────
 
