@@ -33,11 +33,13 @@ export const fetchModels = async (): Promise<UploadedModel3D[]> => {
 };
 
 /** GET /api/models/:id — returns a single model.
- *  Pass `projectUuid` when calling from a public share-link view so the server
- *  can authorise the request without requiring a user session. */
+ *  Pass `projectUuid` when calling from a public share-link view; the request
+ *  is then routed to the public endpoint /models/public_model/:id?project_uuid=. */
 export const fetchModelById = async (id: string, projectUuid?: string): Promise<UploadedModel3D> => {
-  const qs = projectUuid ? `?project_uuid=${encodeURIComponent(projectUuid)}` : '';
-  const res = await apiRequest(`/models/${id}${qs}`);
+  const path = projectUuid
+    ? `/models/public_model/${id}?project_uuid=${encodeURIComponent(projectUuid)}`
+    : `/models/${id}`;
+  const res = await apiRequest(path);
   if (!res.ok) throw new Error('Uploaded model not found');
   return fromApiModel(await res.json() as ApiModel);
 };
