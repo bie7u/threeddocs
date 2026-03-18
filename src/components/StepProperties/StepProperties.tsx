@@ -18,40 +18,8 @@ export const StepProperties = () => {
   const [uploadedModels, setUploadedModels] = useState<UploadedModel3D[]>([]);
 
   useEffect(() => {
-    Promise.all([
-      loadCustom3DElements().catch((): Custom3DElement[] => []),
-      loadUploadedModels().catch((): UploadedModel3D[] => []),
-    ]).then(([elements, models]) => {
-      setCustom3DElements(elements);
-      setUploadedModels(models);
-
-      // Auto-migrate: embed inline data for any steps that reference an element/model
-      // by ID but have no inline data (projects saved before this feature was added).
-      // We read the project from the store directly so we always get the freshest state
-      // even if the async load took a while.
-      const { project: currentProject } = useAppStore.getState();
-      if (!currentProject) return;
-
-      let needsUpdate = false;
-      const updatedSteps = currentProject.steps.map((step) => {
-        const patched = { ...step };
-        let stepChanged = false;
-        if (patched.custom3dElementId && !patched.inlineCustom3DElement) {
-          const el = elements.find((e) => e.id === patched.custom3dElementId);
-          if (el) { patched.inlineCustom3DElement = el; stepChanged = true; }
-        }
-        if (patched.uploadedModelId && !patched.inlineUploadedModel) {
-          const m = models.find((m) => m.id === patched.uploadedModelId);
-          if (m) { patched.inlineUploadedModel = m; stepChanged = true; }
-        }
-        if (stepChanged) needsUpdate = true;
-        return stepChanged ? patched : step;
-      });
-
-      if (needsUpdate) {
-        useAppStore.getState().setProject({ ...currentProject, steps: updatedSteps });
-      }
-    });
+    loadCustom3DElements().then(setCustom3DElements).catch(() => setCustom3DElements([]));
+    loadUploadedModels().then(setUploadedModels).catch(() => setUploadedModels([]));
   }, []);
   
   const [formData, setFormData] = useState<Partial<InstructionStep>>({
@@ -64,8 +32,6 @@ export const StepProperties = () => {
     modelPositionY: 0,
     custom3dElementId: undefined,
     uploadedModelId: undefined,
-    inlineCustom3DElement: undefined,
-    inlineUploadedModel: undefined,
     engravedBlockParams: {
       text: 'DB',
       font: 'helvetiker',
@@ -97,8 +63,6 @@ export const StepProperties = () => {
         modelPositionY: selectedStep.modelPositionY ?? 0,
         custom3dElementId: selectedStep.custom3dElementId,
         uploadedModelId: selectedStep.uploadedModelId,
-        inlineCustom3DElement: selectedStep.inlineCustom3DElement,
-        inlineUploadedModel: selectedStep.inlineUploadedModel,
         engravedBlockParams: selectedStep.engravedBlockParams || {
           text: 'DB',
           font: 'helvetiker',
@@ -126,17 +90,7 @@ export const StepProperties = () => {
 
   const handleSave = () => {
     if (selectedStepId && selectedStep) {
-      const saveData = { ...formData };
-      // Ensure inline data is always embedded, even for steps created before this feature
-      if (saveData.custom3dElementId && !saveData.inlineCustom3DElement) {
-        const element = custom3DElements.find((el) => el.id === saveData.custom3dElementId);
-        if (element) saveData.inlineCustom3DElement = element;
-      }
-      if (saveData.uploadedModelId && !saveData.inlineUploadedModel) {
-        const model = uploadedModels.find((m) => m.id === saveData.uploadedModelId);
-        if (model) saveData.inlineUploadedModel = model;
-      }
-      updateStep(selectedStepId, saveData);
+      updateStep(selectedStepId, { ...formData });
     }
   };
 
@@ -231,8 +185,8 @@ export const StepProperties = () => {
                     ...prev,
                     shapeType: newType,
                     // Clear model-specific selections when switching away from those types
-                    ...(newType !== 'custom3dElement' && { custom3dElementId: undefined, inlineCustom3DElement: undefined }),
-                    ...(newType !== 'uploadedModel' && { uploadedModelId: undefined, inlineUploadedModel: undefined }),
+                    ...(newType !== 'custom3dElement' && { custom3dElementId: undefined }),
+                    ...(newType !== 'uploadedModel' && { uploadedModelId: undefined }),
                   }));
                 }}
                 className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -258,11 +212,9 @@ export const StepProperties = () => {
                   value={formData.custom3dElementId || ''}
                   onChange={(e) => {
                     const id = e.target.value;
-                    const element = custom3DElements.find((el) => el.id === id);
                     setFormData((prev) => ({
                       ...prev,
                       custom3dElementId: id || undefined,
-                      inlineCustom3DElement: element,
                     }));
                   }}
                   className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -287,11 +239,9 @@ export const StepProperties = () => {
                   value={formData.uploadedModelId || ''}
                   onChange={(e) => {
                     const id = e.target.value;
-                    const model = uploadedModels.find((m) => m.id === id);
                     setFormData((prev) => ({
                       ...prev,
                       uploadedModelId: id || undefined,
-                      inlineUploadedModel: model,
                     }));
                   }}
                   className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"

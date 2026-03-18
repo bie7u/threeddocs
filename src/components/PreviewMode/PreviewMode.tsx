@@ -82,7 +82,6 @@ export const PreviewMode = ({ onGoToEditorPanel, isPublic }: { onGoToEditorPanel
           const idx = guideSteps.findIndex((s) => s.id === stepId);
           if (idx !== -1) setCurrentPreviewStepIndex(idx);
         }}
-        preventApiCalls={!!isPublic}
       />
 
       {showCopyNotification && (

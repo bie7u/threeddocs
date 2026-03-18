@@ -77,12 +77,8 @@ export interface InstructionStep {
   engravedBlockParams?: EngravedBlockParams;
   // Custom 3D element reference
   custom3dElementId?: string;
-  // Full element data embedded in the project so share-link views need no extra API calls
-  inlineCustom3DElement?: Custom3DElement;
   // Uploaded 3D model reference
   uploadedModelId?: string;
-  // Full model data embedded in the project so share-link views need no extra API calls
-  inlineUploadedModel?: UploadedModel3D;
   // Upload-model specific: which mesh element this step focuses on
   focusMeshName?: string;
   focusPoint?: [number, number, number];
