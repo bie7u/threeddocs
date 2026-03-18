@@ -268,7 +268,7 @@ const Settings = ({ onClose }) => {
             </div>
             <h3 className="text-lg font-semibold text-gray-800 mb-1">Stwórz element 3D</h3>
             <p className="text-sm text-gray-600">
-              Utwórz własny kształt 3D z tekstu (maks. 5 znaków)
+              Utwórz własny kształt 3D z tekstu (maks. 12 znaków)
             </p>
             <p className="text-xs text-gray-400 mt-1">
               Limit: {elements.length}/{MAX_ELEMENTS} elementów

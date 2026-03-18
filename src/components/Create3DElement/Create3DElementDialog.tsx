@@ -31,7 +31,7 @@ export const Create3DElementDialog = ({ existing, onClose, onSaved }: Props) => 
   };
 
   const handleTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setText(e.target.value.slice(0, 5));
+    setText(e.target.value.slice(0, 12));
   };
 
   const handleTextureUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -69,7 +69,7 @@ export const Create3DElementDialog = ({ existing, onClose, onSaved }: Props) => 
   const handleSave = async () => {
     const trimmed = text.trim();
     if (!trimmed) {
-      alert('Proszę wpisać tekst (maks. 5 znaków).');
+      alert('Proszę wpisać tekst (maks. 12 znaków).');
       return;
     }
     setIsSaving(true);
@@ -119,17 +119,17 @@ export const Create3DElementDialog = ({ existing, onClose, onSaved }: Props) => 
             {/* Text */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1">
-                Tekst <span className="text-gray-400 font-normal">(maks. 5 znaków)</span>
+                Tekst <span className="text-gray-400 font-normal">(maks. 12 znaków)</span>
               </label>
               <input
                 type="text"
                 value={text}
                 onChange={handleTextChange}
-                maxLength={5}
+                maxLength={12}
                 placeholder="np. ABC"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
-              <p className="mt-1 text-xs text-gray-400">{text.length}/5</p>
+              <p className="mt-1 text-xs text-gray-400">{text.length}/12</p>
             </div>
 
             {/* Color */}
