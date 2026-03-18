@@ -18,8 +18,40 @@ export const StepProperties = () => {
   const [uploadedModels, setUploadedModels] = useState<UploadedModel3D[]>([]);
 
   useEffect(() => {
-    loadCustom3DElements().then(setCustom3DElements).catch(() => setCustom3DElements([]));
-    loadUploadedModels().then(setUploadedModels).catch(() => setUploadedModels([]));
+    Promise.all([
+      loadCustom3DElements().catch((): Custom3DElement[] => []),
+      loadUploadedModels().catch((): UploadedModel3D[] => []),
+    ]).then(([elements, models]) => {
+      setCustom3DElements(elements);
+      setUploadedModels(models);
+
+      // Auto-migrate: embed inline data for any steps that reference an element/model
+      // by ID but have no inline data (projects saved before this feature was added).
+      // We read the project from the store directly so we always get the freshest state
+      // even if the async load took a while.
+      const { project: currentProject } = useAppStore.getState();
+      if (!currentProject) return;
+
+      let needsUpdate = false;
+      const updatedSteps = currentProject.steps.map((step) => {
+        const patched = { ...step };
+        let stepChanged = false;
+        if (patched.custom3dElementId && !patched.inlineCustom3DElement) {
+          const el = elements.find((e) => e.id === patched.custom3dElementId);
+          if (el) { patched.inlineCustom3DElement = el; stepChanged = true; }
+        }
+        if (patched.uploadedModelId && !patched.inlineUploadedModel) {
+          const m = models.find((m) => m.id === patched.uploadedModelId);
+          if (m) { patched.inlineUploadedModel = m; stepChanged = true; }
+        }
+        if (stepChanged) needsUpdate = true;
+        return stepChanged ? patched : step;
+      });
+
+      if (needsUpdate) {
+        useAppStore.getState().setProject({ ...currentProject, steps: updatedSteps });
+      }
+    });
   }, []);
   
   const [formData, setFormData] = useState<Partial<InstructionStep>>({
