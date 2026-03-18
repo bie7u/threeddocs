@@ -25,7 +25,7 @@ class ModelErrorBoundary extends Component<
 }
 
 // --- Preview model renderer ---
-// Converts a data URL to a blob URL before passing to useGLTF for compatibility.
+// Converts a data URL to a blob URL, then delegates to PreviewModelScene.
 const PreviewModelRenderer = ({ dataUrl, scale }: { dataUrl: string; scale: number }) => {
   const [blobUrl, setBlobUrl] = useState<string | null>(null);
   const blobUrlRef = useRef<string | null>(null);
@@ -41,7 +41,7 @@ const PreviewModelRenderer = ({ dataUrl, scale }: { dataUrl: string; scale: numb
         blobUrlRef.current = url;
         setBlobUrl(url);
       })
-      .catch(() => {/* ignore */});
+      .catch((err) => { console.error('Failed to convert data URL to blob for preview:', err); });
     return () => {
       cancelled = true;
       if (blobUrlRef.current) {
@@ -51,7 +51,13 @@ const PreviewModelRenderer = ({ dataUrl, scale }: { dataUrl: string; scale: numb
     };
   }, [dataUrl]);
 
-  const { scene } = useGLTF(blobUrl ?? '');
+  if (!blobUrl) return null;
+  return <PreviewModelScene blobUrl={blobUrl} scale={scale} />;
+};
+
+// Receives a guaranteed-valid blob URL and calls useGLTF only with it.
+const PreviewModelScene = ({ blobUrl, scale }: { blobUrl: string; scale: number }) => {
+  const { scene } = useGLTF(blobUrl);
   const cloned = useMemo(() => {
     const c = scene.clone(true);
     c.traverse((child) => {
@@ -64,7 +70,6 @@ const PreviewModelRenderer = ({ dataUrl, scale }: { dataUrl: string; scale: numb
     cloned.scale.set(scale, scale, scale);
   }, [cloned, scale]);
 
-  if (!blobUrl) return null;
   return <primitive object={cloned} />;
 };
 
