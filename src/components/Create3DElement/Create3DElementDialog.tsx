@@ -14,8 +14,6 @@ interface Props {
 export const Create3DElementDialog = ({ existing, onClose, onSaved }: Props) => {
   const [text, setText] = useState(existing?.text ?? '');
   const [color, setColor] = useState(existing?.color ?? '#4299e1');
-  const [wireframe, setWireframe] = useState(existing?.wireframe ?? false);
-  const [wireframeColor, setWireframeColor] = useState(existing?.wireframeColor ?? '#000000');
   const [textureDataUrl, setTextureDataUrl] = useState<string | undefined>(existing?.textureDataUrl);
   const [textureFileName, setTextureFileName] = useState<string>('');
   const [isSaving, setIsSaving] = useState(false);
@@ -26,8 +24,8 @@ export const Create3DElementDialog = ({ existing, onClose, onSaved }: Props) => 
     name: text || 'TXT',
     text: text || 'TXT',
     color,
-    wireframe,
-    wireframeColor,
+    wireframe: false,
+    wireframeColor: '#000000',
     textureDataUrl,
     createdAt: existing?.createdAt ?? Date.now(),
   };
@@ -81,8 +79,8 @@ export const Create3DElementDialog = ({ existing, onClose, onSaved }: Props) => 
         name: trimmed,
         text: trimmed,
         color,
-        wireframe,
-        wireframeColor,
+        wireframe: false,
+        wireframeColor: '#000000',
         textureDataUrl,
         createdAt: existing?.createdAt ?? Date.now(),
       };
@@ -152,39 +150,6 @@ export const Create3DElementDialog = ({ existing, onClose, onSaved }: Props) => 
                 />
               </div>
             </div>
-
-            {/* Wireframe */}
-            <div>
-              <label className="flex items-center gap-2 cursor-pointer select-none">
-                <input
-                  type="checkbox"
-                  checked={wireframe}
-                  onChange={(e) => setWireframe(e.target.checked)}
-                  className="w-4 h-4 accent-blue-500"
-                />
-                <span className="text-sm font-semibold text-gray-700">Pokaż obrys (wireframe)</span>
-              </label>
-            </div>
-
-            {wireframe && (
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">Kolor obrysów</label>
-                <div className="flex items-center gap-3">
-                  <input
-                    type="color"
-                    value={wireframeColor}
-                    onChange={(e) => setWireframeColor(e.target.value)}
-                    className="w-12 h-10 border border-gray-300 rounded cursor-pointer"
-                  />
-                  <input
-                    type="text"
-                    value={wireframeColor}
-                    onChange={(e) => setWireframeColor(e.target.value)}
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
-                  />
-                </div>
-              </div>
-            )}
 
             {/* Texture */}
             <div>
