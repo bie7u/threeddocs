@@ -51,10 +51,10 @@ export const fetchElements = async (): Promise<Custom3DElement[]> => {
 
 /** GET /api/elements/:id — returns a single element.
  *  Pass `projectUuid` when calling from a public share-link view; the request
- *  is then routed to the public endpoint /elements/public_element/:id?project_uuid=. */
+ *  is then routed to the public endpoint /elements/:id/public_element?project_uuid=. */
 export const fetchElementById = async (id: string, projectUuid?: string): Promise<Custom3DElement> => {
   const path = projectUuid
-    ? `/elements/public_element/${id}?project_uuid=${encodeURIComponent(projectUuid)}`
+    ? `/elements/${id}/public_element?project_uuid=${encodeURIComponent(projectUuid)}`
     : `/elements/${id}`;
   const res = await apiRequest(path);
   if (!res.ok) throw new Error('Custom 3D element not found');
