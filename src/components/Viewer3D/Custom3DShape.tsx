@@ -36,7 +36,7 @@ export const Custom3DShape = ({ element, emissive = '#000000', emissiveIntensity
   // Build text geometry
   useEffect(() => {
     let cancelled = false;
-    const safeText = (element.text || DEFAULT_TEXT).slice(0, 5) || DEFAULT_TEXT;
+    const safeText = (element.text || DEFAULT_TEXT).slice(0, 12) || DEFAULT_TEXT;
 
     loadFont().then((font) => {
       if (cancelled) return;
