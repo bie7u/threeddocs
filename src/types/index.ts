@@ -24,7 +24,7 @@ export type ShapeType = 'cube' | 'sphere' | 'cylinder' | 'cone' | 'custom' | 'en
 export interface Custom3DElement {
   id: string;
   name: string;
-  text: string; // max 5 characters – source for the 3D text shape
+  text: string; // max 12 characters – source for the 3D text shape
   color: string;
   wireframe: boolean;
   wireframeColor: string;

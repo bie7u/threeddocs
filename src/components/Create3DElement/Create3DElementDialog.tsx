@@ -14,8 +14,6 @@ interface Props {
 export const Create3DElementDialog = ({ existing, onClose, onSaved }: Props) => {
   const [text, setText] = useState(existing?.text ?? '');
   const [color, setColor] = useState(existing?.color ?? '#4299e1');
-  const [wireframe, setWireframe] = useState(existing?.wireframe ?? false);
-  const [wireframeColor, setWireframeColor] = useState(existing?.wireframeColor ?? '#000000');
   const [textureDataUrl, setTextureDataUrl] = useState<string | undefined>(existing?.textureDataUrl);
   const [textureFileName, setTextureFileName] = useState<string>('');
   const [isSaving, setIsSaving] = useState(false);
@@ -26,14 +24,14 @@ export const Create3DElementDialog = ({ existing, onClose, onSaved }: Props) => 
     name: text || 'TXT',
     text: text || 'TXT',
     color,
-    wireframe,
-    wireframeColor,
+    wireframe: false,
+    wireframeColor: '#000000',
     textureDataUrl,
     createdAt: existing?.createdAt ?? Date.now(),
   };
 
   const handleTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setText(e.target.value.slice(0, 5));
+    setText(e.target.value.slice(0, 12));
   };
 
   const handleTextureUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -71,7 +69,7 @@ export const Create3DElementDialog = ({ existing, onClose, onSaved }: Props) => 
   const handleSave = async () => {
     const trimmed = text.trim();
     if (!trimmed) {
-      alert('Proszę wpisać tekst (maks. 5 znaków).');
+      alert('Proszę wpisać tekst (maks. 12 znaków).');
       return;
     }
     setIsSaving(true);
@@ -81,8 +79,8 @@ export const Create3DElementDialog = ({ existing, onClose, onSaved }: Props) => 
         name: trimmed,
         text: trimmed,
         color,
-        wireframe,
-        wireframeColor,
+        wireframe: false,
+        wireframeColor: '#000000',
         textureDataUrl,
         createdAt: existing?.createdAt ?? Date.now(),
       };
@@ -121,17 +119,17 @@ export const Create3DElementDialog = ({ existing, onClose, onSaved }: Props) => 
             {/* Text */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1">
-                Tekst <span className="text-gray-400 font-normal">(maks. 5 znaków)</span>
+                Tekst <span className="text-gray-400 font-normal">(maks. 12 znaków)</span>
               </label>
               <input
                 type="text"
                 value={text}
                 onChange={handleTextChange}
-                maxLength={5}
+                maxLength={12}
                 placeholder="np. ABC"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
-              <p className="mt-1 text-xs text-gray-400">{text.length}/5</p>
+              <p className="mt-1 text-xs text-gray-400">{text.length}/12</p>
             </div>
 
             {/* Color */}
@@ -152,39 +150,6 @@ export const Create3DElementDialog = ({ existing, onClose, onSaved }: Props) => 
                 />
               </div>
             </div>
-
-            {/* Wireframe */}
-            <div>
-              <label className="flex items-center gap-2 cursor-pointer select-none">
-                <input
-                  type="checkbox"
-                  checked={wireframe}
-                  onChange={(e) => setWireframe(e.target.checked)}
-                  className="w-4 h-4 accent-blue-500"
-                />
-                <span className="text-sm font-semibold text-gray-700">Pokaż obrys (wireframe)</span>
-              </label>
-            </div>
-
-            {wireframe && (
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">Kolor obrysów</label>
-                <div className="flex items-center gap-3">
-                  <input
-                    type="color"
-                    value={wireframeColor}
-                    onChange={(e) => setWireframeColor(e.target.value)}
-                    className="w-12 h-10 border border-gray-300 rounded cursor-pointer"
-                  />
-                  <input
-                    type="text"
-                    value={wireframeColor}
-                    onChange={(e) => setWireframeColor(e.target.value)}
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
-                  />
-                </div>
-              </div>
-            )}
 
             {/* Texture */}
             <div>

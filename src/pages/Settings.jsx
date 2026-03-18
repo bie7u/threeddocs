@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Create3DElementDialog } from '../components/Create3DElement/Create3DElementDialog';
 import { UploadModelDialog } from '../components/UploadModelDialog/UploadModelDialog';
+import { ModelPreviewModal } from '../components/ModelPreviewModal/ModelPreviewModal';
 import { loadCustom3DElements, deleteCustom3DElement } from '../utils/custom3DElements';
 import { loadUploadedModels, deleteUploadedModel } from '../utils/uploadedModels';
 import { getMe, changePassword } from '../services/auth';
@@ -158,15 +159,19 @@ const AccountModal = ({ onClose }) => {
 };
 
 const Settings = ({ onClose }) => {
+  const MAX_ELEMENTS = 20;
+  const MAX_MODELS = 10;
+
   const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [editingElement, setEditingElement] = useState(null);
   const [elements, setElements] = useState([]);
 
   const [showUploadDialog, setShowUploadDialog] = useState(false);
-  const [editingModel, setEditingModel] = useState(null);
   const [uploadedModels, setUploadedModels] = useState([]);
 
   const [showAccountModal, setShowAccountModal] = useState(false);
+
+  const [previewElement, setPreviewElement] = useState(null);
+  const [previewModel, setPreviewModel] = useState(null);
 
   const refreshElements = () => {
     loadCustom3DElements().then(setElements).catch(() => setElements([]));
@@ -188,29 +193,16 @@ const Settings = ({ onClose }) => {
       .catch((err) => alert(err.message ?? 'Nie udało się usunąć elementu.'));
   };
 
-  const handleEdit = (element) => {
-    setEditingElement(element);
-    setShowCreateDialog(true);
-  };
-
   const handleCreate = () => {
-    setEditingElement(null);
     setShowCreateDialog(true);
   };
 
   const handleSaved = () => {
     setShowCreateDialog(false);
-    setEditingElement(null);
     refreshElements();
   };
 
   const handleUploadModel = () => {
-    setEditingModel(null);
-    setShowUploadDialog(true);
-  };
-
-  const handleEditModel = (model) => {
-    setEditingModel(model);
     setShowUploadDialog(true);
   };
 
@@ -223,7 +215,6 @@ const Settings = ({ onClose }) => {
 
   const handleModelSaved = () => {
     setShowUploadDialog(false);
-    setEditingModel(null);
     refreshModels();
   };
 
@@ -270,8 +261,8 @@ const Settings = ({ onClose }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {/* Create 3D Element */}
           <div
-            onClick={handleCreate}
-            className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all cursor-pointer border border-gray-200 hover:border-blue-400 group"
+            onClick={elements.length < MAX_ELEMENTS ? handleCreate : undefined}
+            className={`bg-white p-6 rounded-xl shadow-lg transition-all border border-gray-200 group ${elements.length < MAX_ELEMENTS ? 'hover:shadow-xl cursor-pointer hover:border-blue-400' : 'opacity-60 cursor-not-allowed'}`}
           >
             <div className="text-blue-500 mb-4 group-hover:scale-110 transition-transform">
               <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -281,14 +272,18 @@ const Settings = ({ onClose }) => {
             </div>
             <h3 className="text-lg font-semibold text-gray-800 mb-1">Stwórz element 3D</h3>
             <p className="text-sm text-gray-600">
-              Utwórz własny kształt 3D z tekstu (maks. 5 znaków)
+              Utwórz własny kształt 3D z tekstu (maks. 12 znaków)
+            </p>
+            <p className="text-xs text-gray-400 mt-1">
+              Limit: {elements.length}/{MAX_ELEMENTS} elementów
+              {elements.length >= MAX_ELEMENTS && <span className="text-red-500 ml-1">— osiągnięto limit</span>}
             </p>
           </div>
 
           {/* Upload 3D Model */}
           <div
-            onClick={handleUploadModel}
-            className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all cursor-pointer border border-gray-200 hover:border-indigo-400 group"
+            onClick={uploadedModels.length < MAX_MODELS ? handleUploadModel : undefined}
+            className={`bg-white p-6 rounded-xl shadow-lg transition-all border border-gray-200 group ${uploadedModels.length < MAX_MODELS ? 'hover:shadow-xl cursor-pointer hover:border-indigo-400' : 'opacity-60 cursor-not-allowed'}`}
           >
             <div className="text-indigo-500 mb-4 group-hover:scale-110 transition-transform">
               <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -299,6 +294,10 @@ const Settings = ({ onClose }) => {
             <h3 className="text-lg font-semibold text-gray-800 mb-1">Wgraj element 3D</h3>
             <p className="text-sm text-gray-600">
               Wgraj model 3D (.gltf / .glb) i nadaj mu nazwę oraz skalę
+            </p>
+            <p className="text-xs text-gray-400 mt-1">
+              Limit: {uploadedModels.length}/{MAX_MODELS} modeli
+              {uploadedModels.length >= MAX_MODELS && <span className="text-red-500 ml-1">— osiągnięto limit</span>}
             </p>
           </div>
 
@@ -323,7 +322,7 @@ const Settings = ({ onClose }) => {
         {/* Existing custom 3D text elements */}
         {elements.length > 0 && (
           <div className="mt-12">
-            <h3 className="text-xl font-bold text-gray-800 mb-4">Moje elementy 3D</h3>
+            <h3 className="text-xl font-bold text-gray-800 mb-4">Moje elementy 3D ({elements.length}/{MAX_ELEMENTS})</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {elements.map((el) => (
                 <div
@@ -340,16 +339,15 @@ const Settings = ({ onClose }) => {
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-gray-800 truncate">{el.name}</p>
                     <p className="text-xs text-gray-500">
-                      {el.wireframe ? 'Z obrysem · ' : ''}{el.textureDataUrl ? 'Tekstura · ' : ''}
-                      {new Date(el.createdAt).toLocaleDateString('pl-PL')}
+                      {el.textureDataUrl ? 'Tekstura' : 'Brak tekstury'}
                     </p>
                   </div>
                   <div className="flex flex-col gap-1">
                     <button
-                      onClick={(e) => { e.stopPropagation(); handleEdit(el); }}
-                      className="px-3 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+                      onClick={(e) => { e.stopPropagation(); setPreviewElement(el); }}
+                      className="px-3 py-1 text-xs bg-purple-500 text-white rounded hover:bg-purple-600 transition"
                     >
-                      Edytuj
+                      Podgląd
                     </button>
                     <button
                       onClick={(e) => { e.stopPropagation(); handleDelete(el.id); }}
@@ -367,7 +365,7 @@ const Settings = ({ onClose }) => {
         {/* Uploaded 3D models */}
         {uploadedModels.length > 0 && (
           <div className="mt-12">
-            <h3 className="text-xl font-bold text-gray-800 mb-4">Wgrane modele 3D</h3>
+            <h3 className="text-xl font-bold text-gray-800 mb-4">Wgrane modele 3D ({uploadedModels.length}/{MAX_MODELS})</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {uploadedModels.map((model) => (
                 <div
@@ -384,15 +382,15 @@ const Settings = ({ onClose }) => {
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-gray-800 truncate">{model.name}</p>
                     <p className="text-xs text-gray-500">
-                      Skala: {model.modelScale} · {model.modelFileName} · {new Date(model.createdAt).toLocaleDateString('pl-PL')}
+                      Skala: {model.modelScale} · {model.modelFileName}
                     </p>
                   </div>
                   <div className="flex flex-col gap-1">
                     <button
-                      onClick={(e) => { e.stopPropagation(); handleEditModel(model); }}
-                      className="px-3 py-1 text-xs bg-indigo-500 text-white rounded hover:bg-indigo-600 transition"
+                      onClick={(e) => { e.stopPropagation(); setPreviewModel(model); }}
+                      className="px-3 py-1 text-xs bg-purple-500 text-white rounded hover:bg-purple-600 transition"
                     >
-                      Edytuj
+                      Podgląd
                     </button>
                     <button
                       onClick={(e) => { e.stopPropagation(); handleDeleteModel(model.id); }}
@@ -408,20 +406,18 @@ const Settings = ({ onClose }) => {
         )}
       </div>
 
-      {/* Create / Edit 3D text element dialog */}
+      {/* Create 3D text element dialog */}
       {showCreateDialog && (
         <Create3DElementDialog
-          existing={editingElement}
-          onClose={() => { setShowCreateDialog(false); setEditingElement(null); }}
+          onClose={() => { setShowCreateDialog(false); }}
           onSaved={handleSaved}
         />
       )}
 
-      {/* Upload / Edit 3D model dialog */}
+      {/* Upload 3D model dialog */}
       {showUploadDialog && (
         <UploadModelDialog
-          existing={editingModel}
-          onClose={() => { setShowUploadDialog(false); setEditingModel(null); }}
+          onClose={() => { setShowUploadDialog(false); }}
           onSaved={handleModelSaved}
         />
       )}
@@ -429,6 +425,14 @@ const Settings = ({ onClose }) => {
       {/* My Account modal */}
       {showAccountModal && (
         <AccountModal onClose={() => setShowAccountModal(false)} />
+      )}
+
+      {/* 3D preview modals */}
+      {previewElement && (
+        <ModelPreviewModal element={previewElement} onClose={() => setPreviewElement(null)} />
+      )}
+      {previewModel && (
+        <ModelPreviewModal model={previewModel} onClose={() => setPreviewModel(null)} />
       )}
     </div>
   );

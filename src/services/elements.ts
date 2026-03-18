@@ -44,7 +44,7 @@ const toApiElementBody = (e: Omit<Custom3DElement, 'id' | 'createdAt'>): ApiElem
 
 /** GET /api/elements — returns all custom 3D elements owned by the user. */
 export const fetchElements = async (): Promise<Custom3DElement[]> => {
-  const res = await apiRequest('/elements');
+  const res = await apiRequest('/elements/');
   if (!res.ok) throw new Error('Failed to fetch custom 3D elements');
   return (await res.json() as ApiElement[]).map(fromApi);
 };
@@ -65,7 +65,7 @@ export const fetchElementById = async (id: string, projectUuid?: string): Promis
 export const createElementRequest = async (
   element: Omit<Custom3DElement, 'id' | 'createdAt'>,
 ): Promise<Custom3DElement> => {
-  const res = await apiRequest('/elements', {
+  const res = await apiRequest('/elements/', {
     method: 'POST',
     body: JSON.stringify(toApiElementBody(element)),
   });
