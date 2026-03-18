@@ -173,32 +173,34 @@ interface Shape3DProps {
   custom3dElementId?: string;
   uploadedModelId?: string;
   modelPositionY?: number;
+  /** Share token from the public share-link URL, forwarded as ?project_uuid= on API calls. */
+  shareToken?: string;
 }
 
 // Reusable 3D shape component
-const Shape3D = ({ shapeType = 'cube', size = 2, color, emissive = '#000000', emissiveIntensity = 0, customModelUrl, modelScale = 1, engravedBlockParams, custom3dElementId, uploadedModelId, modelPositionY = 0 }: Shape3DProps) => {
+const Shape3D = ({ shapeType = 'cube', size = 2, color, emissive = '#000000', emissiveIntensity = 0, customModelUrl, modelScale = 1, engravedBlockParams, custom3dElementId, uploadedModelId, modelPositionY = 0, shareToken }: Shape3DProps) => {
   const [uploadedModel, setUploadedModel] = useState<UploadedModel3D | null>(null);
   const [customElement, setCustomElement] = useState<Custom3DElement | null>(null);
 
   useEffect(() => {
     if (shapeType === 'uploadedModel' && uploadedModelId) {
-      getUploadedModelById(uploadedModelId)
+      getUploadedModelById(uploadedModelId, shareToken)
         .then((m) => setUploadedModel(m ?? null))
         .catch(() => setUploadedModel(null));
     } else {
       setUploadedModel(null);
     }
-  }, [shapeType, uploadedModelId]);
+  }, [shapeType, uploadedModelId, shareToken]);
 
   useEffect(() => {
     if (shapeType === 'custom3dElement' && custom3dElementId) {
-      getCustom3DElementById(custom3dElementId)
+      getCustom3DElementById(custom3dElementId, shareToken)
         .then((e) => setCustomElement(e ?? null))
         .catch(() => setCustomElement(null));
     } else {
       setCustomElement(null);
     }
-  }, [shapeType, custom3dElementId]);
+  }, [shapeType, custom3dElementId, shareToken]);
 
   if (shapeType === 'custom' && customModelUrl) {
     return (
@@ -317,9 +319,10 @@ interface StepCubeProps {
   hasActiveStep?: boolean;
   allowDimming?: boolean;
   onClick?: () => void;
+  shareToken?: string;
 }
 
-const StepCube = ({ step, position, isActive, hasActiveStep, allowDimming = true, onClick }: StepCubeProps) => {
+const StepCube = ({ step, position, isActive, hasActiveStep, allowDimming = true, onClick, shareToken }: StepCubeProps) => {
   const meshRef = useRef<THREE.Group>(null);
   const ringRef = useRef<THREE.Mesh>(null);
   
@@ -369,6 +372,7 @@ const StepCube = ({ step, position, isActive, hasActiveStep, allowDimming = true
           engravedBlockParams={step.engravedBlockParams}
           custom3dElementId={step.custom3dElementId}
           uploadedModelId={step.uploadedModelId}
+          shareToken={shareToken}
         />
       </group>
       {isActive && (
@@ -717,9 +721,10 @@ interface UnifiedModelProps {
   onConnectionClick?: (description: string) => void;
   onStepClick?: (stepId: string) => void;
   allowDimming?: boolean;
+  shareToken?: string;
 }
 
-const UnifiedModel = ({ project, currentStepId, nodePositions, onConnectionClick, onStepClick, allowDimming = true }: UnifiedModelProps) => {
+const UnifiedModel = ({ project, currentStepId, nodePositions, onConnectionClick, onStepClick, allowDimming = true, shareToken }: UnifiedModelProps) => {
   const steps = project.steps;
   
   const layout = useMemo(() => {
@@ -773,6 +778,7 @@ const UnifiedModel = ({ project, currentStepId, nodePositions, onConnectionClick
           hasActiveStep={!!currentStepId}
           allowDimming={allowDimming}
           onClick={onStepClick ? () => onStepClick(step.id) : undefined}
+          shareToken={shareToken}
         />
       ))}
       {connections.map((conn, index) => (
@@ -888,9 +894,11 @@ interface Viewer3DProps {
   cameraMode?: 'auto' | 'free';
   showStepOverlay?: boolean;
   onStepSelect?: (stepId: string) => void;
+  /** Share token from the public share-link URL, forwarded as ?project_uuid= on /elements and /models API calls. */
+  shareToken?: string;
 }
 
-export const Viewer3D = ({ project, currentStepId, nodePositions = {}, cameraMode = 'free', showStepOverlay = true, onStepSelect }: Viewer3DProps) => {
+export const Viewer3D = ({ project, currentStepId, nodePositions = {}, cameraMode = 'free', showStepOverlay = true, onStepSelect, shareToken }: Viewer3DProps) => {
   const currentStep = project?.steps.find(s => s.id === currentStepId);
   const [selectedConnectionDesc, setSelectedConnectionDesc] = useState<string | null>(null);
   const orbitControlsRef = useRef<OrbitControlsImpl | null>(null);
@@ -962,6 +970,7 @@ export const Viewer3D = ({ project, currentStepId, nodePositions = {}, cameraMod
             onConnectionClick={handleConnectionClick}
             onStepClick={onStepSelect}
             allowDimming={false}
+            shareToken={shareToken}
           />
         )}
         

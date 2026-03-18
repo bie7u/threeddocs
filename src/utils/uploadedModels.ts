@@ -42,10 +42,11 @@ export async function deleteUploadedModel(id: string): Promise<void> {
   return deleteModelRequest(id);
 }
 
-/** Returns a single uploaded model, or undefined if not found. */
-export async function getUploadedModelById(id: string): Promise<UploadedModel3D | undefined> {
+/** Returns a single uploaded model, or undefined if not found.
+ *  Pass `projectUuid` when calling from a public share-link view. */
+export async function getUploadedModelById(id: string, projectUuid?: string): Promise<UploadedModel3D | undefined> {
   try {
-    return await fetchModelById(id);
+    return await fetchModelById(id, projectUuid);
   } catch {
     return undefined;
   }

@@ -34,10 +34,11 @@ export async function deleteCustom3DElement(id: string): Promise<void> {
   return deleteElementRequest(id);
 }
 
-/** Returns a single custom 3D element, or undefined if not found. */
-export async function getCustom3DElementById(id: string): Promise<Custom3DElement | undefined> {
+/** Returns a single custom 3D element, or undefined if not found.
+ *  Pass `projectUuid` when calling from a public share-link view. */
+export async function getCustom3DElementById(id: string, projectUuid?: string): Promise<Custom3DElement | undefined> {
   try {
-    return await fetchElementById(id);
+    return await fetchElementById(id, projectUuid);
   } catch {
     return undefined;
   }
