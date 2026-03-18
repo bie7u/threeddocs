@@ -18,6 +18,7 @@ export const Create3DElementDialog = ({ existing, onClose, onSaved }: Props) => 
   const [wireframeColor, setWireframeColor] = useState(existing?.wireframeColor ?? '#000000');
   const [textureDataUrl, setTextureDataUrl] = useState<string | undefined>(existing?.textureDataUrl);
   const [textureFileName, setTextureFileName] = useState<string>('');
+  const [isSaving, setIsSaving] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const previewElement: Custom3DElement = {
@@ -67,24 +68,32 @@ export const Create3DElementDialog = ({ existing, onClose, onSaved }: Props) => 
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const trimmed = text.trim();
     if (!trimmed) {
       alert('Proszę wpisać tekst (maks. 5 znaków).');
       return;
     }
-    const element: Custom3DElement = {
-      id: existing?.id ?? `custom3d-${crypto.randomUUID()}`,
-      name: trimmed,
-      text: trimmed,
-      color,
-      wireframe,
-      wireframeColor,
-      textureDataUrl,
-      createdAt: existing?.createdAt ?? Date.now(),
-    };
-    saveCustom3DElement(element);
-    onSaved(element);
+    setIsSaving(true);
+    try {
+      const payload: Custom3DElement = {
+        id: existing?.id ?? '',
+        name: trimmed,
+        text: trimmed,
+        color,
+        wireframe,
+        wireframeColor,
+        textureDataUrl,
+        createdAt: existing?.createdAt ?? Date.now(),
+      };
+
+      const saved = await saveCustom3DElement(payload, !existing);
+      onSaved(saved);
+    } catch (err) {
+      alert((err as Error).message ?? 'Nie udało się zapisać elementu.');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -218,15 +227,17 @@ export const Create3DElementDialog = ({ existing, onClose, onSaved }: Props) => 
         <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-200 bg-gray-50">
           <button
             onClick={onClose}
-            className="px-5 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 transition"
+            disabled={isSaving}
+            className="px-5 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 transition disabled:opacity-60 disabled:cursor-not-allowed"
           >
             Anuluj
           </button>
           <button
             onClick={handleSave}
-            className="px-5 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg hover:from-blue-600 hover:to-purple-700 transition"
+            disabled={isSaving}
+            className="px-5 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg hover:from-blue-600 hover:to-purple-700 transition disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            Zapisz element
+            {isSaving ? 'Zapisywanie…' : 'Zapisz element'}
           </button>
         </div>
       </div>

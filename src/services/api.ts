@@ -33,10 +33,14 @@ export const apiRequest = async (
     ...options,
     credentials: 'include',
     headers: {
-      // Only set Content-Type when sending a body so that bodyless requests
-      // (GET, DELETE, etc.) do not include a non-simple header that would
-      // trigger a CORS preflight and potentially block the cookie from being sent.
-      ...(options.body !== undefined ? { 'Content-Type': 'application/json' } : {}),
+      // Only set Content-Type when sending a JSON body.
+      // FormData bodies must NOT have Content-Type set by hand – the browser
+      // adds the correct multipart/form-data value (with boundary) automatically.
+      // Bodyless requests (GET, DELETE, etc.) also skip Content-Type to avoid
+      // triggering a CORS preflight that could block the cookie.
+      ...(options.body !== undefined && !(options.body instanceof FormData)
+        ? { 'Content-Type': 'application/json' }
+        : {}),
       ...options.headers,
     },
   });

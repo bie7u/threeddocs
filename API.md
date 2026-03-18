@@ -310,7 +310,302 @@ credential — anyone who knows the token can update the project.
 
 ---
 
+### Custom 3D Elements ("Stwórz element 3D")
+
+Custom 3D elements are text-based 3D shapes generated from up to 5 characters.
+They are stored per-user and referenced from instruction steps by `custom3dElementId`.
+All endpoints require a valid session.
+
+#### Custom 3D Element object
+
+```json
+{
+  "id": "custom3d-uuid",
+  "name": "ABC",
+  "text": "ABC",
+  "color": "#4299e1",
+  "texture_data_url": "data:image/png;base64,…",
+  "createdAt": 1700000000000
+}
+```
+
+| Field | Type | Access | Description |
+|-------|------|--------|-------------|
+| `id` | `string` | **read-only** | Server-assigned UUID |
+| `name` | `string` | read/write | Display name (equals `text` by default) |
+| `text` | `string` | read/write | Source text for the 3D shape – **max 5 characters** |
+| `color` | `string` | read/write | Hex fill color, e.g. `"#4299e1"` |
+| `texture_data_url` | `string \| null` | read/write | Base64 data URL of the texture image (PNG/JPG/WebP, max 5 MB); `null` if no texture |
+| `createdAt` | `integer` | **read-only** | Unix timestamp in ms of creation |
+
+---
+
+#### `GET /api/elements`
+
+Returns all custom 3D elements owned by the authenticated user.
+
+**Auth:** required
+
+**Response `200 OK`**
+```json
+[
+  {
+    "id": "custom3d-uuid",
+    "name": "ABC",
+    "text": "ABC",
+    "color": "#4299e1",
+    "texture_data_url": null,
+    "createdAt": 1700000000000
+  }
+]
+```
+
+---
+
+#### `POST /api/elements`
+
+Creates a new custom 3D element. The server assigns `id` and `createdAt`.
+
+**Auth:** required
+
+**Request body** – JSON; `texture_data_url` may be omitted or `null`
+```json
+{
+  "name": "ABC",
+  "text": "ABC",
+  "color": "#4299e1",
+  "texture_data_url": null
+}
+```
+
+**Validation**
+- `text` must be 1–5 characters (non-empty after trimming).
+- `texture_data_url` is optional. When provided (not `null`), it must be a valid
+  `data:image/…;base64,…` string whose decoded size does not exceed **5 MB**.
+
+**Response `201 Created`** – returns the saved object with server-assigned `id` and `createdAt`.
+
+**Response `422 Unprocessable Entity`**
+```json
+{ "message": "text must be 1–5 characters" }
+```
+
+---
+
+#### `GET /api/elements/:id`
+
+Returns a single custom 3D element by ID.
+
+**Auth:** required
+
+**Response `200 OK`** – same shape as an element in `GET /api/elements`.
+**Response `404 Not Found`** – element does not exist or belongs to another user.
+
+---
+
+#### `PUT /api/elements/:id`
+
+Replaces the full element document (complete replace, not partial patch).
+
+**Auth:** required
+
+**Request body** – same shape as `POST /api/elements`.
+
+**Response `200 OK`** – the updated document.
+**Response `404 Not Found`**
+**Response `422 Unprocessable Entity`**
+
+---
+
+#### `DELETE /api/elements/:id`
+
+Deletes the custom 3D element.
+
+**Auth:** required
+
+**Response `204 No Content`**
+**Response `404 Not Found`**
+
+---
+
+### Uploaded 3D Models ("Wgraj element 3D")
+
+Uploaded 3D models are GLB/GLTF files provided by the user.
+They are stored per-user and referenced from instruction steps by `uploadedModelId`.
+All endpoints require a valid session.
+
+#### Uploaded 3D Model object
+
+```json
+{
+  "id": "uploaded3d-uuid",
+  "name": "Silnik turbinowy",
+  "model_data_url": "data:model/gltf-binary;base64,…",
+  "model_file_name": "engine.glb",
+  "model_scale": 1.0,
+  "createdAt": 1700000000000
+}
+```
+
+| Field | Type | Access | Description |
+|-------|------|--------|-------------|
+| `id` | `string` | **read-only** | Server-assigned UUID |
+| `name` | `string` | read/write | Human-readable model name |
+| `model_data_url` | `string` | read/write | Base64-encoded data URL of the GLB/GLTF file |
+| `model_file_name` | `string` | **read-only** | Original filename supplied at upload |
+| `model_scale` | `number` | read/write | Default scale factor (0.1 – 5.0) applied when the model is added to a step |
+| `createdAt` | `integer` | **read-only** | Unix timestamp in ms of creation |
+
+---
+
+#### `GET /api/models`
+
+Returns all uploaded 3D models owned by the authenticated user.
+
+**Auth:** required
+
+**Response `200 OK`**
+```json
+[
+  {
+    "id": "uploaded3d-uuid",
+    "name": "Silnik turbinowy",
+    "model_data_url": "data:model/gltf-binary;base64,…",
+    "model_file_name": "engine.glb",
+    "model_scale": 1.0,
+    "createdAt": 1700000000000
+  }
+]
+```
+
+---
+
+#### `POST /api/models`
+
+Saves a new 3D model (as a base64 data URL) and creates the model record.
+
+**Auth:** required
+**Content-Type:** `application/json`
+
+| JSON field | Type | Required | Description |
+|------------|------|----------|-------------|
+| `model_data_url` | string | yes | Base64-encoded data URL of the GLB or GLTF file, **max 50 MB** decoded |
+| `model_file_name` | string | yes | Original filename (e.g. `engine.glb`) |
+| `name` | string | yes | Human-readable model name |
+| `model_scale` | number | no | Default scale factor (0.1–5.0, default `1.0`) |
+
+**Example request (curl)**
+```bash
+curl -X POST /api/models \
+  -b "access_token=…" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Silnik turbinowy","model_file_name":"engine.glb","model_scale":1.0,"model_data_url":"data:model/gltf-binary;base64,…"}'
+```
+
+**Validation**
+- `model_file_name` must have the extension `.glb` or `.gltf`.
+- Decoded file size must not exceed **50 MB**.
+- `name` must be non-empty after trimming.
+- `model_scale` must be between `0.1` and `5.0` (inclusive).
+
+**Response `201 Created`** – returns the model object with the server-assigned
+`id`, `model_data_url`, `model_file_name`, and `createdAt`.
+
+```json
+{
+  "id": "uploaded3d-uuid",
+  "name": "Silnik turbinowy",
+  "model_data_url": "data:model/gltf-binary;base64,…",
+  "model_file_name": "engine.glb",
+  "model_scale": 1.0,
+  "createdAt": 1700000000000
+}
+```
+
+**Response `413 Content Too Large`** – file exceeds 50 MB.
+**Response `422 Unprocessable Entity`**
+```json
+{ "message": "Only .glb and .gltf files are supported" }
+```
+
+---
+
+#### `GET /api/models/:id`
+
+Returns a single uploaded 3D model by ID.
+
+**Auth:** required
+
+**Response `200 OK`** – same shape as an element in `GET /api/models`.
+**Response `404 Not Found`** – model does not exist or belongs to another user.
+
+---
+
+#### `PUT /api/models/:id`
+
+Updates editable metadata of the model (`name`, `model_scale`).
+
+**Auth:** required
+**Content-Type:** `application/json`
+
+**Request body**
+```json
+{
+  "name": "Silnik turbinowy v2",
+  "model_scale": 1.5
+}
+```
+
+**Response `200 OK`** – the updated model object.
+**Response `404 Not Found`**
+**Response `422 Unprocessable Entity`**
+
+---
+
+#### `DELETE /api/models/:id`
+
+Deletes the model record and its stored file.
+
+**Auth:** required
+
+**Response `204 No Content`**
+**Response `404 Not Found`**
+
+---
+
 ## Data Schemas
+
+### `Custom3DElement`
+
+```typescript
+interface Custom3DElement {
+  id: string;
+  name: string;
+  text: string;               // max 5 characters – source for the 3D text shape
+  color: string;              // hex fill color, e.g. "#4299e1"
+  wireframe: boolean;
+  wireframeColor: string;     // hex wireframe line color
+  textureDataUrl: string | null; // base64-encoded image (PNG/JPG/WebP, max 5 MB); null if absent
+  createdAt: number;          // Unix timestamp in ms
+}
+```
+
+---
+
+### `UploadedModel3D`
+
+```typescript
+interface UploadedModel3D {
+  id: string;
+  name: string;
+  modelDataUrl: string;      // base64-encoded data URL of the GLB/GLTF file
+  modelFileName: string;     // original filename
+  modelScale: number;        // default scale factor (0.1 – 5.0)
+  createdAt: number;         // Unix timestamp in ms
+}
+```
+
+---
 
 ### `ProjectData` (internal frontend type)
 
@@ -341,15 +636,18 @@ interface GuideStep {
 interface InstructionStep {
   id: string;
   title: string;
-  description: string;        // may contain sanitised HTML from the rich-text editor
+  description: string;           // may contain sanitised HTML from the rich-text editor
   modelPath: string;
   cameraPosition: CameraPosition;
   annotations?: Annotation[];
   highlightColor?: string;
-  shapeType?: 'cube' | 'sphere' | 'cylinder' | 'cone' | 'custom';
-  customModelUrl?: string;    // data URL of an embedded GLB/GLTF
+  shapeType?: 'cube' | 'sphere' | 'cylinder' | 'cone' | 'custom'
+            | 'custom3dElement' | 'uploadedModel';
+  customModelUrl?: string;       // data URL of an embedded GLB/GLTF
   modelScale?: number;
-  focusMeshName?: string;     // upload-type: mesh to highlight
+  custom3dElementId?: string;    // ID from GET /api/elements – used when shapeType === 'custom3dElement'
+  uploadedModelId?: string;      // ID from GET /api/models   – used when shapeType === 'uploadedModel'
+  focusMeshName?: string;        // upload-type: mesh to highlight
   focusPoint?: [number, number, number];
 }
 ```

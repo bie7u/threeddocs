@@ -1,10 +1,10 @@
-import { useState, useRef, useCallback, useEffect, useMemo, Suspense, Component, type ReactNode } from 'react';
+import { useState, useRef, useCallback, useMemo, useEffect, Suspense, Component, type ReactNode } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import { useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
 import type { UploadedModel3D } from '../../types';
-import { saveUploadedModel } from '../../utils/uploadedModels';
+import { uploadNewModel, saveUploadedModelMeta } from '../../utils/uploadedModels';
 
 // --- Error Boundary ---
 class ModelErrorBoundary extends Component<
@@ -24,15 +24,44 @@ class ModelErrorBoundary extends Component<
   }
 }
 
-// --- Preview model renderer (needs a proper blob URL, not a data URL) ---
-const PreviewModelRenderer = ({ blobUrl, scale }: { blobUrl: string; scale: number }) => {
+// --- Preview model renderer ---
+// Converts a data URL to a blob URL, then delegates to PreviewModelScene.
+const PreviewModelRenderer = ({ dataUrl, scale }: { dataUrl: string; scale: number }) => {
+  const [blobUrl, setBlobUrl] = useState<string | null>(null);
+  const blobUrlRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!dataUrl) return;
+    let cancelled = false;
+    fetch(dataUrl)
+      .then((r) => r.blob())
+      .then((blob) => {
+        if (cancelled) return;
+        const url = URL.createObjectURL(blob);
+        blobUrlRef.current = url;
+        setBlobUrl(url);
+      })
+      .catch((err) => { console.error('Failed to convert data URL to blob for preview:', err); });
+    return () => {
+      cancelled = true;
+      if (blobUrlRef.current) {
+        URL.revokeObjectURL(blobUrlRef.current);
+        blobUrlRef.current = null;
+      }
+    };
+  }, [dataUrl]);
+
+  if (!blobUrl) return null;
+  return <PreviewModelScene blobUrl={blobUrl} scale={scale} />;
+};
+
+// Receives a guaranteed-valid blob URL and calls useGLTF only with it.
+const PreviewModelScene = ({ blobUrl, scale }: { blobUrl: string; scale: number }) => {
   const { scene } = useGLTF(blobUrl);
   const cloned = useMemo(() => {
     const c = scene.clone(true);
     c.traverse((child) => {
-      if (child instanceof THREE.Mesh) {
-        child.castShadow = true;
-      }
+      if (child instanceof THREE.Mesh) child.castShadow = true;
     });
     return c;
   }, [scene]);
@@ -71,57 +100,9 @@ export const UploadModelDialog = ({ existing, onClose, onSaved }: Props) => {
   const [modelFileName, setModelFileName] = useState(existing?.modelFileName ?? '');
   const [modelScale, setModelScale] = useState(existing?.modelScale ?? 1);
   const [isLoading, setIsLoading] = useState(false);
-
-  // Manage blob URL for the live preview (data URLs don't work with useGLTF directly)
-  const [blobUrl, setBlobUrl] = useState<string | null>(null);
-  const blobUrlRef = useRef<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // When modelDataUrl changes, convert to blob URL for the preview
-  useEffect(() => {
-    if (!modelDataUrl) {
-      if (blobUrlRef.current) {
-        URL.revokeObjectURL(blobUrlRef.current);
-        blobUrlRef.current = null;
-      }
-      setBlobUrl(null);
-      return;
-    }
-    // If it's already a blob URL (shouldn't happen here, but guard anyway)
-    if (modelDataUrl.startsWith('blob:')) {
-      setBlobUrl(modelDataUrl);
-      return;
-    }
-    // Convert data URL → blob URL
-    fetch(modelDataUrl)
-      .then((res) => res.blob())
-      .then((blob) => {
-        if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current);
-        const url = URL.createObjectURL(blob);
-        blobUrlRef.current = url;
-        setBlobUrl(url);
-      })
-      .catch(() => {
-        setBlobUrl(null);
-      });
-    return () => {
-      if (blobUrlRef.current) {
-        URL.revokeObjectURL(blobUrlRef.current);
-        blobUrlRef.current = null;
-      }
-    };
-  }, [modelDataUrl]);
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (blobUrlRef.current) {
-        URL.revokeObjectURL(blobUrlRef.current);
-        blobUrlRef.current = null;
-      }
-    };
-  }, []);
 
   const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -140,43 +121,45 @@ export const UploadModelDialog = ({ existing, onClose, onSaved }: Props) => {
     }
 
     setIsLoading(true);
+    setModelFileName(file.name);
+    if (!name) setName(file.name.replace(/\.(gltf|glb)$/i, ''));
+
     const reader = new FileReader();
-    reader.onload = (evt) => {
-      const result = evt.target?.result as string;
-      if (result) {
-        setModelDataUrl(result);
-        setModelFileName(file.name);
-        if (!name) setName(file.name.replace(/\.(gltf|glb)$/i, ''));
-      }
+    reader.onload = (ev) => {
+      setModelDataUrl(ev.target?.result as string);
       setIsLoading(false);
     };
     reader.onerror = () => {
-      alert('Błąd odczytu pliku. Spróbuj ponownie.');
+      alert('Nie udało się wczytać pliku.');
       setIsLoading(false);
     };
     reader.readAsDataURL(file);
   }, [name]);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const trimmedName = name.trim();
     if (!trimmedName) {
       alert('Proszę podać nazwę modelu.');
       return;
     }
-    if (!modelDataUrl) {
+    if (!existing && !modelDataUrl) {
       alert('Proszę wybrać plik modelu 3D.');
       return;
     }
-    const model: UploadedModel3D = {
-      id: existing?.id ?? `uploaded3d-${crypto.randomUUID()}`,
-      name: trimmedName,
-      modelDataUrl,
-      modelFileName,
-      modelScale,
-      createdAt: existing?.createdAt ?? Date.now(),
-    };
-    saveUploadedModel(model);
-    onSaved(model);
+    setIsSaving(true);
+    try {
+      let saved: UploadedModel3D;
+      if (existing) {
+        saved = await saveUploadedModelMeta(existing.id, trimmedName, modelScale);
+      } else {
+        saved = await uploadNewModel(modelDataUrl!, modelFileName, trimmedName, modelScale);
+      }
+      onSaved(saved);
+    } catch (err) {
+      alert((err as Error).message ?? 'Nie udało się zapisać modelu.');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -223,7 +206,7 @@ export const UploadModelDialog = ({ existing, onClose, onSaved }: Props) => {
               <div
                 onClick={() => fileInputRef.current?.click()}
                 className={`w-full p-4 border-2 border-dashed rounded-xl cursor-pointer transition-all ${
-                  modelDataUrl
+                  (modelDataUrl || isLoading)
                     ? 'border-green-400 bg-green-50'
                     : 'border-gray-300 hover:border-indigo-400 hover:bg-indigo-50'
                 }`}
@@ -235,16 +218,14 @@ export const UploadModelDialog = ({ existing, onClose, onSaved }: Props) => {
                   onChange={handleFileChange}
                   className="hidden"
                 />
-                {isLoading ? (
-                  <p className="text-center text-sm text-gray-500">Wczytywanie pliku…</p>
-                ) : modelDataUrl ? (
+                {(modelDataUrl || isLoading) ? (
                   <div className="flex items-center gap-3">
                     <svg className="w-6 h-6 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     <div>
                       <p className="text-sm font-medium text-green-700">{modelFileName}</p>
-                      <p className="text-xs text-gray-500">Kliknij, aby zmienić plik</p>
+                      <p className="text-xs text-gray-500">{isLoading ? 'Wczytywanie…' : 'Kliknij, aby zmienić plik'}</p>
                     </div>
                   </div>
                 ) : (
@@ -298,10 +279,10 @@ export const UploadModelDialog = ({ existing, onClose, onSaved }: Props) => {
                 <ambientLight intensity={0.7} />
                 <directionalLight position={[5, 5, 5]} intensity={1} castShadow />
                 <directionalLight position={[-3, -3, -3]} intensity={0.3} />
-                {blobUrl ? (
+                {modelDataUrl ? (
                   <ModelErrorBoundary fallback={<ErrorPlaceholder />}>
                     <Suspense fallback={<LoadingPlaceholder />}>
-                      <PreviewModelRenderer blobUrl={blobUrl} scale={modelScale} />
+                      <PreviewModelRenderer dataUrl={modelDataUrl} scale={modelScale} />
                     </Suspense>
                   </ModelErrorBoundary>
                 ) : (
@@ -317,15 +298,17 @@ export const UploadModelDialog = ({ existing, onClose, onSaved }: Props) => {
         <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-200 bg-gray-50">
           <button
             onClick={onClose}
-            className="px-5 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 transition"
+            disabled={isSaving}
+            className="px-5 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 transition disabled:opacity-60 disabled:cursor-not-allowed"
           >
             Anuluj
           </button>
           <button
             onClick={handleSave}
-            className="px-5 py-2 text-sm font-medium text-white bg-gradient-to-r from-indigo-500 to-blue-600 rounded-lg hover:from-indigo-600 hover:to-blue-700 transition"
+            disabled={isSaving}
+            className="px-5 py-2 text-sm font-medium text-white bg-gradient-to-r from-indigo-500 to-blue-600 rounded-lg hover:from-indigo-600 hover:to-blue-700 transition disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            Zapisz model
+            {isSaving ? 'Zapisywanie…' : 'Zapisz model'}
           </button>
         </div>
       </div>

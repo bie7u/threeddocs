@@ -3,7 +3,7 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera, useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
-import type { InstructionStep, ConnectionStyle, ShapeType, ArrowDirection, ConnectionType } from '../../types';
+import type { InstructionStep, ConnectionStyle, ShapeType, ArrowDirection, ConnectionType, UploadedModel3D, Custom3DElement } from '../../types';
 import type { ProjectData } from '../../types';
 import { calculateCreatorBasedLayout } from '../../utils/layoutCalculator';
 import { EngravedBlock } from './EngravedBlock';
@@ -173,10 +173,35 @@ interface Shape3DProps {
   custom3dElementId?: string;
   uploadedModelId?: string;
   modelPositionY?: number;
+  /** Share token from the public share-link URL, forwarded as ?project_uuid= on API calls. */
+  shareToken?: string;
 }
 
 // Reusable 3D shape component
-const Shape3D = ({ shapeType = 'cube', size = 2, color, emissive = '#000000', emissiveIntensity = 0, customModelUrl, modelScale = 1, engravedBlockParams, custom3dElementId, uploadedModelId, modelPositionY = 0 }: Shape3DProps) => {
+const Shape3D = ({ shapeType = 'cube', size = 2, color, emissive = '#000000', emissiveIntensity = 0, customModelUrl, modelScale = 1, engravedBlockParams, custom3dElementId, uploadedModelId, modelPositionY = 0, shareToken }: Shape3DProps) => {
+  const [uploadedModel, setUploadedModel] = useState<UploadedModel3D | null>(null);
+  const [customElement, setCustomElement] = useState<Custom3DElement | null>(null);
+
+  useEffect(() => {
+    if (shapeType === 'uploadedModel' && uploadedModelId) {
+      getUploadedModelById(uploadedModelId, shareToken)
+        .then((m) => setUploadedModel(m ?? null))
+        .catch(() => setUploadedModel(null));
+    } else {
+      setUploadedModel(null);
+    }
+  }, [shapeType, uploadedModelId, shareToken]);
+
+  useEffect(() => {
+    if (shapeType === 'custom3dElement' && custom3dElementId) {
+      getCustom3DElementById(custom3dElementId, shareToken)
+        .then((e) => setCustomElement(e ?? null))
+        .catch(() => setCustomElement(null));
+    } else {
+      setCustomElement(null);
+    }
+  }, [shapeType, custom3dElementId, shareToken]);
+
   if (shapeType === 'custom' && customModelUrl) {
     return (
       <group position={[0, modelPositionY, 0]}>
@@ -196,18 +221,17 @@ const Shape3D = ({ shapeType = 'cube', size = 2, color, emissive = '#000000', em
   }
 
   if (shapeType === 'uploadedModel' && uploadedModelId) {
-    const model = getUploadedModelById(uploadedModelId);
-    if (model) {
+    if (uploadedModel) {
       return (
         <group position={[0, modelPositionY, 0]}>
           <ModelErrorBoundary fallback={<ModelErrorFallback />}>
             <Suspense fallback={<ModelLoadingFallback />}>
               <CustomModel
-                url={model.modelDataUrl}
+                url={uploadedModel.modelDataUrl}
                 color={color}
                 emissive={emissive}
                 emissiveIntensity={emissiveIntensity}
-                scale={modelScale * model.modelScale}
+                scale={modelScale * uploadedModel.modelScale}
                 preserveMaterials={true}
               />
             </Suspense>
@@ -215,7 +239,7 @@ const Shape3D = ({ shapeType = 'cube', size = 2, color, emissive = '#000000', em
         </group>
       );
     }
-    // Fallback if model not found
+    // Fallback while loading or if model not found
     return (
       <group position={[0, modelPositionY, 0]} scale={[modelScale, modelScale, modelScale]}>
         <mesh castShadow>
@@ -227,15 +251,14 @@ const Shape3D = ({ shapeType = 'cube', size = 2, color, emissive = '#000000', em
   }
 
   if (shapeType === 'custom3dElement' && custom3dElementId) {
-    const element = getCustom3DElementById(custom3dElementId);
-    if (element) {
+    if (customElement) {
       return (
         <group position={[0, modelPositionY, 0]} scale={[modelScale, modelScale, modelScale]}>
-          <Custom3DShape element={element} emissive={emissive} emissiveIntensity={emissiveIntensity} />
+          <Custom3DShape element={customElement} emissive={emissive} emissiveIntensity={emissiveIntensity} />
         </group>
       );
     }
-    // Fallback if element not found
+    // Fallback while loading or if element not found
     return (
       <group position={[0, modelPositionY, 0]} scale={[modelScale, modelScale, modelScale]}>
         <mesh castShadow>
@@ -296,9 +319,10 @@ interface StepCubeProps {
   hasActiveStep?: boolean;
   allowDimming?: boolean;
   onClick?: () => void;
+  shareToken?: string;
 }
 
-const StepCube = ({ step, position, isActive, hasActiveStep, allowDimming = true, onClick }: StepCubeProps) => {
+const StepCube = ({ step, position, isActive, hasActiveStep, allowDimming = true, onClick, shareToken }: StepCubeProps) => {
   const meshRef = useRef<THREE.Group>(null);
   const ringRef = useRef<THREE.Mesh>(null);
   
@@ -348,6 +372,7 @@ const StepCube = ({ step, position, isActive, hasActiveStep, allowDimming = true
           engravedBlockParams={step.engravedBlockParams}
           custom3dElementId={step.custom3dElementId}
           uploadedModelId={step.uploadedModelId}
+          shareToken={shareToken}
         />
       </group>
       {isActive && (
@@ -696,9 +721,10 @@ interface UnifiedModelProps {
   onConnectionClick?: (description: string) => void;
   onStepClick?: (stepId: string) => void;
   allowDimming?: boolean;
+  shareToken?: string;
 }
 
-const UnifiedModel = ({ project, currentStepId, nodePositions, onConnectionClick, onStepClick, allowDimming = true }: UnifiedModelProps) => {
+const UnifiedModel = ({ project, currentStepId, nodePositions, onConnectionClick, onStepClick, allowDimming = true, shareToken }: UnifiedModelProps) => {
   const steps = project.steps;
   
   const layout = useMemo(() => {
@@ -752,6 +778,7 @@ const UnifiedModel = ({ project, currentStepId, nodePositions, onConnectionClick
           hasActiveStep={!!currentStepId}
           allowDimming={allowDimming}
           onClick={onStepClick ? () => onStepClick(step.id) : undefined}
+          shareToken={shareToken}
         />
       ))}
       {connections.map((conn, index) => (
@@ -867,9 +894,11 @@ interface Viewer3DProps {
   cameraMode?: 'auto' | 'free';
   showStepOverlay?: boolean;
   onStepSelect?: (stepId: string) => void;
+  /** Share token from the public share-link URL, forwarded as ?project_uuid= on /elements and /models API calls. */
+  shareToken?: string;
 }
 
-export const Viewer3D = ({ project, currentStepId, nodePositions = {}, cameraMode = 'free', showStepOverlay = true, onStepSelect }: Viewer3DProps) => {
+export const Viewer3D = ({ project, currentStepId, nodePositions = {}, cameraMode = 'free', showStepOverlay = true, onStepSelect, shareToken }: Viewer3DProps) => {
   const currentStep = project?.steps.find(s => s.id === currentStepId);
   const [selectedConnectionDesc, setSelectedConnectionDesc] = useState<string | null>(null);
   const orbitControlsRef = useRef<OrbitControlsImpl | null>(null);
@@ -941,6 +970,7 @@ export const Viewer3D = ({ project, currentStepId, nodePositions = {}, cameraMod
             onConnectionClick={handleConnectionClick}
             onStepClick={onStepSelect}
             allowDimming={false}
+            shareToken={shareToken}
           />
         )}
         

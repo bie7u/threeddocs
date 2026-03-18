@@ -5,7 +5,7 @@ import { Viewer3D } from '../Viewer3D/Viewer3D';
 import { isHtmlContent } from '../../utils/html';
 import { generateShareToken } from '../../services/projects';
 
-export const PreviewMode = ({ onGoToEditorPanel, isPublic }: { onGoToEditorPanel?: () => void; isPublic?: boolean }) => {
+export const PreviewMode = ({ onGoToEditorPanel, isPublic, shareToken }: { onGoToEditorPanel?: () => void; isPublic?: boolean; shareToken?: string }) => {
   const { 
     project, 
     currentPreviewStepIndex, 
@@ -82,6 +82,7 @@ export const PreviewMode = ({ onGoToEditorPanel, isPublic }: { onGoToEditorPanel
           const idx = guideSteps.findIndex((s) => s.id === stepId);
           if (idx !== -1) setCurrentPreviewStepIndex(idx);
         }}
+        shareToken={shareToken}
       />
 
       {showCopyNotification && (

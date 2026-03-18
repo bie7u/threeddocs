@@ -1,33 +1,46 @@
 import type { Custom3DElement } from '../types';
+import {
+  fetchElements,
+  fetchElementById,
+  createElementRequest,
+  updateElementRequest,
+  deleteElementRequest,
+} from '../services/elements';
 
-const STORAGE_KEY = 'custom3dElements';
+/** Returns all custom 3D elements owned by the current user. */
+export async function loadCustom3DElements(): Promise<Custom3DElement[]> {
+  return fetchElements();
+}
 
-export function loadCustom3DElements(): Custom3DElement[] {
+/**
+ * Creates or updates a custom 3D element via the API.
+ * Pass `isNew = true` when creating for the first time (omits the server-side
+ * id that hasn't been assigned yet). Returns the saved element with the
+ * server-assigned id and createdAt.
+ */
+export async function saveCustom3DElement(
+  element: Custom3DElement,
+  isNew: boolean,
+): Promise<Custom3DElement> {
+  const { id, createdAt, ...body } = element;
+  if (isNew) {
+    return createElementRequest(body);
+  }
+  return updateElementRequest(id, body);
+}
+
+/** Deletes a custom 3D element by id. */
+export async function deleteCustom3DElement(id: string): Promise<void> {
+  return deleteElementRequest(id);
+}
+
+/** Returns a single custom 3D element, or undefined if not found.
+ *  Pass `projectUuid` when calling from a public share-link view. */
+export async function getCustom3DElementById(id: string, projectUuid?: string): Promise<Custom3DElement | undefined> {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return [];
-    return JSON.parse(raw) as Custom3DElement[];
+    return await fetchElementById(id, projectUuid);
   } catch {
-    return [];
+    return undefined;
   }
 }
 
-export function saveCustom3DElement(element: Custom3DElement): void {
-  const elements = loadCustom3DElements();
-  const existing = elements.findIndex((e) => e.id === element.id);
-  if (existing >= 0) {
-    elements[existing] = element;
-  } else {
-    elements.push(element);
-  }
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(elements));
-}
-
-export function deleteCustom3DElement(id: string): void {
-  const elements = loadCustom3DElements().filter((e) => e.id !== id);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(elements));
-}
-
-export function getCustom3DElementById(id: string): Custom3DElement | undefined {
-  return loadCustom3DElements().find((e) => e.id === id);
-}
