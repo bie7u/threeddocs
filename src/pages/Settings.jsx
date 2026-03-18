@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Create3DElementDialog } from '../components/Create3DElement/Create3DElementDialog';
 import { UploadModelDialog } from '../components/UploadModelDialog/UploadModelDialog';
+import { ModelPreviewModal } from '../components/ModelPreviewModal/ModelPreviewModal';
 import { loadCustom3DElements, deleteCustom3DElement } from '../utils/custom3DElements';
 import { loadUploadedModels, deleteUploadedModel } from '../utils/uploadedModels';
 import { getMe, changePassword } from '../services/auth';
@@ -169,6 +170,9 @@ const Settings = ({ onClose }) => {
 
   const [showAccountModal, setShowAccountModal] = useState(false);
 
+  const [previewElement, setPreviewElement] = useState(null);
+  const [previewModel, setPreviewModel] = useState(null);
+
   const refreshElements = () => {
     loadCustom3DElements().then(setElements).catch(() => setElements([]));
   };
@@ -335,11 +339,16 @@ const Settings = ({ onClose }) => {
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-gray-800 truncate">{el.name}</p>
                     <p className="text-xs text-gray-500">
-                      {el.textureDataUrl ? 'Tekstura · ' : ''}
-                      {new Date(el.createdAt).toLocaleDateString('pl-PL')}
+                      {el.textureDataUrl ? 'Tekstura' : 'Brak tekstury'}
                     </p>
                   </div>
                   <div className="flex flex-col gap-1">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setPreviewElement(el); }}
+                      className="px-3 py-1 text-xs bg-purple-500 text-white rounded hover:bg-purple-600 transition"
+                    >
+                      Podgląd
+                    </button>
                     <button
                       onClick={(e) => { e.stopPropagation(); handleDelete(el.id); }}
                       className="px-3 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600 transition"
@@ -373,10 +382,16 @@ const Settings = ({ onClose }) => {
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-gray-800 truncate">{model.name}</p>
                     <p className="text-xs text-gray-500">
-                      Skala: {model.modelScale} · {model.modelFileName} · {new Date(model.createdAt).toLocaleDateString('pl-PL')}
+                      Skala: {model.modelScale} · {model.modelFileName}
                     </p>
                   </div>
                   <div className="flex flex-col gap-1">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setPreviewModel(model); }}
+                      className="px-3 py-1 text-xs bg-purple-500 text-white rounded hover:bg-purple-600 transition"
+                    >
+                      Podgląd
+                    </button>
                     <button
                       onClick={(e) => { e.stopPropagation(); handleDeleteModel(model.id); }}
                       className="px-3 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600 transition"
@@ -410,6 +425,14 @@ const Settings = ({ onClose }) => {
       {/* My Account modal */}
       {showAccountModal && (
         <AccountModal onClose={() => setShowAccountModal(false)} />
+      )}
+
+      {/* 3D preview modals */}
+      {previewElement && (
+        <ModelPreviewModal element={previewElement} onClose={() => setPreviewElement(null)} />
+      )}
+      {previewModel && (
+        <ModelPreviewModal model={previewModel} onClose={() => setPreviewModel(null)} />
       )}
     </div>
   );
