@@ -159,8 +159,7 @@ const AccountModal = ({ onClose }) => {
 };
 
 const Settings = ({ onClose }) => {
-  const MAX_ELEMENTS = 20;
-  const MAX_MODELS = 10;
+  const MAX_TOTAL_MODELS = 30;
 
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [elements, setElements] = useState([]);
@@ -172,6 +171,8 @@ const Settings = ({ onClose }) => {
 
   const [previewElement, setPreviewElement] = useState(null);
   const [previewModel, setPreviewModel] = useState(null);
+
+  const totalModels = elements.length + uploadedModels.length;
 
   const refreshElements = () => {
     loadCustom3DElements().then(setElements).catch(() => setElements([]));
@@ -261,8 +262,8 @@ const Settings = ({ onClose }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {/* Create 3D Element */}
           <div
-            onClick={elements.length < MAX_ELEMENTS ? handleCreate : undefined}
-            className={`bg-white p-6 rounded-xl shadow-lg transition-all border border-gray-200 group ${elements.length < MAX_ELEMENTS ? 'hover:shadow-xl cursor-pointer hover:border-blue-400' : 'opacity-60 cursor-not-allowed'}`}
+            onClick={totalModels < MAX_TOTAL_MODELS ? handleCreate : undefined}
+            className={`bg-white p-6 rounded-xl shadow-lg transition-all border border-gray-200 group ${totalModels < MAX_TOTAL_MODELS ? 'hover:shadow-xl cursor-pointer hover:border-blue-400' : 'opacity-60 cursor-not-allowed'}`}
           >
             <div className="text-blue-500 mb-4 group-hover:scale-110 transition-transform">
               <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -275,15 +276,15 @@ const Settings = ({ onClose }) => {
               Utwórz własny kształt 3D z tekstu (maks. 12 znaków)
             </p>
             <p className="text-xs text-gray-400 mt-1">
-              Limit: {elements.length}/{MAX_ELEMENTS} elementów
-              {elements.length >= MAX_ELEMENTS && <span className="text-red-500 ml-1">— osiągnięto limit</span>}
+              Modele łącznie: {totalModels}/{MAX_TOTAL_MODELS}
+              {totalModels >= MAX_TOTAL_MODELS && <span className="text-red-500 ml-1">— osiągnięto limit</span>}
             </p>
           </div>
 
           {/* Upload 3D Model */}
           <div
-            onClick={uploadedModels.length < MAX_MODELS ? handleUploadModel : undefined}
-            className={`bg-white p-6 rounded-xl shadow-lg transition-all border border-gray-200 group ${uploadedModels.length < MAX_MODELS ? 'hover:shadow-xl cursor-pointer hover:border-indigo-400' : 'opacity-60 cursor-not-allowed'}`}
+            onClick={totalModels < MAX_TOTAL_MODELS ? handleUploadModel : undefined}
+            className={`bg-white p-6 rounded-xl shadow-lg transition-all border border-gray-200 group ${totalModels < MAX_TOTAL_MODELS ? 'hover:shadow-xl cursor-pointer hover:border-indigo-400' : 'opacity-60 cursor-not-allowed'}`}
           >
             <div className="text-indigo-500 mb-4 group-hover:scale-110 transition-transform">
               <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -296,8 +297,8 @@ const Settings = ({ onClose }) => {
               Wgraj model 3D (.gltf / .glb) i nadaj mu nazwę oraz skalę
             </p>
             <p className="text-xs text-gray-400 mt-1">
-              Limit: {uploadedModels.length}/{MAX_MODELS} modeli
-              {uploadedModels.length >= MAX_MODELS && <span className="text-red-500 ml-1">— osiągnięto limit</span>}
+              Modele łącznie: {totalModels}/{MAX_TOTAL_MODELS}
+              {totalModels >= MAX_TOTAL_MODELS && <span className="text-red-500 ml-1">— osiągnięto limit</span>}
             </p>
           </div>
 
@@ -322,7 +323,7 @@ const Settings = ({ onClose }) => {
         {/* Existing custom 3D text elements */}
         {elements.length > 0 && (
           <div className="mt-12">
-            <h3 className="text-xl font-bold text-gray-800 mb-4">Moje elementy 3D ({elements.length}/{MAX_ELEMENTS})</h3>
+            <h3 className="text-xl font-bold text-gray-800 mb-4">Moje elementy 3D ({elements.length})</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {elements.map((el) => (
                 <div
@@ -365,7 +366,7 @@ const Settings = ({ onClose }) => {
         {/* Uploaded 3D models */}
         {uploadedModels.length > 0 && (
           <div className="mt-12">
-            <h3 className="text-xl font-bold text-gray-800 mb-4">Wgrane modele 3D ({uploadedModels.length}/{MAX_MODELS})</h3>
+            <h3 className="text-xl font-bold text-gray-800 mb-4">Wgrane modele 3D ({uploadedModels.length})</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {uploadedModels.map((model) => (
                 <div
