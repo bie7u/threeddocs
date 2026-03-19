@@ -6,13 +6,12 @@ import { useAppStore } from '../store';
 
 const GuestDashboard = () => {
   const navigate = useNavigate();
-  const { createNewGuestProject, clearGuestMode, guestShareToken, project } = useAppStore();
+  const { createNewGuestProject, clearGuestMode, project } = useAppStore();
 
   const [showNewProjectDialog, setShowNewProjectDialog] = useState(false);
   const [showEditor, setShowEditor] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [createError, setCreateError] = useState('');
-  const [showLinkCopied, setShowLinkCopied] = useState(false);
 
   // On mount, clear any previous guest/auth state so we start fresh
   useEffect(() => {
@@ -40,19 +39,6 @@ const GuestDashboard = () => {
   const handleGoToLogin = () => {
     clearGuestMode();
     navigate('/login');
-  };
-
-  const handleCopyLink = async () => {
-    if (!guestShareToken) return;
-    const url = `${window.location.origin}/view/${guestShareToken}`;
-    try {
-      await navigator.clipboard.writeText(url);
-    } catch {
-      alert(`Skopiuj ten link: ${url}`);
-      return;
-    }
-    setShowLinkCopied(true);
-    setTimeout(() => setShowLinkCopied(false), 3000);
   };
 
   if (showEditor) {
@@ -94,18 +80,18 @@ const GuestDashboard = () => {
             Wypróbuj ThreeDocsy bez rejestracji
           </h1>
           <p className="text-xl text-gray-600 mb-2">
-            Stwórz jeden model 3D i wygeneruj link do udostępnienia
+            Stwórz model 3D bez rejestracji
           </p>
           <p className="text-sm text-gray-400 mb-8">
-            Aby zapisać więcej modeli i korzystać ze wszystkich funkcji,{' '}
+            Model będzie przechowywany lokalnie w tej przeglądarce. Aby zapisywać modele i udostępniać je innym,{' '}
             <button onClick={handleGoToLogin} className="text-blue-500 hover:underline font-medium">
               zaloguj się
             </button>
             .
           </p>
 
-          {project && guestShareToken ? (
-            /* Model already created – show share link panel */
+          {project ? (
+            /* Model already created – show panel */
             <div className="max-w-lg mx-auto space-y-6">
               <div className="bg-white rounded-2xl shadow-lg border border-green-200 p-6">
                 <div className="flex items-center gap-3 mb-4">
@@ -116,45 +102,19 @@ const GuestDashboard = () => {
                   </div>
                   <div className="text-left">
                     <p className="font-bold text-gray-800">{project.name}</p>
-                    <p className="text-xs text-gray-500">Model gotowy do udostępnienia</p>
+                    <p className="text-xs text-gray-500">Model gotowy do edycji</p>
                   </div>
                 </div>
 
-                <div className="bg-gray-50 rounded-xl p-3 mb-4 flex items-center gap-2 border border-gray-200">
-                  <span className="flex-1 text-xs text-gray-600 truncate font-mono">
-                    {`${window.location.origin}/view/${guestShareToken}`}
-                  </span>
-                </div>
-
-                {showLinkCopied && (
-                  <div className="mb-3 flex items-center gap-2 text-green-600 text-sm font-medium justify-center">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    Link skopiowany do schowka!
-                  </div>
-                )}
-
-                <div className="flex gap-3">
-                  <button
-                    onClick={handleCopyLink}
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-xl hover:from-purple-600 hover:to-pink-700 transition-all font-medium shadow-lg"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                    </svg>
-                    Skopiuj link
-                  </button>
-                  <button
-                    onClick={() => setShowEditor(true)}
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl hover:from-blue-600 hover:to-indigo-700 transition-all font-medium shadow-lg"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                    </svg>
-                    Edytuj model
-                  </button>
-                </div>
+                <button
+                  onClick={() => setShowEditor(true)}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl hover:from-blue-600 hover:to-indigo-700 transition-all font-medium shadow-lg"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                  Edytuj model
+                </button>
               </div>
 
               <p className="text-xs text-gray-400">
@@ -162,7 +122,7 @@ const GuestDashboard = () => {
                 <button onClick={handleGoToLogin} className="text-blue-500 hover:underline">
                   Zaloguj się
                 </button>{' '}
-                aby móc zarządzać swoimi modelami z dowolnego urządzenia.
+                aby móc zarządzać swoimi modelami z dowolnego urządzenia i udostępniać je innym.
               </p>
             </div>
           ) : (
@@ -179,7 +139,7 @@ const GuestDashboard = () => {
                 </div>
                 <h3 className="text-lg font-bold text-gray-800 mb-1">Stwórz model 3D</h3>
                 <p className="text-sm text-gray-500">
-                  Wgraj model GLTF/GLB lub zbuduj go z kształtów 3D i wygeneruj link do udostępnienia
+                  Wgraj model GLTF/GLB lub zbuduj go z kształtów 3D
                 </p>
               </div>
             </div>
