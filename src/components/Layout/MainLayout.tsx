@@ -6,7 +6,7 @@ import { StepProperties } from '../StepProperties/StepProperties';
 import { PreviewMode } from '../PreviewMode/PreviewMode';
 import { GuideBuilder } from '../GuideBuilder/GuideBuilder';
 import { UploadModelEditor, UploadPreviewMode } from '../UploadModelEditor';
-import { sampleProject } from '../../utils/sampleData';
+import { sampleProject, sampleNodePositions } from '../../utils/sampleData';
 
 interface MainLayoutProps {
   onBackToProjectList?: () => void;
@@ -32,7 +32,7 @@ export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, useSamplePr
 
   useEffect(() => {
     if (!project && useSampleProjectFallback) {
-      setProject(sampleProject);
+      setProject(sampleProject, sampleNodePositions);
     }
   }, [project, setProject, useSampleProjectFallback]);
 
@@ -40,7 +40,7 @@ export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, useSamplePr
   const handleToggleCameraMode = () => { setCameraMode(cameraMode === 'auto' ? 'free' : 'auto'); };
   const handleLoadSample = () => {
     if (window.confirm('Załadować przykładowy projekt? To zastąpi bieżący projekt.')) {
-      setProject(sampleProject);
+      setProject(sampleProject, sampleNodePositions);
     }
   };
 

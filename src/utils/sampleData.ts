@@ -81,3 +81,24 @@ export const sampleProject: ProjectData = {
     { id: 'guide-6', stepId: 'step-5' },
   ],
 };
+
+/**
+ * Node positions for the sample project flow graph.
+ * The graph has a diamond shape:
+ *   step-1 → step-2a ─┐
+ *          ↘ step-2b ─┴→ step-3 → step-4 → step-5
+ *
+ * ─────────────────────────────────────────────────────────────
+ * 👉 Jeśli chcesz wkleić własny przykład, zastąp obiekt
+ *    `sampleProject` powyżej swoim JSONem (ProjectData),
+ *    a tutaj podaj pozycje węzłów dla swojego projektu.
+ * ─────────────────────────────────────────────────────────────
+ */
+export const sampleNodePositions: Record<string, { x: number; y: number }> = {
+  'step-1':  { x: 250, y: 0   },
+  'step-2a': { x: 50,  y: 175 },
+  'step-2b': { x: 450, y: 175 },
+  'step-3':  { x: 250, y: 350 },
+  'step-4':  { x: 250, y: 525 },
+  'step-5':  { x: 250, y: 700 },
+};
