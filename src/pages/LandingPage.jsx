@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { probeSession, logout } from '../services/auth';
+import { API_BASE } from '../services/api';
 const LOGO_SRC = '/logo.svg';
 
 const features = [
@@ -88,15 +89,33 @@ const useCases = [
   { emoji: '🎯', label: 'Pitch techniczny' },
 ];
 
+const StatCard = ({ value, label, textColor, gradientFrom, note }) => (
+  <div className="relative bg-white/5 border border-white/10 rounded-2xl p-8 hover:bg-white/10 transition-colors overflow-hidden">
+    <div className={`absolute inset-0 bg-gradient-to-br ${gradientFrom}/10 to-transparent rounded-2xl pointer-events-none`} />
+    <div className="relative">
+      <div className="text-6xl font-black text-white mb-1 tabular-nums">
+        {value !== null ? value : <span className="animate-pulse text-gray-600">—</span>}
+      </div>
+      <div className={`${textColor} font-semibold text-lg mb-2`}>{label}</div>
+      <div className="text-gray-500 text-sm">{note}</div>
+    </div>
+  </div>
+);
+
 const LandingPage = () => {
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [stats, setStats] = useState(null);
 
   useEffect(() => {
     let ignore = false;
     probeSession().then(user => {
       if (!ignore) setIsLoggedIn(!!user);
     });
+    fetch(`${API_BASE}/user_counter`, { credentials: 'include' })
+      .then(res => res.ok ? res.json() : null)
+      .then(data => { if (!ignore && data) setStats(data); })
+      .catch(() => {});
     return () => { ignore = true; };
   }, []); // run once on mount
 
@@ -396,6 +415,80 @@ const LandingPage = () => {
               wysyłam link. Każdy rozumie od razu."
             </p>
             <p className="text-blue-200 text-sm mt-4">— Przykładowe zastosowanie: senior developer w zespole productowym</p>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Community Transparency Stats ─────────────────────────────────── */}
+      <section className="py-24 bg-gradient-to-br from-indigo-950 via-slate-900 to-purple-950">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <span className="inline-block mb-3 px-4 py-1.5 bg-yellow-400/15 text-yellow-300 text-sm font-semibold rounded-full">
+            🌱 Gramy w otwarte karty
+          </span>
+          <h2 className="text-4xl font-extrabold text-white mb-4">
+            Mała społeczność?{' '}
+            <span className="bg-gradient-to-r from-yellow-300 to-orange-400 bg-clip-text text-transparent">
+              To Twoja przewaga.
+            </span>
+          </h2>
+          <p className="text-gray-400 text-lg max-w-2xl mx-auto mb-14">
+            Nie ukrywamy liczb — nawet gdy są małe. Jesteś jednym z pierwszych użytkowników,
+            co oznacza, że Twoje sugestie realnie kształtują produkt.
+            Każda opinia trafia bezpośrednio do twórców.
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-12">
+            <StatCard
+              value={stats !== null ? stats.users_count : null}
+              label="Zarejestrowanych użytkowników"
+              textColor="text-blue-300"
+              gradientFrom="from-blue-600"
+              note={
+                <span>
+                  Twoja opinia to{' '}
+                  <span className="text-blue-400 font-semibold">
+                    {stats !== null && stats.users_count > 0
+                      ? `1/${stats.users_count} głosu`
+                      : 'realny głos'}
+                  </span>{' '}
+                  w kierunku produktu
+                </span>
+              }
+            />
+            <StatCard
+              value={stats !== null ? stats.projects_count : null}
+              label="Stworzonych modeli"
+              textColor="text-purple-300"
+              gradientFrom="from-purple-600"
+              note={
+                <span>
+                  Każdy zaczął od zera —{' '}
+                  <span className="text-purple-400 font-semibold">tak jak Ty zaraz</span>
+                </span>
+              }
+            />
+            <StatCard
+              value={stats !== null ? stats.project_shared_count : null}
+              label="Udostępnionych prezentacji"
+              textColor="text-green-300"
+              gradientFrom="from-green-600"
+              note={
+                <span>
+                  Wiedza{' '}
+                  <span className="text-green-400 font-semibold">już krąży</span>{' '}
+                  w zespołach
+                </span>
+              }
+            />
+          </div>
+
+          <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-2xl p-6 text-left max-w-2xl mx-auto">
+            <p className="text-yellow-200 font-semibold mb-2">💡 Dlaczego pokazujemy te liczby?</p>
+            <p className="text-gray-400 text-sm leading-relaxed">
+              Wierzymy, że transparentność buduje zaufanie. Mała liczba użytkowników to nie
+              słabość — to szansa. Dołącz teraz i współtwórz narzędzie od podstaw.
+              Twoje potrzeby usłyszymy jako jedne z pierwszych.
+            </p>
           </div>
         </div>
       </section>
