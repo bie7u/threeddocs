@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import type { Edge } from 'reactflow';
 import type { InstructionStep, ProjectData, ConnectionData, GuideStep } from '../types';
 import {
-  fetchProjects,
+  fetchProjectsPage,
   createProject,
   updateProject,
   deleteProjectRequest,
@@ -22,6 +22,9 @@ interface AppStore {
 
   // Cached list of all user projects (loaded from API)
   projects: SavedProject[];
+
+  // Total number of projects on the server (may exceed the locally cached page)
+  projectsCount: number;
 
   // Selected step
   selectedStepId: string | null;
@@ -78,6 +81,7 @@ interface AppStore {
 export const useAppStore = create<AppStore>((set, get) => ({
   project: null,
   projects: [],
+  projectsCount: 0,
   selectedStepId: null,
   isPreviewMode: false,
   currentPreviewStepIndex: 0,
@@ -269,8 +273,8 @@ export const useAppStore = create<AppStore>((set, get) => ({
 
   loadProjects: async () => {
     try {
-      const projects = await fetchProjects();
-      set({ projects });
+      const page = await fetchProjectsPage(1);
+      set({ projects: page.results, projectsCount: page.count });
     } catch (error) {
       console.error('Failed to load projects from server', error);
     }
@@ -283,6 +287,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
       await deleteProjectRequest(projectId);
       set(state => ({
         projects: state.projects.filter(p => p.project.id !== projectId),
+        projectsCount: Math.max(0, state.projectsCount - 1),
         project: state.project?.id === projectId ? null : state.project,
         nodePositions: state.project?.id === projectId ? {} : state.nodePositions,
         selectedStepId: state.project?.id === projectId ? null : state.selectedStepId,
@@ -310,7 +315,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
     // POST to server — get back the server-assigned integer id
     const created = await createProject(provisional);
     set({ project: created.project, nodePositions: created.nodePositions, selectedStepId: null });
-    set(state => ({ projects: [...state.projects, created] }));
+    set(state => ({ projects: [...state.projects, created], projectsCount: state.projectsCount + 1 }));
     return created.project;
   },
 

@@ -9,8 +9,10 @@ import { getMe } from '../services/auth';
 import { logout } from '../services/auth';
 
 const Dashboard = () => {
+  const MAX_PROJECTS = 30;
+
   const navigate = useNavigate();
-  const { createNewProject, loadProjects } = useAppStore();
+  const { createNewProject, loadProjects, projectsCount } = useAppStore();
 
   const [showNewProjectDialog, setShowNewProjectDialog] = useState(false);
   const [showEditor, setShowEditor] = useState(false);
@@ -152,8 +154,8 @@ const Dashboard = () => {
 
             {/* Dodaj nowy model (Add new model) */}
             <div
-              onClick={() => setShowNewProjectDialog(true)}
-              className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow cursor-pointer border border-gray-200 hover:border-purple-400 group"
+              onClick={projectsCount < MAX_PROJECTS ? () => setShowNewProjectDialog(true) : undefined}
+              className={`bg-white p-6 rounded-xl shadow-lg transition-all border border-gray-200 group ${projectsCount < MAX_PROJECTS ? 'hover:shadow-xl cursor-pointer hover:border-purple-400' : 'opacity-60 cursor-not-allowed'}`}
             >
               <div className="text-purple-500 mb-4 group-hover:scale-110 transition-transform">
                 <svg
@@ -172,6 +174,10 @@ const Dashboard = () => {
               </div>
               <h3 className="text-lg font-semibold text-gray-800 mb-2">Dodaj nowy model</h3>
               <p className="text-sm text-gray-600">Wgraj nowy model 3D</p>
+              <p className="text-xs text-gray-400 mt-1">
+                Projekty: {projectsCount}/{MAX_PROJECTS}
+                {projectsCount >= MAX_PROJECTS && <span className="text-red-500 ml-1">— osiągnięto limit</span>}
+              </p>
             </div>
 
             {/* Ustawienia (Settings) */}

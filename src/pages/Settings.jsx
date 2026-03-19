@@ -275,7 +275,7 @@ const Settings = ({ onClose }) => {
               Utwórz własny kształt 3D z tekstu (maks. 12 znaków)
             </p>
             <p className="text-xs text-gray-400 mt-1">
-              Limit: {elements.length}/{MAX_ELEMENTS} elementów
+              Elementy: {elements.length}/{MAX_ELEMENTS}
               {elements.length >= MAX_ELEMENTS && <span className="text-red-500 ml-1">— osiągnięto limit</span>}
             </p>
           </div>
@@ -296,7 +296,7 @@ const Settings = ({ onClose }) => {
               Wgraj model 3D (.gltf / .glb) i nadaj mu nazwę oraz skalę
             </p>
             <p className="text-xs text-gray-400 mt-1">
-              Limit: {uploadedModels.length}/{MAX_MODELS} modeli
+              Modele: {uploadedModels.length}/{MAX_MODELS}
               {uploadedModels.length >= MAX_MODELS && <span className="text-red-500 ml-1">— osiągnięto limit</span>}
             </p>
           </div>
@@ -322,7 +322,7 @@ const Settings = ({ onClose }) => {
         {/* Existing custom 3D text elements */}
         {elements.length > 0 && (
           <div className="mt-12">
-            <h3 className="text-xl font-bold text-gray-800 mb-4">Moje elementy 3D ({elements.length}/{MAX_ELEMENTS})</h3>
+            <h3 className="text-xl font-bold text-gray-800 mb-4">Moje elementy 3D ({elements.length})</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {elements.map((el) => (
                 <div
@@ -365,7 +365,7 @@ const Settings = ({ onClose }) => {
         {/* Uploaded 3D models */}
         {uploadedModels.length > 0 && (
           <div className="mt-12">
-            <h3 className="text-xl font-bold text-gray-800 mb-4">Wgrane modele 3D ({uploadedModels.length}/{MAX_MODELS})</h3>
+            <h3 className="text-xl font-bold text-gray-800 mb-4">Wgrane modele 3D ({uploadedModels.length})</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {uploadedModels.map((model) => (
                 <div
