@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useAppStore } from '../../store';
 import { StepBuilder } from '../StepBuilder/StepBuilder';
 import { Viewer3D } from '../Viewer3D/Viewer3D';
@@ -28,10 +28,7 @@ export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, useSamplePr
     setEditorMode,
     setSelectedStepId,
     isGuestMode,
-    guestShareToken,
   } = useAppStore();
-
-  const [showGuestLinkCopied, setShowGuestLinkCopied] = useState(false);
 
   useEffect(() => {
     if (!project && useSampleProjectFallback) {
@@ -47,19 +44,6 @@ export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, useSamplePr
     }
   };
 
-  const handleCopyGuestLink = async () => {
-    if (!guestShareToken) return;
-    const url = `${window.location.origin}/view/${guestShareToken}`;
-    try {
-      await navigator.clipboard.writeText(url);
-    } catch {
-      alert(`Skopiuj ten link: ${url}`);
-      return;
-    }
-    setShowGuestLinkCopied(true);
-    setTimeout(() => setShowGuestLinkCopied(false), 3000);
-  };
-
   if (isPreviewMode) {
     if (project?.projectType === 'upload') {
       return <div className="w-screen h-screen"><UploadPreviewMode onGoToEditorPanel={onGoToEditorPanel} /></div>;
@@ -70,14 +54,6 @@ export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, useSamplePr
   if (project?.projectType === 'upload') {
     return (
       <div className="w-screen h-screen flex flex-col bg-gradient-to-br from-slate-50 to-slate-100">
-        {showGuestLinkCopied && (
-          <div className="absolute top-20 right-6 bg-green-500 text-white px-6 py-3 rounded-xl shadow-2xl z-50 flex items-center gap-3">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-            <span className="font-medium">Link skopiowany!</span>
-          </div>
-        )}
         <div className="h-16 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white flex items-center justify-between px-6 shadow-xl border-b border-slate-700">
           <div className="flex items-center gap-4">
             {onBackToProjectList && (
@@ -99,18 +75,6 @@ export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, useSamplePr
             </div>
           </div>
           <div className="flex items-center gap-3">
-            {isGuestMode && guestShareToken && (
-              <button
-                onClick={handleCopyGuestLink}
-                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg hover:from-purple-600 hover:to-pink-700 transition-all duration-200 shadow-lg font-medium text-sm"
-                title="Skopiuj link do udostępnienia"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                </svg>
-                Skopiuj link
-              </button>
-            )}
             <div className="px-4 py-2 bg-green-500/20 backdrop-blur-sm rounded-lg border border-green-500/30 shadow-lg flex items-center gap-2">
               <div className="w-2 h-2 bg-green-400 rounded-full shadow-lg shadow-green-400/50 motion-safe:animate-pulse" aria-hidden="true"></div>
               <span className="text-sm font-medium text-green-300">Tryb edytora</span>
@@ -126,14 +90,6 @@ export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, useSamplePr
 
   return (
     <div className="w-screen h-screen flex flex-col bg-gradient-to-br from-slate-50 to-slate-100">
-      {showGuestLinkCopied && (
-        <div className="absolute top-20 right-6 bg-green-500 text-white px-6 py-3 rounded-xl shadow-2xl z-50 flex items-center gap-3">
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-          </svg>
-          <span className="font-medium">Link skopiowany!</span>
-        </div>
-      )}
       <div className="h-16 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white flex items-center justify-between px-6 shadow-xl border-b border-slate-700">
         <div className="flex items-center gap-4">
           {onBackToProjectList && (
@@ -156,18 +112,6 @@ export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, useSamplePr
         </div>
         
         <div className="flex items-center gap-3">
-          {isGuestMode && guestShareToken && (
-            <button
-              onClick={handleCopyGuestLink}
-              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg hover:from-purple-600 hover:to-pink-700 transition-all duration-200 shadow-lg font-medium text-sm"
-              title="Skopiuj link do udostępnienia"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-              </svg>
-              Skopiuj link
-            </button>
-          )}
           <div className="px-4 py-2 bg-green-500/20 backdrop-blur-sm rounded-lg border border-green-500/30 shadow-lg flex items-center gap-2">
             <div className="w-2 h-2 bg-green-400 rounded-full shadow-lg shadow-green-400/50 motion-safe:animate-pulse" aria-hidden="true"></div>
             <span className="text-sm font-medium text-green-300">Tryb edytora</span>

@@ -6,9 +6,9 @@ import {
   createProject,
   updateProject,
   deleteProjectRequest,
-  createGuestProject,
-  updateGuestProject,
 } from '../services/projects';
+
+const GUEST_PROJECT_KEY = '3ddocs_guest_project';
 
 export interface SavedProject {
   project: ProjectData;
@@ -231,7 +231,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
   },
 
   saveToApi: () => {
-    const { project, nodePositions, isGuestMode, guestShareToken } = get();
+    const { project, nodePositions, isGuestMode } = get();
     if (!project) return;
 
     const savedProject: SavedProject = {
@@ -243,11 +243,8 @@ export const useAppStore = create<AppStore>((set, get) => ({
     const persist = async () => {
       try {
         if (isGuestMode) {
-          // Guest mode: update via shareToken (no auth). Skip if token not yet set
-          // (creation is handled by createNewGuestProject).
-          if (guestShareToken) {
-            await updateGuestProject(guestShareToken, savedProject);
-          }
+          // Guest mode: persist to localStorage only, no API calls.
+          localStorage.setItem(GUEST_PROJECT_KEY, JSON.stringify(savedProject));
           return;
         }
 
@@ -320,9 +317,10 @@ export const useAppStore = create<AppStore>((set, get) => ({
   },
 
   createNewGuestProject: async (projectName: string, projectType?: 'builder' | 'upload', projectModelUrl?: string) => {
-    const provisional: SavedProject = {
+    const projectId = `guest-${crypto.randomUUID()}`;
+    const newSavedProject: SavedProject = {
       project: {
-        id: '',
+        id: projectId,
         name: projectName,
         projectType: projectType ?? 'builder',
         projectModelUrl: projectModelUrl,
@@ -333,19 +331,20 @@ export const useAppStore = create<AppStore>((set, get) => ({
       nodePositions: {},
       lastModified: Date.now(),
     };
-    const { savedProject, shareToken } = await createGuestProject(provisional);
+    localStorage.setItem(GUEST_PROJECT_KEY, JSON.stringify(newSavedProject));
     set({
-      project: savedProject.project,
-      nodePositions: savedProject.nodePositions,
+      project: newSavedProject.project,
+      nodePositions: newSavedProject.nodePositions,
       selectedStepId: null,
       isGuestMode: true,
-      guestShareToken: shareToken,
+      guestShareToken: null,
       isPreviewMode: false,
     });
-    return savedProject.project;
+    return newSavedProject.project;
   },
 
   clearGuestMode: () => {
+    localStorage.removeItem(GUEST_PROJECT_KEY);
     set({
       isGuestMode: false,
       guestShareToken: null,
