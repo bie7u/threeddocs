@@ -71,7 +71,7 @@ export const apiRequest = async (
         isRefreshing = false;
         // Only redirect to login when not already on a public auth page to
         // avoid an infinite reload loop (e.g. Login page calling getMe()).
-        const publicPaths = ['/login', '/register'];
+        const publicPaths = ['/login', '/register', '/guest'];
         if (!publicPaths.includes(window.location.pathname)) {
           window.location.href = '/login';
         }

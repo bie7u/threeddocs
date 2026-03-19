@@ -7,7 +7,7 @@ import { loadUploadedModels } from '../../utils/uploadedModels';
 import type { Custom3DElement } from '../../types';
 
 export const StepProperties = () => {
-  const { project, selectedStepId, updateStep, deleteStep, addStep } = useAppStore();
+  const { project, selectedStepId, updateStep, deleteStep, addStep, isGuestMode } = useAppStore();
   
   const selectedStep = project?.steps.find((step) => step.id === selectedStepId);
   
@@ -18,9 +18,12 @@ export const StepProperties = () => {
   const [uploadedModels, setUploadedModels] = useState<UploadedModel3D[]>([]);
 
   useEffect(() => {
+    // Guest users have no server-side elements or models — skip API calls to
+    // prevent a 401 that would otherwise redirect them to the login page.
+    if (isGuestMode) return;
     loadCustom3DElements().then(setCustom3DElements).catch(() => setCustom3DElements([]));
     loadUploadedModels().then(setUploadedModels).catch(() => setUploadedModels([]));
-  }, []);
+  }, [isGuestMode]);
   
   const [formData, setFormData] = useState<Partial<InstructionStep>>({
     title: '',
