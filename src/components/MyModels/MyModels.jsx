@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAppStore } from '../../store';
 import { generateShareToken, fetchProjectsPage } from '../../services/projects';
+import { Footer } from '../Footer/Footer';
 
 const PAGE_SIZE = 10;
 
@@ -98,7 +99,7 @@ export const MyModels = ({ onOpenEditor, onClose }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex flex-col">
       {/* Navigation Bar */}
       <nav className="bg-white shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -145,7 +146,7 @@ export const MyModels = ({ onOpenEditor, onClose }) => {
       </nav>
 
       {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <div className="w-full flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         {/* Clipboard fallback: show inline error when clipboard API is unavailable */}
         {shareError && (
           <div className="mb-6 flex items-center justify-between gap-4 px-5 py-3 bg-yellow-50 border border-yellow-300 rounded-xl text-sm text-yellow-800">
@@ -393,6 +394,8 @@ export const MyModels = ({ onOpenEditor, onClose }) => {
           </>
         )}
       </div>
+
+      <Footer />
     </div>
   );
 };

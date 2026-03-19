@@ -7,6 +7,7 @@ import Settings from './Settings';
 import { useAppStore } from '../store';
 import { getMe } from '../services/auth';
 import { logout } from '../services/auth';
+import { Footer } from '../components/Footer/Footer';
 
 const Dashboard = () => {
   const MAX_PROJECTS = 30;
@@ -95,7 +96,7 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex flex-col">
       {/* Navigation Bar */}
       <nav className="bg-white shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -117,7 +118,7 @@ const Dashboard = () => {
       </nav>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="w-full flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
             Witaj w panelu ThreeDocsy
@@ -222,6 +223,8 @@ const Dashboard = () => {
           createError={createError}
         />
       )}
+
+      <Footer />
     </div>
   );
 };

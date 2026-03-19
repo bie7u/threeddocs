@@ -5,6 +5,7 @@ import { ModelPreviewModal } from '../components/ModelPreviewModal/ModelPreviewM
 import { loadCustom3DElements, deleteCustom3DElement } from '../utils/custom3DElements';
 import { loadUploadedModels, deleteUploadedModel } from '../utils/uploadedModels';
 import { getMe, changePassword } from '../services/auth';
+import { Footer } from '../components/Footer/Footer';
 
 // ─── Account Modal ────────────────────────────────────────────────────────────
 
@@ -219,7 +220,7 @@ const Settings = ({ onClose }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex flex-col">
       {/* Navigation Bar */}
       <nav className="bg-white shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -251,7 +252,7 @@ const Settings = ({ onClose }) => {
       </nav>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="w-full flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Ustawienia</h2>
           <p className="text-gray-600">Konfiguruj swoje preferencje i zasoby 3D</p>
@@ -434,6 +435,8 @@ const Settings = ({ onClose }) => {
       {previewModel && (
         <ModelPreviewModal model={previewModel} onClose={() => setPreviewModel(null)} />
       )}
+
+      <Footer />
     </div>
   );
 };
