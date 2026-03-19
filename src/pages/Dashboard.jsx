@@ -175,7 +175,7 @@ const Dashboard = () => {
               <h3 className="text-lg font-semibold text-gray-800 mb-2">Dodaj nowy model</h3>
               <p className="text-sm text-gray-600">Wgraj nowy model 3D</p>
               <p className="text-xs text-gray-400 mt-1">
-                Modele: {projectsCount}/{MAX_PROJECTS}
+                Projekty: {projectsCount}/{MAX_PROJECTS}
                 {projectsCount >= MAX_PROJECTS && <span className="text-red-500 ml-1">— osiągnięto limit</span>}
               </p>
             </div>
