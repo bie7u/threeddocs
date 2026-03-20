@@ -21,8 +21,9 @@ export async function uploadNewModel(
   modelFileName: string,
   name: string,
   modelScale: number,
+  description?: string,
 ): Promise<UploadedModel3D> {
-  return uploadModelRequest(modelDataUrl, modelFileName, name, modelScale);
+  return uploadModelRequest(modelDataUrl, modelFileName, name, modelScale, description);
 }
 
 /**
@@ -33,8 +34,9 @@ export async function saveUploadedModelMeta(
   id: string,
   name: string,
   modelScale: number,
+  description?: string,
 ): Promise<UploadedModel3D> {
-  return updateModelRequest(id, name, modelScale);
+  return updateModelRequest(id, name, modelScale, description);
 }
 
 /** Deletes an uploaded model by id. */

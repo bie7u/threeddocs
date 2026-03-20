@@ -29,6 +29,7 @@ export interface Custom3DElement {
   wireframe: boolean;
   wireframeColor: string;
   textureDataUrl?: string; // base64-encoded image
+  description?: string;
   createdAt: number;
 }
 
@@ -38,6 +39,7 @@ export interface UploadedModel3D {
   modelDataUrl: string; // base64-encoded data URL of the GLB/GLTF file
   modelFileName: string;
   modelScale: number;
+  description?: string;
   createdAt: number;
 }
 

@@ -9,6 +9,7 @@ interface ApiModel {
   model_file_name: string;
   model_scale: number;
   model_data_url: string;
+  description: string | null;
   createdAt: number;
 }
 
@@ -20,6 +21,7 @@ const fromApiModel = (m: ApiModel): UploadedModel3D => ({
   modelDataUrl: m.model_data_url,
   modelFileName: m.model_file_name,
   modelScale: m.model_scale,
+  description: m.description ?? undefined,
   createdAt: m.createdAt,
 });
 
@@ -52,10 +54,11 @@ export const uploadModelRequest = async (
   modelFileName: string,
   name: string,
   modelScale: number,
+  description?: string,
 ): Promise<UploadedModel3D> => {
   const res = await apiRequest('/models', {
     method: 'POST',
-    body: JSON.stringify({ name, model_file_name: modelFileName, model_scale: modelScale, model_data_url: modelDataUrl }),
+    body: JSON.stringify({ name, model_file_name: modelFileName, model_scale: modelScale, model_data_url: modelDataUrl, description: description ?? null }),
   });
   if (!res.ok) throw new Error('Failed to upload model');
   return fromApiModel(await res.json() as ApiModel);
@@ -69,10 +72,11 @@ export const updateModelRequest = async (
   id: string,
   name: string,
   modelScale: number,
+  description?: string,
 ): Promise<UploadedModel3D> => {
   const res = await apiRequest(`/models/${id}`, {
     method: 'PUT',
-    body: JSON.stringify({ name, model_scale: modelScale }),
+    body: JSON.stringify({ name, model_scale: modelScale, description: description ?? null }),
   });
   if (!res.ok) throw new Error('Failed to update model');
   return fromApiModel(await res.json() as ApiModel);

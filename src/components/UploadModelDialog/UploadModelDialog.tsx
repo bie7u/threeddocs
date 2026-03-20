@@ -99,6 +99,7 @@ export const UploadModelDialog = ({ existing, onClose, onSaved }: Props) => {
   const [modelDataUrl, setModelDataUrl] = useState<string | null>(existing?.modelDataUrl ?? null);
   const [modelFileName, setModelFileName] = useState(existing?.modelFileName ?? '');
   const [modelScale, setModelScale] = useState(existing?.modelScale ?? 1);
+  const [description, setDescription] = useState(existing?.description ?? '');
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -150,9 +151,9 @@ export const UploadModelDialog = ({ existing, onClose, onSaved }: Props) => {
     try {
       let saved: UploadedModel3D;
       if (existing) {
-        saved = await saveUploadedModelMeta(existing.id, trimmedName, modelScale);
+        saved = await saveUploadedModelMeta(existing.id, trimmedName, modelScale, description.trim() || undefined);
       } else {
-        saved = await uploadNewModel(modelDataUrl!, modelFileName, trimmedName, modelScale);
+        saved = await uploadNewModel(modelDataUrl!, modelFileName, trimmedName, modelScale, description.trim() || undefined);
       }
       onSaved(saved);
     } catch (err) {
@@ -265,6 +266,20 @@ export const UploadModelDialog = ({ existing, onClose, onSaved }: Props) => {
                 />
               </div>
               <p className="mt-1 text-xs text-gray-400">Domyślna skala użyta przy dodaniu do kroku</p>
+            </div>
+
+            {/* Description */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">
+                Opis <span className="text-gray-400 font-normal">(opcjonalny)</span>
+              </label>
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                rows={3}
+                placeholder="Krótki opis modelu…"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none text-sm"
+              />
             </div>
           </div>
 
