@@ -94,6 +94,7 @@ export const ModelPreviewModal = ({ element, model, onClose }: ModelPreviewModal
   }, [onClose]);
 
   const title = element?.name ?? model?.name ?? 'Podgląd';
+  const description = element?.description ?? model?.description;
 
   return (
     <div
@@ -138,6 +139,15 @@ export const ModelPreviewModal = ({ element, model, onClose }: ModelPreviewModal
         <p className="text-center text-xs text-gray-500 py-2">
           Przeciągnij aby obrócić · Scroll aby przybliżyć
         </p>
+
+        {/* Description */}
+        {description && (
+          <div className="px-5 pb-4">
+            <p className="text-sm text-gray-300 bg-gray-800 rounded-lg px-4 py-3 leading-relaxed">
+              {description}
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
