@@ -1,10 +1,11 @@
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface RichTextEditorProps {
   value: string;
   onChange: (value: string) => void;
+  maxLength?: number;
 }
 
 const ToolbarButton = ({
@@ -35,26 +36,41 @@ const ToolbarButton = ({
   </button>
 );
 
-export const RichTextEditor = ({ value, onChange }: RichTextEditorProps) => {
+export const RichTextEditor = ({ value, onChange, maxLength }: RichTextEditorProps) => {
   // Track the last value we programmatically set to avoid unnecessary updates
   const lastSetValueRef = useRef<string>(value);
+  // Track last valid HTML to restore when limit is exceeded
+  const lastValidHtmlRef = useRef<string>(value);
+  const [charCount, setCharCount] = useState<number>(0);
 
   const editor = useEditor({
     extensions: [StarterKit],
     content: value,
     onUpdate: ({ editor }) => {
+      const text = editor.getText();
+      if (maxLength !== undefined && text.length > maxLength) {
+        // Restore last valid content without emitting another update
+        editor.commands.setContent(lastValidHtmlRef.current, false);
+        return;
+      }
       const html = editor.getHTML();
       lastSetValueRef.current = html;
+      lastValidHtmlRef.current = html;
+      setCharCount(text.length);
       onChange(html);
     },
   });
 
   // Sync external value changes (e.g. when step selection changes)
+  // Also initializes charCount once the editor is ready
   useEffect(() => {
-    if (editor && value !== lastSetValueRef.current) {
+    if (!editor) return;
+    if (value !== lastSetValueRef.current) {
       lastSetValueRef.current = value;
+      lastValidHtmlRef.current = value;
       editor.commands.setContent(value);
     }
+    setCharCount(editor.getText().length);
   }, [value, editor]);
 
   if (!editor) return null;
@@ -185,6 +201,14 @@ export const RichTextEditor = ({ value, onChange }: RichTextEditorProps) => {
         editor={editor}
         className="prose prose-sm max-w-none p-3 min-h-[120px] focus:outline-none [&_.ProseMirror]:outline-none"
       />
+      {/* Character counter */}
+      {maxLength !== undefined && (
+        <div className="flex justify-end px-3 py-1 border-t border-gray-200 bg-gray-50 rounded-b">
+          <span className={`text-xs ${charCount >= maxLength ? 'text-red-500 font-semibold' : 'text-gray-400'}`}>
+            {charCount}/{maxLength}
+          </span>
+        </div>
+      )}
     </div>
   );
 };

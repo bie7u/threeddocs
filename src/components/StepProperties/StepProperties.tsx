@@ -187,13 +187,17 @@ export const StepProperties = () => {
         ) : (
           <div className="space-y-3 mt-2">
             <div className="bg-white rounded-lg border border-slate-200 p-3 shadow-sm">
-              <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Tytuł kroku</label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide">Tytuł kroku</label>
+                <span className="text-xs text-slate-400">{(formData.title || '').length}/200</span>
+              </div>
               <input
                 type="text"
                 value={formData.title || ''}
                 onChange={(e) => handleInputChange('title', e.target.value)}
                 className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Np. Krok 1 – Montaż podstawy"
+                maxLength={200}
               />
             </div>
             <div className="bg-white rounded-lg border border-slate-200 p-3 shadow-sm">
@@ -201,6 +205,7 @@ export const StepProperties = () => {
               <RichTextEditor
                 value={formData.description || ''}
                 onChange={(value) => handleInputChange('description', value)}
+                maxLength={2000}
               />
             </div>
             <div className="bg-white rounded-lg border border-slate-200 p-3 shadow-sm">

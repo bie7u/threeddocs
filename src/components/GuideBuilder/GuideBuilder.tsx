@@ -197,12 +197,16 @@ export const GuideBuilder = () => {
             </div>
             <div className="p-3 space-y-3 overflow-y-auto max-h-64">
               <div>
-                <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1">Tytuł</label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide">Tytuł</label>
+                  <span className="text-xs text-slate-400">{selectedStep.title.length}/200</span>
+                </div>
                 <input
                   type="text"
                   value={selectedStep.title}
                   onChange={(e) => updateStep(selectedStep.id, { title: e.target.value })}
                   className="w-full px-3 py-1.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  maxLength={200}
                 />
               </div>
               <div>
@@ -210,6 +214,7 @@ export const GuideBuilder = () => {
                 <RichTextEditor
                   value={selectedStep.description}
                   onChange={(value) => updateStep(selectedStep.id, { description: value })}
+                  maxLength={2000}
                 />
               </div>
             </div>
