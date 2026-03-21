@@ -133,7 +133,7 @@ export const StepProperties = () => {
       sphere: '🔵 Kula',
       cylinder: '🥫 Walec',
       cone: '🔺 Stożek',
-      engravedBlock: '🔲 Grawerowany klocek',
+      engravedBlock: '🔲 Klocek z tekstem',
     };
     if (formData.shapeType === 'custom3dElement') {
       const el = custom3DElements.find((e) => e.id === formData.custom3dElementId);
@@ -235,7 +235,7 @@ export const StepProperties = () => {
 
             {formData.shapeType === 'engravedBlock' && (
               <div className="bg-white rounded-lg border border-slate-200 p-3 shadow-sm space-y-3">
-                <p className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Ustawienia grawerowanego klocka</p>
+                <p className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Ustawienia klocka z tekstem</p>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Tekst <span className="text-gray-400 font-normal">(maks. 3 słów, 24 znaki)</span>
