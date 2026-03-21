@@ -65,6 +65,7 @@ export interface ConnectionData {
   shapeModelPositionY?: number;
   arrowDirection?: ArrowDirection;
   connectionType?: ConnectionType;
+  engravedBlockParams?: EngravedBlockParams;
 }
 
 export interface InstructionStep {

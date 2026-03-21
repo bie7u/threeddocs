@@ -49,6 +49,7 @@ interface ConnectionWithIndices {
   shapeModelPositionY?: number;
   arrowDirection?: ArrowDirection;
   connectionType?: ConnectionType;
+  engravedBlockParams?: InstructionStep['engravedBlockParams'];
 }
 
 interface CustomModelProps {
@@ -402,11 +403,12 @@ interface ConnectionTubeProps {
   shapeModelPositionY?: number;
   arrowDirection?: ArrowDirection;
   connectionType?: ConnectionType;
+  engravedBlockParams?: InstructionStep['engravedBlockParams'];
   shareToken?: string;
   onClick?: () => void;
 }
 
-const ConnectionTube = ({ startPos, endPos, isActive, style = 'standard', shapeType, custom3dElementId, uploadedModelId, shapeModelScale = 1, shapeModelPositionY = 0, arrowDirection, connectionType = 'tube', shareToken, onClick }: ConnectionTubeProps) => {
+const ConnectionTube = ({ startPos, endPos, isActive, style = 'standard', shapeType, custom3dElementId, uploadedModelId, shapeModelScale = 1, shapeModelPositionY = 0, arrowDirection, connectionType = 'tube', engravedBlockParams, shareToken, onClick }: ConnectionTubeProps) => {
   const tubeRef = useRef<THREE.Mesh>(null);
   const glowRef = useRef<THREE.Mesh>(null);
   const shapeRef = useRef<THREE.Group>(null);
@@ -720,6 +722,7 @@ const ConnectionTube = ({ startPos, endPos, isActive, style = 'standard', shapeT
             uploadedModelId={uploadedModelId}
             modelScale={shapeModelScale}
             modelPositionY={shapeModelPositionY}
+            engravedBlockParams={engravedBlockParams}
             shareToken={shareToken}
           />
         </group>
@@ -774,6 +777,7 @@ const UnifiedModel = ({ project, currentStepId, nodePositions, onConnectionClick
           shapeModelPositionY: conn.data?.shapeModelPositionY,
           arrowDirection: conn.data?.arrowDirection,
           connectionType: conn.data?.connectionType,
+          engravedBlockParams: conn.data?.engravedBlockParams,
         } as ConnectionWithIndices;
       })
       .filter((c): c is ConnectionWithIndices => c !== null);
@@ -814,6 +818,7 @@ const UnifiedModel = ({ project, currentStepId, nodePositions, onConnectionClick
           shapeModelPositionY={conn.shapeModelPositionY}
           arrowDirection={conn.arrowDirection}
           connectionType={conn.connectionType}
+          engravedBlockParams={conn.engravedBlockParams}
           shareToken={shareToken}
           onClick={conn.description && onConnectionClick ? () => onConnectionClick(conn.description as string) : undefined}
         />

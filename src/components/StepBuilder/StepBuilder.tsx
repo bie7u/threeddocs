@@ -19,7 +19,7 @@ import ReactFlow, {
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { useAppStore } from '../../store';
-import type { InstructionStep, ConnectionData, ConnectionStyle, ShapeType, ArrowDirection, ConnectionType } from '../../types';
+import type { InstructionStep, ConnectionData, ConnectionStyle, ShapeType, ArrowDirection, ConnectionType, EngravedBlockParams } from '../../types';
 import { ShapeTypePicker } from '../ShapeTypePicker/ShapeTypePicker';
 
 // Custom node component
@@ -109,6 +109,7 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
   const [draftShapePosY,         setDraftShapePosY]         = useState<number>(data?.shapeModelPositionY ?? 0);
   const [draftArrow,             setDraftArrow]             = useState<ArrowDirection>(currentArrowDir);
   const [draftConnType,          setDraftConnType]          = useState<ConnectionType>(currentConnType);
+  const [draftEngravedParams,    setDraftEngravedParams]    = useState<EngravedBlockParams>(data?.engravedBlockParams ?? { text: 'DB', font: 'helvetiker', depth: 0.08, padding: 0.1, face: 'front' });
 
   // Re-sync draft when edge data changes externally
   useEffect(() => {
@@ -121,6 +122,7 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
     setDraftShapePosY(data?.shapeModelPositionY ?? 0);
     setDraftArrow(data?.arrowDirection || 'none');
     setDraftConnType(data?.connectionType || 'tube');
+    setDraftEngravedParams(data?.engravedBlockParams ?? { text: 'DB', font: 'helvetiker', depth: 0.08, padding: 0.1, face: 'front' });
   }, [data]);
 
   const styleInfo = CONNECTION_STYLES.find(s => s.value === currentStyle) || CONNECTION_STYLES[0];
@@ -154,11 +156,15 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
     setDraftShapePosY(0);
   };
 
+  const handleEngravedParamChange = <K extends keyof EngravedBlockParams>(key: K, value: EngravedBlockParams[K]) => {
+    setDraftEngravedParams(prev => ({ ...prev, [key]: value }));
+  };
+
   const handleSave = () => {
     if (!project) return;
     const updated = project.connections.map(conn =>
       conn.id === id
-        ? { ...conn, data: { ...conn.data, description: draftDesc, style: draftStyle, shapeType: draftShape, custom3dElementId: draftCustom3dElementId, uploadedModelId: draftUploadedModelId, shapeModelScale: draftShapeScale, shapeModelPositionY: draftShapePosY, arrowDirection: draftArrow, connectionType: draftConnType } }
+        ? { ...conn, data: { ...conn.data, description: draftDesc, style: draftStyle, shapeType: draftShape, custom3dElementId: draftCustom3dElementId, uploadedModelId: draftUploadedModelId, shapeModelScale: draftShapeScale, shapeModelPositionY: draftShapePosY, arrowDirection: draftArrow, connectionType: draftConnType, engravedBlockParams: draftShape === 'engravedBlock' ? draftEngravedParams : undefined } }
         : conn
     );
     updateConnections(updated);
@@ -349,6 +355,42 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
                           onChange={e => setDraftShapePosY(parseFloat(e.target.value))}
                           className="w-14 px-1.5 py-1 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Engraved block settings */}
+                {draftShape === 'engravedBlock' && (
+                  <div className="space-y-2 border border-slate-200 rounded-lg p-2 bg-slate-50">
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Ustawienia klocka z tekstem</p>
+                    <div>
+                      <p className="text-xs font-semibold text-slate-500 mb-1">Tekst <span className="font-normal text-slate-400">(maks. 24 znaki)</span></p>
+                      <input
+                        type="text"
+                        value={draftEngravedParams.text}
+                        onChange={e => handleEngravedParamChange('text', e.target.value)}
+                        maxLength={24}
+                        className="w-full px-2 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-slate-500 mb-1">Czcionka</p>
+                      <select
+                        value={draftEngravedParams.font}
+                        onChange={e => handleEngravedParamChange('font', e.target.value as EngravedBlockParams['font'])}
+                        className="w-full px-2 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="helvetiker">Sans (Helvetiker)</option>
+                        <option value="optimer">Serif (Optimer)</option>
+                        <option value="gentilis">Mono (Gentilis)</option>
+                      </select>
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-slate-500 mb-1">Grubość <span className="font-normal text-slate-400">(0.05–0.3)</span></p>
+                      <div className="flex items-center gap-2">
+                        <input type="range" min="0.05" max="0.3" step="0.01" value={draftEngravedParams.depth} onChange={e => handleEngravedParamChange('depth', parseFloat(e.target.value))} className="flex-1" />
+                        <input type="number" min="0.05" max="0.3" step="0.01" value={draftEngravedParams.depth} onChange={e => handleEngravedParamChange('depth', parseFloat(e.target.value))} className="w-14 px-1.5 py-1 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
                       </div>
                     </div>
                   </div>
