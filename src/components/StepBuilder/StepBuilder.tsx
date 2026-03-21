@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import ReactFlow, {
   type Node,
   type Edge,
@@ -18,7 +19,8 @@ import ReactFlow, {
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { useAppStore } from '../../store';
-import type { InstructionStep, ConnectionData, ConnectionStyle, ShapeType, ArrowDirection, ConnectionType } from '../../types';
+import type { InstructionStep, ConnectionData, ConnectionStyle, ShapeType, ArrowDirection, ConnectionType, EngravedBlockParams } from '../../types';
+import { ShapeTypePicker } from '../ShapeTypePicker/ShapeTypePicker';
 
 // Custom node component
 const StepNode = ({ data, selected }: NodeProps<InstructionStep>) => {
@@ -83,18 +85,12 @@ const CONN_TYPES: { value: ConnectionType; label: string }[] = [
   { value: 'arrow', label: '➡ Strzałka' },
 ];
 
-const SHAPE_MARKERS: { value: string; label: string }[] = [
-  { value: '',         label: 'Brak' },
-  { value: 'cube',     label: '📦 Sześcian' },
-  { value: 'sphere',   label: '🔵 Kula' },
-  { value: 'cylinder', label: '🥫 Walec' },
-  { value: 'cone',     label: '🔺 Stożek' },
-];
 
 // ─── Inline connection editor rendered on the edge label ──────────────────────
 const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<ConnectionData>) => {
-  const { updateConnections, project } = useAppStore();
+  const { updateConnections, project, isGuestMode } = useAppStore();
   const [open, setOpen] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
   const [edgePath, labelX, labelY] = getBezierPath({ sourceX, sourceY, targetX, targetY });
 
   const currentStyle       = data?.style          || 'standard';
@@ -104,28 +100,71 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
   const currentConnType    = data?.connectionType || 'tube';
 
   // Local draft state – only committed on Save
-  const [draftDesc,     setDraftDesc]     = useState(currentDescription);
-  const [draftStyle,    setDraftStyle]    = useState<ConnectionStyle>(currentStyle);
-  const [draftShape,    setDraftShape]    = useState<ShapeType | undefined>(currentShapeType);
-  const [draftArrow,    setDraftArrow]    = useState<ArrowDirection>(currentArrowDir);
-  const [draftConnType, setDraftConnType] = useState<ConnectionType>(currentConnType);
+  const [draftDesc,              setDraftDesc]              = useState(currentDescription);
+  const [draftStyle,             setDraftStyle]             = useState<ConnectionStyle>(currentStyle);
+  const [draftShape,             setDraftShape]             = useState<ShapeType | undefined>(currentShapeType);
+  const [draftCustom3dElementId, setDraftCustom3dElementId] = useState<string | undefined>(data?.custom3dElementId);
+  const [draftUploadedModelId,   setDraftUploadedModelId]   = useState<string | undefined>(data?.uploadedModelId);
+  const [draftShapeScale,        setDraftShapeScale]        = useState<number>(data?.shapeModelScale ?? 1);
+  const [draftShapePosY,         setDraftShapePosY]         = useState<number>(data?.shapeModelPositionY ?? 0);
+  const [draftArrow,             setDraftArrow]             = useState<ArrowDirection>(currentArrowDir);
+  const [draftConnType,          setDraftConnType]          = useState<ConnectionType>(currentConnType);
+  const [draftEngravedParams,    setDraftEngravedParams]    = useState<EngravedBlockParams>(data?.engravedBlockParams ?? { text: 'DB', font: 'helvetiker', depth: 0.08, padding: 0.1, face: 'front' });
 
   // Re-sync draft when edge data changes externally
   useEffect(() => {
     setDraftDesc(data?.description    || '');
     setDraftStyle(data?.style          || 'standard');
     setDraftShape(data?.shapeType);
+    setDraftCustom3dElementId(data?.custom3dElementId);
+    setDraftUploadedModelId(data?.uploadedModelId);
+    setDraftShapeScale(data?.shapeModelScale ?? 1);
+    setDraftShapePosY(data?.shapeModelPositionY ?? 0);
     setDraftArrow(data?.arrowDirection || 'none');
     setDraftConnType(data?.connectionType || 'tube');
+    setDraftEngravedParams(data?.engravedBlockParams ?? { text: 'DB', font: 'helvetiker', depth: 0.08, padding: 0.1, face: 'front' });
   }, [data]);
 
   const styleInfo = CONNECTION_STYLES.find(s => s.value === currentStyle) || CONNECTION_STYLES[0];
+
+  const getShapeButtonLabel = (): string => {
+    if (!draftShape) return 'Brak';
+    const labels: Partial<Record<ShapeType, string>> = {
+      cube: '📦 Sześcian',
+      sphere: '🔵 Kula',
+      cylinder: '🥫 Walec',
+      cone: '🔺 Stożek',
+      engravedBlock: '🔲 Klocek z tekstem',
+      custom3dElement: '🧩 Element 3D',
+      uploadedModel: '📤 Wgrany model',
+    };
+    return labels[draftShape] ?? draftShape;
+  };
+
+  const handleShapeSelect = (type: ShapeType, elementId?: string, modelId?: string) => {
+    setDraftShape(type);
+    setDraftCustom3dElementId(elementId);
+    setDraftUploadedModelId(modelId);
+    setPickerOpen(false);
+  };
+
+  const handleClearShape = () => {
+    setDraftShape(undefined);
+    setDraftCustom3dElementId(undefined);
+    setDraftUploadedModelId(undefined);
+    setDraftShapeScale(1);
+    setDraftShapePosY(0);
+  };
+
+  const handleEngravedParamChange = <K extends keyof EngravedBlockParams>(key: K, value: EngravedBlockParams[K]) => {
+    setDraftEngravedParams(prev => ({ ...prev, [key]: value }));
+  };
 
   const handleSave = () => {
     if (!project) return;
     const updated = project.connections.map(conn =>
       conn.id === id
-        ? { ...conn, data: { ...conn.data, description: draftDesc, style: draftStyle, shapeType: draftShape, arrowDirection: draftArrow, connectionType: draftConnType } }
+        ? { ...conn, data: { ...conn.data, description: draftDesc, style: draftStyle, shapeType: draftShape, custom3dElementId: draftCustom3dElementId, uploadedModelId: draftUploadedModelId, shapeModelScale: draftShapeScale, shapeModelPositionY: draftShapePosY, arrowDirection: draftArrow, connectionType: draftConnType, engravedBlockParams: draftShape === 'engravedBlock' ? draftEngravedParams : undefined } }
         : conn
     );
     updateConnections(updated);
@@ -202,7 +241,7 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
                 </div>
 
                 {/* Connection type + Arrow direction side by side */}
-                <div className="grid grid-cols-2 gap-2">
+                <div className={draftConnType === 'arrow' ? 'grid grid-cols-2 gap-2' : 'grid grid-cols-1 gap-2'}>
                   <div>
                     <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Typ</p>
                     <select
@@ -213,29 +252,149 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
                       {CONN_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
                     </select>
                   </div>
-                  <div>
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Kierunek</p>
-                    <select
-                      value={draftArrow}
-                      onChange={e => setDraftArrow(e.target.value as ArrowDirection)}
-                      className="w-full px-2 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      {ARROW_DIRS.map(a => <option key={a.value} value={a.value}>{a.label}</option>)}
-                    </select>
-                  </div>
+                  {draftConnType === 'arrow' && (
+                    <div>
+                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Kierunek</p>
+                      <select
+                        value={draftArrow}
+                        onChange={e => setDraftArrow(e.target.value as ArrowDirection)}
+                        className="w-full px-2 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        {ARROW_DIRS.map(a => <option key={a.value} value={a.value}>{a.label}</option>)}
+                      </select>
+                    </div>
+                  )}
                 </div>
 
-                {/* Shape marker */}
+                {/* Shape type picker */}
                 <div>
-                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Znacznik kształtu</p>
-                  <select
-                    value={draftShape || ''}
-                    onChange={e => setDraftShape(e.target.value ? (e.target.value as ShapeType) : undefined)}
-                    className="w-full px-2 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    {SHAPE_MARKERS.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
-                  </select>
+                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Typ kształtu</p>
+                  <div className="flex gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => setPickerOpen(true)}
+                      className="flex-1 flex items-center justify-between px-2 py-1.5 text-xs border border-slate-200 rounded-lg text-slate-700 hover:border-blue-400 hover:bg-slate-50 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <span>{getShapeButtonLabel()}</span>
+                      <svg className="w-3.5 h-3.5 text-slate-400 flex-shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
+                      </svg>
+                    </button>
+                    {draftShape && (
+                      <button
+                        type="button"
+                        onClick={handleClearShape}
+                        title="Usuń kształt"
+                        className="px-2 py-1.5 text-xs border border-slate-200 rounded-lg text-slate-400 hover:text-red-500 hover:border-red-200 hover:bg-red-50 transition-colors focus:outline-none"
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </div>
+                  {pickerOpen && createPortal(
+                    <ShapeTypePicker
+                      currentShapeType={draftShape ?? 'cube'}
+                      currentElementId={draftCustom3dElementId}
+                      currentModelId={draftUploadedModelId}
+                      isGuestMode={isGuestMode}
+                      onSelect={handleShapeSelect}
+                      onClose={() => setPickerOpen(false)}
+                    />,
+                    document.body
+                  )}
                 </div>
+
+                {/* Shape scale + Y-position (visible only when shape is selected) */}
+                {draftShape && (
+                  <div className="space-y-2">
+                    <div>
+                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">
+                        Skala kształtu <span className="font-normal normal-case text-slate-400">(0.1 – 5.0)</span>
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="range"
+                          min="0.1"
+                          max="5"
+                          step="0.1"
+                          value={draftShapeScale}
+                          onChange={e => setDraftShapeScale(parseFloat(e.target.value))}
+                          className="flex-1"
+                        />
+                        <input
+                          type="number"
+                          min="0.1"
+                          max="5"
+                          step="0.1"
+                          value={draftShapeScale}
+                          onChange={e => setDraftShapeScale(parseFloat(e.target.value))}
+                          className="w-14 px-1.5 py-1 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">
+                        Pozycja Y <span className="font-normal normal-case text-slate-400">(-10 – 10)</span>
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="range"
+                          min="-10"
+                          max="10"
+                          step="0.1"
+                          value={draftShapePosY}
+                          onChange={e => setDraftShapePosY(parseFloat(e.target.value))}
+                          className="flex-1"
+                        />
+                        <input
+                          type="number"
+                          min="-10"
+                          max="10"
+                          step="0.1"
+                          value={draftShapePosY}
+                          onChange={e => setDraftShapePosY(parseFloat(e.target.value))}
+                          className="w-14 px-1.5 py-1 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Engraved block settings */}
+                {draftShape === 'engravedBlock' && (
+                  <div className="space-y-2 border border-slate-200 rounded-lg p-2 bg-slate-50">
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Ustawienia klocka z tekstem</p>
+                    <div>
+                      <p className="text-xs font-semibold text-slate-500 mb-1">Tekst <span className="font-normal text-slate-400">(maks. 24 znaki)</span></p>
+                      <input
+                        type="text"
+                        value={draftEngravedParams.text}
+                        onChange={e => handleEngravedParamChange('text', e.target.value)}
+                        maxLength={24}
+                        className="w-full px-2 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-slate-500 mb-1">Czcionka</p>
+                      <select
+                        value={draftEngravedParams.font}
+                        onChange={e => handleEngravedParamChange('font', e.target.value as EngravedBlockParams['font'])}
+                        className="w-full px-2 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="helvetiker">Sans (Helvetiker)</option>
+                        <option value="optimer">Serif (Optimer)</option>
+                        <option value="gentilis">Mono (Gentilis)</option>
+                      </select>
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-slate-500 mb-1">Grubość <span className="font-normal text-slate-400">(0.05–0.3)</span></p>
+                      <div className="flex items-center gap-2">
+                        <input type="range" min="0.05" max="0.3" step="0.01" value={draftEngravedParams.depth} onChange={e => handleEngravedParamChange('depth', parseFloat(e.target.value))} className="flex-1" />
+                        <input type="number" min="0.05" max="0.3" step="0.01" value={draftEngravedParams.depth} onChange={e => handleEngravedParamChange('depth', parseFloat(e.target.value))} className="w-14 px-1.5 py-1 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {/* Description */}
                 <div>

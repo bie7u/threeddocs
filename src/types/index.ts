@@ -59,8 +59,13 @@ export interface ConnectionData {
   style?: ConnectionStyle;
   description?: string;
   shapeType?: ShapeType;
+  custom3dElementId?: string;
+  uploadedModelId?: string;
+  shapeModelScale?: number;
+  shapeModelPositionY?: number;
   arrowDirection?: ArrowDirection;
   connectionType?: ConnectionType;
+  engravedBlockParams?: EngravedBlockParams;
 }
 
 export interface InstructionStep {

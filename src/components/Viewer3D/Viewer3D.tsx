@@ -43,8 +43,13 @@ interface ConnectionWithIndices {
   style: ConnectionStyle;
   description?: string;
   shapeType?: ShapeType;
+  custom3dElementId?: string;
+  uploadedModelId?: string;
+  shapeModelScale?: number;
+  shapeModelPositionY?: number;
   arrowDirection?: ArrowDirection;
   connectionType?: ConnectionType;
+  engravedBlockParams?: InstructionStep['engravedBlockParams'];
 }
 
 interface CustomModelProps {
@@ -392,12 +397,18 @@ interface ConnectionTubeProps {
   style?: 'standard' | 'glass' | 'glow' | 'neon';
   description?: string;
   shapeType?: ShapeType;
+  custom3dElementId?: string;
+  uploadedModelId?: string;
+  shapeModelScale?: number;
+  shapeModelPositionY?: number;
   arrowDirection?: ArrowDirection;
   connectionType?: ConnectionType;
+  engravedBlockParams?: InstructionStep['engravedBlockParams'];
+  shareToken?: string;
   onClick?: () => void;
 }
 
-const ConnectionTube = ({ startPos, endPos, isActive, style = 'standard', shapeType, arrowDirection, connectionType = 'tube', onClick }: ConnectionTubeProps) => {
+const ConnectionTube = ({ startPos, endPos, isActive, style = 'standard', shapeType, custom3dElementId, uploadedModelId, shapeModelScale = 1, shapeModelPositionY = 0, arrowDirection, connectionType = 'tube', engravedBlockParams, shareToken, onClick }: ConnectionTubeProps) => {
   const tubeRef = useRef<THREE.Mesh>(null);
   const glowRef = useRef<THREE.Mesh>(null);
   const shapeRef = useRef<THREE.Group>(null);
@@ -496,7 +507,7 @@ const ConnectionTube = ({ startPos, endPos, isActive, style = 'standard', shapeT
         return (
           <>
             <mesh ref={tubeRef}>
-              <tubeGeometry args={[path, 20, 0.15, 8, false]} />
+              <tubeGeometry args={[path, 20, 0.08, 8, false]} />
               <meshPhysicalMaterial 
                 color={isActive ? '#60a5fa' : '#93c5fd'}
                 transparent
@@ -508,7 +519,7 @@ const ConnectionTube = ({ startPos, endPos, isActive, style = 'standard', shapeT
               />
             </mesh>
             <mesh>
-              <tubeGeometry args={[path, 20, 0.18, 8, false]} />
+              <tubeGeometry args={[path, 20, 0.1, 8, false]} />
               <meshBasicMaterial 
                 color="#60a5fa"
                 transparent 
@@ -521,7 +532,7 @@ const ConnectionTube = ({ startPos, endPos, isActive, style = 'standard', shapeT
         return (
           <>
             <mesh ref={tubeRef}>
-              <tubeGeometry args={[path, 20, 0.12, 8, false]} />
+              <tubeGeometry args={[path, 20, 0.06, 8, false]} />
               <meshStandardMaterial 
                 color={isActive ? '#fbbf24' : '#fcd34d'}
                 emissive="#fbbf24"
@@ -529,7 +540,7 @@ const ConnectionTube = ({ startPos, endPos, isActive, style = 'standard', shapeT
               />
             </mesh>
             <mesh ref={glowRef}>
-              <tubeGeometry args={[path, 20, 0.25, 8, false]} />
+              <tubeGeometry args={[path, 20, 0.13, 8, false]} />
               <meshBasicMaterial 
                 color="#fbbf24"
                 transparent 
@@ -542,7 +553,7 @@ const ConnectionTube = ({ startPos, endPos, isActive, style = 'standard', shapeT
         return (
           <>
             <mesh ref={tubeRef}>
-              <tubeGeometry args={[path, 20, 0.1, 8, false]} />
+              <tubeGeometry args={[path, 20, 0.05, 8, false]} />
               <meshStandardMaterial 
                 color={isActive ? '#ec4899' : '#f472b6'}
                 emissive={isActive ? '#ec4899' : '#f472b6'}
@@ -550,7 +561,7 @@ const ConnectionTube = ({ startPos, endPos, isActive, style = 'standard', shapeT
               />
             </mesh>
             <mesh ref={glowRef}>
-              <tubeGeometry args={[path, 20, 0.2, 8, false]} />
+              <tubeGeometry args={[path, 20, 0.1, 8, false]} />
               <meshBasicMaterial 
                 color="#ec4899"
                 transparent 
@@ -558,7 +569,7 @@ const ConnectionTube = ({ startPos, endPos, isActive, style = 'standard', shapeT
               />
             </mesh>
             <mesh>
-              <tubeGeometry args={[path, 20, 0.3, 8, false]} />
+              <tubeGeometry args={[path, 20, 0.15, 8, false]} />
               <meshBasicMaterial 
                 color="#ec4899"
                 transparent 
@@ -571,7 +582,7 @@ const ConnectionTube = ({ startPos, endPos, isActive, style = 'standard', shapeT
       default:
         return (
           <mesh ref={tubeRef}>
-            <tubeGeometry args={[path, 20, 0.15, 8, false]} />
+            <tubeGeometry args={[path, 20, 0.08, 8, false]} />
             <meshStandardMaterial 
               color={isActive ? '#60a5fa' : '#4b5563'}
               emissive={isActive ? '#3b82f6' : '#000000'}
@@ -705,8 +716,14 @@ const ConnectionTube = ({ startPos, endPos, isActive, style = 'standard', shapeT
             shapeType={shapeType}
             size={0.8}
             color="#fbbf24"
-            emissive="#f59e0b"
-            emissiveIntensity={0.5}
+            emissive={shapeType === 'custom3dElement' || shapeType === 'uploadedModel' ? '#000000' : '#f59e0b'}
+            emissiveIntensity={shapeType === 'custom3dElement' || shapeType === 'uploadedModel' ? 0 : 0.5}
+            custom3dElementId={custom3dElementId}
+            uploadedModelId={uploadedModelId}
+            modelScale={shapeModelScale}
+            modelPositionY={shapeModelPositionY}
+            engravedBlockParams={engravedBlockParams}
+            shareToken={shareToken}
           />
         </group>
       )}
@@ -754,8 +771,13 @@ const UnifiedModel = ({ project, currentStepId, nodePositions, onConnectionClick
           style: conn.data?.style || 'standard' as ConnectionStyle,
           description: conn.data?.description,
           shapeType: conn.data?.shapeType,
+          custom3dElementId: conn.data?.custom3dElementId,
+          uploadedModelId: conn.data?.uploadedModelId,
+          shapeModelScale: conn.data?.shapeModelScale,
+          shapeModelPositionY: conn.data?.shapeModelPositionY,
           arrowDirection: conn.data?.arrowDirection,
           connectionType: conn.data?.connectionType,
+          engravedBlockParams: conn.data?.engravedBlockParams,
         } as ConnectionWithIndices;
       })
       .filter((c): c is ConnectionWithIndices => c !== null);
@@ -790,8 +812,14 @@ const UnifiedModel = ({ project, currentStepId, nodePositions, onConnectionClick
           style={conn.style}
           description={conn.description}
           shapeType={conn.shapeType}
+          custom3dElementId={conn.custom3dElementId}
+          uploadedModelId={conn.uploadedModelId}
+          shapeModelScale={conn.shapeModelScale}
+          shapeModelPositionY={conn.shapeModelPositionY}
           arrowDirection={conn.arrowDirection}
           connectionType={conn.connectionType}
+          engravedBlockParams={conn.engravedBlockParams}
+          shareToken={shareToken}
           onClick={conn.description && onConnectionClick ? () => onConnectionClick(conn.description as string) : undefined}
         />
       ))}
