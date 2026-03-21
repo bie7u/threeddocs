@@ -458,24 +458,32 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
 
                 {/* Title */}
                 <div>
-                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Tytuł (opcjonalnie)</p>
+                  <div className="flex items-center justify-between mb-1">
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Tytuł (opcjonalnie)</p>
+                    <span className="text-xs text-slate-400">{draftTitle.length}/50</span>
+                  </div>
                   <input
                     type="text"
                     value={draftTitle}
                     onChange={e => { setDraftTitle(e.target.value); commitDraft({ title: e.target.value }); }}
                     placeholder="Tytuł połączenia…"
+                    maxLength={50}
                     className="w-full px-2 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
 
                 {/* Description */}
                 <div>
-                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Opis (opcjonalnie)</p>
+                  <div className="flex items-center justify-between mb-1">
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Opis (opcjonalnie)</p>
+                    <span className="text-xs text-slate-400">{draftDesc.length}/500</span>
+                  </div>
                   <textarea
                     value={draftDesc}
                     onChange={e => { setDraftDesc(e.target.value); commitDraft({ description: e.target.value }); }}
                     rows={2}
                     placeholder="Opis połączenia…"
+                    maxLength={500}
                     className="w-full px-2 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                   />
                 </div>
