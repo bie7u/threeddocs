@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useAppStore } from '../../store';
 import { StepBuilder } from '../StepBuilder/StepBuilder';
 import { Viewer3D } from '../Viewer3D/Viewer3D';
@@ -35,6 +35,41 @@ export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, useSamplePr
       setProject(sampleProject, sampleNodePositions);
     }
   }, [project, setProject, useSampleProjectFallback]);
+
+  const [panelWidth, setPanelWidth] = useState(320);
+  const [isResizing, setIsResizing] = useState(false);
+  const isResizingRef = useRef(false);
+  const startXRef = useRef(0);
+  const startWidthRef = useRef(320);
+
+  const handleResizeStart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    isResizingRef.current = true;
+    setIsResizing(true);
+    startXRef.current = e.clientX;
+    startWidthRef.current = panelWidth;
+  };
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isResizingRef.current) return;
+      const delta = e.clientX - startXRef.current;
+      const newWidth = Math.max(240, Math.min(600, startWidthRef.current + delta));
+      setPanelWidth(newWidth);
+    };
+    const handleMouseUp = () => {
+      if (isResizingRef.current) {
+        isResizingRef.current = false;
+        setIsResizing(false);
+      }
+    };
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, []);
 
   const handleTogglePreview = () => { setPreviewMode(!isPreviewMode); };
   const handleToggleCameraMode = () => { setCameraMode(cameraMode === 'auto' ? 'free' : 'auto'); };
@@ -150,13 +185,13 @@ export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, useSamplePr
         </div>
       </div>
 
-      <div className="flex-1 flex overflow-hidden gap-1.5 p-1.5">
+      <div className={`flex-1 flex overflow-hidden gap-0 p-1.5${isResizing ? ' cursor-col-resize select-none' : ''}`}>
         {editorMode === 'guide' ? (
           <GuideBuilder />
         ) : (
           <>
             {/* Left panel – Step properties */}
-            <div className="w-80 flex-shrink-0 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden flex flex-col">
+            <div className="flex-shrink-0 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden flex flex-col" style={{ width: panelWidth }}>
               <div className="px-5 py-3.5 bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200 flex-shrink-0">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-amber-600 rounded-lg flex items-center justify-center shadow-md" aria-hidden="true">
@@ -173,8 +208,17 @@ export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, useSamplePr
               <div className="flex-1 overflow-y-auto bg-slate-50"><StepProperties /></div>
             </div>
 
+            {/* Resize handle */}
+            <div
+              className="flex-shrink-0 w-1.5 cursor-col-resize relative group"
+              onMouseDown={handleResizeStart}
+              title="Przeciągnij, aby zmienić szerokość panelu"
+            >
+              <div className={`absolute inset-y-0 left-1/2 w-0.5 -translate-x-1/2 rounded-full transition-colors ${isResizing ? 'bg-blue-400' : 'bg-transparent group-hover:bg-blue-400'}`} />
+            </div>
+
             {/* Center panel – Model flow builder */}
-            <div className="flex-1 min-w-0 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden flex flex-col">
+            <div className="flex-1 min-w-0 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden flex flex-col ml-1.5">
               <div className="px-5 py-3.5 bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200 flex-shrink-0">
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
@@ -206,7 +250,7 @@ export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, useSamplePr
             </div>
 
             {/* Right panel – 3D Preview */}
-            <div className="w-96 flex-shrink-0 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden flex flex-col">
+            <div className="w-96 flex-shrink-0 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden flex flex-col ml-1.5">
               <div className="px-5 py-3.5 bg-gradient-to-r from-slate-900 to-slate-800 border-b border-slate-700 flex-shrink-0">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center shadow-md" aria-hidden="true">

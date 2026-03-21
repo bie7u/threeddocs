@@ -99,7 +99,7 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
   const currentArrowDir    = data?.arrowDirection || 'none';
   const currentConnType    = data?.connectionType || 'tube';
 
-  // Local draft state – only committed on Save
+  // Local draft state – committed immediately on each change for live preview
   const [draftDesc,              setDraftDesc]              = useState(currentDescription);
   const [draftStyle,             setDraftStyle]             = useState<ConnectionStyle>(currentStyle);
   const [draftShape,             setDraftShape]             = useState<ShapeType | undefined>(currentShapeType);
@@ -127,6 +127,35 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
 
   const styleInfo = CONNECTION_STYLES.find(s => s.value === currentStyle) || CONNECTION_STYLES[0];
 
+  // Helper that immediately commits the provided overrides merged with current draft state
+  const commitDraft = useCallback((override: Partial<ConnectionData>) => {
+    if (!project) return;
+    // Use override's shapeType if provided, otherwise fall back to current draft
+    const effectiveShapeType = 'shapeType' in override ? override.shapeType : draftShape;
+    const updated = project.connections.map(conn =>
+      conn.id === id
+        ? {
+            ...conn,
+            data: {
+              ...conn.data,
+              description: draftDesc,
+              style: draftStyle,
+              shapeType: draftShape,
+              custom3dElementId: draftCustom3dElementId,
+              uploadedModelId: draftUploadedModelId,
+              shapeModelScale: draftShapeScale,
+              shapeModelPositionY: draftShapePosY,
+              arrowDirection: draftArrow,
+              connectionType: draftConnType,
+              engravedBlockParams: effectiveShapeType === 'engravedBlock' ? draftEngravedParams : undefined,
+              ...override,
+            },
+          }
+        : conn
+    );
+    updateConnections(updated);
+  }, [project, id, draftDesc, draftStyle, draftShape, draftCustom3dElementId, draftUploadedModelId, draftShapeScale, draftShapePosY, draftArrow, draftConnType, draftEngravedParams, updateConnections]);
+
   const getShapeButtonLabel = (): string => {
     if (!draftShape) return 'Brak';
     const labels: Partial<Record<ShapeType, string>> = {
@@ -146,6 +175,7 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
     setDraftCustom3dElementId(elementId);
     setDraftUploadedModelId(modelId);
     setPickerOpen(false);
+    commitDraft({ shapeType: type, custom3dElementId: elementId, uploadedModelId: modelId, engravedBlockParams: type === 'engravedBlock' ? draftEngravedParams : undefined });
   };
 
   const handleClearShape = () => {
@@ -154,20 +184,16 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
     setDraftUploadedModelId(undefined);
     setDraftShapeScale(1);
     setDraftShapePosY(0);
+    commitDraft({ shapeType: undefined, custom3dElementId: undefined, uploadedModelId: undefined, shapeModelScale: 1, shapeModelPositionY: 0, engravedBlockParams: undefined });
   };
 
   const handleEngravedParamChange = <K extends keyof EngravedBlockParams>(key: K, value: EngravedBlockParams[K]) => {
-    setDraftEngravedParams(prev => ({ ...prev, [key]: value }));
+    const updatedParams = { ...draftEngravedParams, [key]: value };
+    setDraftEngravedParams(updatedParams);
+    commitDraft({ engravedBlockParams: updatedParams });
   };
 
-  const handleSave = () => {
-    if (!project) return;
-    const updated = project.connections.map(conn =>
-      conn.id === id
-        ? { ...conn, data: { ...conn.data, description: draftDesc, style: draftStyle, shapeType: draftShape, custom3dElementId: draftCustom3dElementId, uploadedModelId: draftUploadedModelId, shapeModelScale: draftShapeScale, shapeModelPositionY: draftShapePosY, arrowDirection: draftArrow, connectionType: draftConnType, engravedBlockParams: draftShape === 'engravedBlock' ? draftEngravedParams : undefined } }
-        : conn
-    );
-    updateConnections(updated);
+  const handleClose = () => {
     setOpen(false);
   };
 
@@ -229,7 +255,7 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
                     {CONNECTION_STYLES.map(s => (
                       <button
                         key={s.value}
-                        onClick={() => setDraftStyle(s.value)}
+                        onClick={() => { setDraftStyle(s.value); commitDraft({ style: s.value }); }}
                         title={s.label}
                         className={`flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all ${draftStyle === s.value ? 'ring-2 ring-offset-1 ring-blue-500 scale-105' : 'opacity-70 hover:opacity-100'}`}
                         style={{ backgroundColor: s.color, color: s.textColor }}
@@ -246,7 +272,7 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
                     <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Typ</p>
                     <select
                       value={draftConnType}
-                      onChange={e => setDraftConnType(e.target.value as ConnectionType)}
+                      onChange={e => { setDraftConnType(e.target.value as ConnectionType); commitDraft({ connectionType: e.target.value as ConnectionType }); }}
                       className="w-full px-2 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       {CONN_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
@@ -257,7 +283,7 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
                       <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Kierunek</p>
                       <select
                         value={draftArrow}
-                        onChange={e => setDraftArrow(e.target.value as ArrowDirection)}
+                        onChange={e => { setDraftArrow(e.target.value as ArrowDirection); commitDraft({ arrowDirection: e.target.value as ArrowDirection }); }}
                         className="w-full px-2 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                       >
                         {ARROW_DIRS.map(a => <option key={a.value} value={a.value}>{a.label}</option>)}
@@ -318,7 +344,7 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
                           max="5"
                           step="0.1"
                           value={draftShapeScale}
-                          onChange={e => setDraftShapeScale(parseFloat(e.target.value))}
+                          onChange={e => { const v = parseFloat(e.target.value); setDraftShapeScale(v); commitDraft({ shapeModelScale: v }); }}
                           className="flex-1"
                         />
                         <input
@@ -327,7 +353,7 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
                           max="5"
                           step="0.1"
                           value={draftShapeScale}
-                          onChange={e => setDraftShapeScale(parseFloat(e.target.value))}
+                          onChange={e => { const v = parseFloat(e.target.value); setDraftShapeScale(v); commitDraft({ shapeModelScale: v }); }}
                           className="w-14 px-1.5 py-1 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                       </div>
@@ -343,7 +369,7 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
                           max="10"
                           step="0.1"
                           value={draftShapePosY}
-                          onChange={e => setDraftShapePosY(parseFloat(e.target.value))}
+                          onChange={e => { const v = parseFloat(e.target.value); setDraftShapePosY(v); commitDraft({ shapeModelPositionY: v }); }}
                           className="flex-1"
                         />
                         <input
@@ -352,7 +378,7 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
                           max="10"
                           step="0.1"
                           value={draftShapePosY}
-                          onChange={e => setDraftShapePosY(parseFloat(e.target.value))}
+                          onChange={e => { const v = parseFloat(e.target.value); setDraftShapePosY(v); commitDraft({ shapeModelPositionY: v }); }}
                           className="w-14 px-1.5 py-1 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                       </div>
@@ -401,7 +427,7 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
                   <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Opis (opcjonalnie)</p>
                   <textarea
                     value={draftDesc}
-                    onChange={e => setDraftDesc(e.target.value)}
+                    onChange={e => { setDraftDesc(e.target.value); commitDraft({ description: e.target.value }); }}
                     rows={2}
                     placeholder="Opis połączenia…"
                     className="w-full px-2 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
@@ -412,13 +438,13 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
               {/* Footer actions */}
               <div className="flex gap-2 px-3 pb-3">
                 <button
-                  onClick={handleSave}
+                  onClick={handleClose}
                   className="flex-1 flex items-center justify-center gap-1 py-1.5 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white text-xs font-semibold rounded-lg shadow transition-all"
                 >
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
                   </svg>
-                  Zapisz
+                  Gotowe
                 </button>
                 <button
                   onClick={handleDelete}
