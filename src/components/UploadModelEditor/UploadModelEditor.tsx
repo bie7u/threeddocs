@@ -210,7 +210,10 @@ export const UploadModelEditor = () => {
               )}
 
               <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">Tytuł</label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-xs font-medium text-slate-600">Tytuł</label>
+                  <span className="text-xs text-slate-400">{editingStep.title.length}/200</span>
+                </div>
                 <input
                   type="text"
                   value={editingStep.title}
@@ -218,6 +221,7 @@ export const UploadModelEditor = () => {
                   className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Tytuł kroku…"
                   autoFocus={!isPickMode}
+                  maxLength={200}
                 />
               </div>
               <div>
@@ -225,6 +229,7 @@ export const UploadModelEditor = () => {
                 <RichTextEditor
                   value={editingStep.description}
                   onChange={(value) => setEditingStep((prev) => prev ? { ...prev, description: value } : prev)}
+                  maxLength={2000}
                 />
               </div>
               <div>
