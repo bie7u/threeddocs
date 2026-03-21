@@ -187,7 +187,7 @@ interface Shape3DProps {
 const degToRad = (degrees: number) => degrees * Math.PI / 180;
 
 // Reusable 3D shape component
-const Shape3D = ( shapeType = 'cube', size = 2, color, emissive = '#000000', emissiveIntensity = 0, customModelUrl, modelScale = 1, engravedBlockParams, custom3dElementId, uploadedModelId, modelPositionY = 0, modelRotationY = 0, shareToken }: Shape3DProps) => {
+const Shape3D = ({ shapeType = 'cube', size = 2, color, emissive = '#000000', emissiveIntensity = 0, customModelUrl, modelScale = 1, engravedBlockParams, custom3dElementId, uploadedModelId, modelPositionY = 0, modelRotationY = 0, shareToken }: Shape3DProps) => {
   const [uploadedModel, setUploadedModel] = useState<UploadedModel3D | null>(null);
   const [customElement, setCustomElement] = useState<Custom3DElement | null>(null);
 
