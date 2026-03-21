@@ -35,6 +35,7 @@ export const StepProperties = () => {
     customModelUrl: '',
     modelScale: 1,
     modelPositionY: 0,
+    modelRotationY: 0,
     custom3dElementId: undefined,
     uploadedModelId: undefined,
     engravedBlockParams: {
@@ -66,6 +67,7 @@ export const StepProperties = () => {
         customModelUrl: selectedStep.customModelUrl || '',
         modelScale: selectedStep.modelScale || 1,
         modelPositionY: selectedStep.modelPositionY ?? 0,
+        modelRotationY: selectedStep.modelRotationY ?? 0,
         custom3dElementId: selectedStep.custom3dElementId,
         uploadedModelId: selectedStep.uploadedModelId,
         engravedBlockParams: selectedStep.engravedBlockParams || {
@@ -372,6 +374,33 @@ export const StepProperties = () => {
                   step="0.1"
                   value={formData.modelPositionY ?? 0}
                   onChange={(e) => handleInputChange('modelPositionY', parseFloat(e.target.value))}
+                  className="w-16 px-2 py-1 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg border border-slate-200 p-3 shadow-sm">
+              <label htmlFor="model-rotation-y" className="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">
+                Obrót wokół własnej osi <span className="text-slate-400 font-normal normal-case">(0 – 360°)</span>
+              </label>
+              <div className="flex items-center gap-3">
+                <input
+                  id="model-rotation-y"
+                  type="range"
+                  min="0"
+                  max="360"
+                  step="1"
+                  value={formData.modelRotationY ?? 0}
+                  onChange={(e) => handleInputChange('modelRotationY', parseFloat(e.target.value))}
+                  className="flex-1"
+                />
+                <input
+                  type="number"
+                  min="0"
+                  max="360"
+                  step="1"
+                  value={formData.modelRotationY ?? 0}
+                  onChange={(e) => handleInputChange('modelRotationY', parseFloat(e.target.value))}
                   className="w-16 px-2 py-1 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>

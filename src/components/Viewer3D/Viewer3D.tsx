@@ -47,6 +47,7 @@ interface ConnectionWithIndices {
   uploadedModelId?: string;
   shapeModelScale?: number;
   shapeModelPositionY?: number;
+  shapeModelRotationY?: number;
   arrowDirection?: ArrowDirection;
   connectionType?: ConnectionType;
   engravedBlockParams?: InstructionStep['engravedBlockParams'];
@@ -178,12 +179,15 @@ interface Shape3DProps {
   custom3dElementId?: string;
   uploadedModelId?: string;
   modelPositionY?: number;
+  modelRotationY?: number;
   /** Share token from the public share-link URL, forwarded as ?project_uuid= on API calls. */
   shareToken?: string;
 }
 
+const degToRad = (degrees: number) => degrees * Math.PI / 180;
+
 // Reusable 3D shape component
-const Shape3D = ({ shapeType = 'cube', size = 2, color, emissive = '#000000', emissiveIntensity = 0, customModelUrl, modelScale = 1, engravedBlockParams, custom3dElementId, uploadedModelId, modelPositionY = 0, shareToken }: Shape3DProps) => {
+const Shape3D = ( shapeType = 'cube', size = 2, color, emissive = '#000000', emissiveIntensity = 0, customModelUrl, modelScale = 1, engravedBlockParams, custom3dElementId, uploadedModelId, modelPositionY = 0, modelRotationY = 0, shareToken }: Shape3DProps) => {
   const [uploadedModel, setUploadedModel] = useState<UploadedModel3D | null>(null);
   const [customElement, setCustomElement] = useState<Custom3DElement | null>(null);
 
@@ -209,7 +213,7 @@ const Shape3D = ({ shapeType = 'cube', size = 2, color, emissive = '#000000', em
 
   if (shapeType === 'custom' && customModelUrl) {
     return (
-      <group position={[0, modelPositionY, 0]}>
+      <group position={[0, modelPositionY, 0]} rotation={[0, degToRad(modelRotationY), 0]}>
         <ModelErrorBoundary fallback={<ModelErrorFallback />}>
           <Suspense fallback={<ModelLoadingFallback />}>
             <CustomModel 
@@ -228,7 +232,7 @@ const Shape3D = ({ shapeType = 'cube', size = 2, color, emissive = '#000000', em
   if (shapeType === 'uploadedModel' && uploadedModelId) {
     if (uploadedModel) {
       return (
-        <group position={[0, modelPositionY, 0]}>
+        <group position={[0, modelPositionY, 0]} rotation={[0, degToRad(modelRotationY), 0]}>
           <ModelErrorBoundary fallback={<ModelErrorFallback />}>
             <Suspense fallback={<ModelLoadingFallback />}>
               <CustomModel
@@ -246,7 +250,7 @@ const Shape3D = ({ shapeType = 'cube', size = 2, color, emissive = '#000000', em
     }
     // Fallback while loading or if model not found
     return (
-      <group position={[0, modelPositionY, 0]} scale={[modelScale, modelScale, modelScale]}>
+      <group position={[0, modelPositionY, 0]} rotation={[0, degToRad(modelRotationY), 0]} scale={[modelScale, modelScale, modelScale]}>
         <mesh castShadow>
           <boxGeometry args={[size, size, size]} />
           <meshStandardMaterial color={color} wireframe />
@@ -258,14 +262,14 @@ const Shape3D = ({ shapeType = 'cube', size = 2, color, emissive = '#000000', em
   if (shapeType === 'custom3dElement' && custom3dElementId) {
     if (customElement) {
       return (
-        <group position={[0, modelPositionY, 0]} scale={[modelScale, modelScale, modelScale]}>
+        <group position={[0, modelPositionY, 0]} rotation={[0, degToRad(modelRotationY), 0]} scale={[modelScale, modelScale, modelScale]}>
           <Custom3DShape element={customElement} emissive={emissive} emissiveIntensity={emissiveIntensity} />
         </group>
       );
     }
     // Fallback while loading or if element not found
     return (
-      <group position={[0, modelPositionY, 0]} scale={[modelScale, modelScale, modelScale]}>
+      <group position={[0, modelPositionY, 0]} rotation={[0, degToRad(modelRotationY), 0]} scale={[modelScale, modelScale, modelScale]}>
         <mesh castShadow>
           <boxGeometry args={[size, size, size]} />
           <meshStandardMaterial color={color} wireframe />
@@ -277,7 +281,7 @@ const Shape3D = ({ shapeType = 'cube', size = 2, color, emissive = '#000000', em
   if (shapeType === 'engravedBlock') {
     const ebParams = engravedBlockParams ?? { text: 'DB', font: 'helvetiker', depth: 0.08, padding: 0.1, face: 'front' };
     return (
-      <group position={[0, modelPositionY, 0]} scale={[modelScale, modelScale, modelScale]}>
+      <group position={[0, modelPositionY, 0]} rotation={[0, degToRad(modelRotationY), 0]} scale={[modelScale, modelScale, modelScale]}>
         <EngravedBlock
           params={ebParams}
           color={color}
@@ -303,7 +307,7 @@ const Shape3D = ({ shapeType = 'cube', size = 2, color, emissive = '#000000', em
   };
 
   return (
-    <group position={[0, modelPositionY, 0]} scale={[modelScale, modelScale, modelScale]}>
+    <group position={[0, modelPositionY, 0]} rotation={[0, degToRad(modelRotationY), 0]} scale={[modelScale, modelScale, modelScale]}>
       <mesh castShadow>
         {renderGeometry()}
         <meshStandardMaterial 
@@ -355,6 +359,7 @@ const StepCube = ({ step, position, isActive, hasActiveStep, allowDimming = true
   const shapeType = step.shapeType || 'cube';
   const modelScale = step.modelScale ?? 1;
   const modelPositionY = step.modelPositionY ?? 0;
+  const modelRotationY = step.modelRotationY ?? 0;
 
   const dimmed = allowDimming && hasActiveStep && !isActive;
 
@@ -374,6 +379,7 @@ const StepCube = ({ step, position, isActive, hasActiveStep, allowDimming = true
           customModelUrl={step.customModelUrl}
           modelScale={modelScale}
           modelPositionY={modelPositionY}
+          modelRotationY={modelRotationY}
           engravedBlockParams={step.engravedBlockParams}
           custom3dElementId={step.custom3dElementId}
           uploadedModelId={step.uploadedModelId}
@@ -401,6 +407,7 @@ interface ConnectionTubeProps {
   uploadedModelId?: string;
   shapeModelScale?: number;
   shapeModelPositionY?: number;
+  shapeModelRotationY?: number;
   arrowDirection?: ArrowDirection;
   connectionType?: ConnectionType;
   engravedBlockParams?: InstructionStep['engravedBlockParams'];
@@ -408,7 +415,7 @@ interface ConnectionTubeProps {
   onClick?: () => void;
 }
 
-const ConnectionTube = ({ startPos, endPos, isActive, style = 'standard', shapeType, custom3dElementId, uploadedModelId, shapeModelScale = 1, shapeModelPositionY = 0, arrowDirection, connectionType = 'tube', engravedBlockParams, shareToken, onClick }: ConnectionTubeProps) => {
+const ConnectionTube = ({ startPos, endPos, isActive, style = 'standard', shapeType, custom3dElementId, uploadedModelId, shapeModelScale = 1, shapeModelPositionY = 0, shapeModelRotationY = 0, arrowDirection, connectionType = 'tube', engravedBlockParams, shareToken, onClick }: ConnectionTubeProps) => {
   const tubeRef = useRef<THREE.Mesh>(null);
   const glowRef = useRef<THREE.Mesh>(null);
   const shapeRef = useRef<THREE.Group>(null);
@@ -722,6 +729,7 @@ const ConnectionTube = ({ startPos, endPos, isActive, style = 'standard', shapeT
             uploadedModelId={uploadedModelId}
             modelScale={shapeModelScale}
             modelPositionY={shapeModelPositionY}
+            modelRotationY={shapeModelRotationY}
             engravedBlockParams={engravedBlockParams}
             shareToken={shareToken}
           />
@@ -775,6 +783,7 @@ const UnifiedModel = ({ project, currentStepId, nodePositions, onConnectionClick
           uploadedModelId: conn.data?.uploadedModelId,
           shapeModelScale: conn.data?.shapeModelScale,
           shapeModelPositionY: conn.data?.shapeModelPositionY,
+          shapeModelRotationY: conn.data?.shapeModelRotationY,
           arrowDirection: conn.data?.arrowDirection,
           connectionType: conn.data?.connectionType,
           engravedBlockParams: conn.data?.engravedBlockParams,
@@ -816,6 +825,7 @@ const UnifiedModel = ({ project, currentStepId, nodePositions, onConnectionClick
           uploadedModelId={conn.uploadedModelId}
           shapeModelScale={conn.shapeModelScale}
           shapeModelPositionY={conn.shapeModelPositionY}
+          shapeModelRotationY={conn.shapeModelRotationY}
           arrowDirection={conn.arrowDirection}
           connectionType={conn.connectionType}
           engravedBlockParams={conn.engravedBlockParams}
