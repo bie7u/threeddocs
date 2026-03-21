@@ -57,6 +57,7 @@ export type ConnectionType = 'tube' | 'arrow';
 
 export interface ConnectionData {
   style?: ConnectionStyle;
+  title?: string;
   description?: string;
   shapeType?: ShapeType;
   custom3dElementId?: string;

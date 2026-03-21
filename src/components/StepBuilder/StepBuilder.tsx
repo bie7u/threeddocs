@@ -94,12 +94,14 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
   const [edgePath, labelX, labelY] = getBezierPath({ sourceX, sourceY, targetX, targetY });
 
   const currentStyle       = data?.style          || 'standard';
+  const currentTitle       = data?.title          || '';
   const currentDescription = data?.description    || '';
   const currentShapeType   = data?.shapeType;
   const currentArrowDir    = data?.arrowDirection || 'none';
   const currentConnType    = data?.connectionType || 'tube';
 
   // Local draft state – committed immediately on each change for live preview
+  const [draftTitle,             setDraftTitle]             = useState(currentTitle);
   const [draftDesc,              setDraftDesc]              = useState(currentDescription);
   const [draftStyle,             setDraftStyle]             = useState<ConnectionStyle>(currentStyle);
   const [draftShape,             setDraftShape]             = useState<ShapeType | undefined>(currentShapeType);
@@ -114,6 +116,7 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
 
   // Re-sync draft when edge data changes externally
   useEffect(() => {
+    setDraftTitle(data?.title         || '');
     setDraftDesc(data?.description    || '');
     setDraftStyle(data?.style          || 'standard');
     setDraftShape(data?.shapeType);
@@ -140,6 +143,7 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
             ...conn,
             data: {
               ...conn.data,
+              title: draftTitle,
               description: draftDesc,
               style: draftStyle,
               shapeType: draftShape,
@@ -157,7 +161,7 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
         : conn
     );
     updateConnections(updated);
-  }, [project, id, draftDesc, draftStyle, draftShape, draftCustom3dElementId, draftUploadedModelId, draftShapeScale, draftShapePosY, draftShapeRotY, draftArrow, draftConnType, draftEngravedParams, updateConnections]);
+  }, [project, id, draftTitle, draftDesc, draftStyle, draftShape, draftCustom3dElementId, draftUploadedModelId, draftShapeScale, draftShapePosY, draftShapeRotY, draftArrow, draftConnType, draftEngravedParams, updateConnections]);
 
   const getShapeButtonLabel = (): string => {
     if (!draftShape) return 'Brak';
@@ -451,6 +455,18 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
                     </div>
                   </div>
                 )}
+
+                {/* Title */}
+                <div>
+                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Tytuł (opcjonalnie)</p>
+                  <input
+                    type="text"
+                    value={draftTitle}
+                    onChange={e => { setDraftTitle(e.target.value); commitDraft({ title: e.target.value }); }}
+                    placeholder="Tytuł połączenia…"
+                    className="w-full px-2 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
 
                 {/* Description */}
                 <div>

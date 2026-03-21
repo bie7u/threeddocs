@@ -41,6 +41,7 @@ interface ConnectionWithIndices {
   sourceIndex: number;
   targetIndex: number;
   style: ConnectionStyle;
+  title?: string;
   description?: string;
   shapeType?: ShapeType;
   custom3dElementId?: string;
@@ -743,7 +744,7 @@ interface UnifiedModelProps {
   project: ProjectData;
   currentStepId: string | null;
   nodePositions: Record<string, { x: number; y: number }>;
-  onConnectionClick?: (description: string) => void;
+  onConnectionClick?: (title: string | undefined, description: string) => void;
   onStepClick?: (stepId: string) => void;
   allowDimming?: boolean;
   shareToken?: string;
@@ -777,6 +778,7 @@ const UnifiedModel = ({ project, currentStepId, nodePositions, onConnectionClick
           sourceIndex, 
           targetIndex, 
           style: conn.data?.style || 'standard' as ConnectionStyle,
+          title: conn.data?.title,
           description: conn.data?.description,
           shapeType: conn.data?.shapeType,
           custom3dElementId: conn.data?.custom3dElementId,
@@ -830,7 +832,7 @@ const UnifiedModel = ({ project, currentStepId, nodePositions, onConnectionClick
           connectionType={conn.connectionType}
           engravedBlockParams={conn.engravedBlockParams}
           shareToken={shareToken}
-          onClick={conn.description && onConnectionClick ? () => onConnectionClick(conn.description as string) : undefined}
+          onClick={(conn.title || conn.description) && onConnectionClick ? () => onConnectionClick(conn.title, conn.description || '') : undefined}
         />
       ))}
     </group>
@@ -938,11 +940,11 @@ interface Viewer3DProps {
 
 export const Viewer3D = ({ project, currentStepId, nodePositions = {}, cameraMode = 'free', showStepOverlay = true, onStepSelect, shareToken }: Viewer3DProps) => {
   const currentStep = project?.steps.find(s => s.id === currentStepId);
-  const [selectedConnectionDesc, setSelectedConnectionDesc] = useState<string | null>(null);
+  const [selectedConnection, setSelectedConnection] = useState<{ title?: string; description: string } | null>(null);
   const orbitControlsRef = useRef<OrbitControlsImpl | null>(null);
   
-  const handleConnectionClick = (description: string) => {
-    setSelectedConnectionDesc(description);
+  const handleConnectionClick = (title: string | undefined, description: string) => {
+    setSelectedConnection({ title, description });
   };
   
   return (
@@ -1023,15 +1025,15 @@ export const Viewer3D = ({ project, currentStepId, nodePositions = {}, cameraMod
         </div>
       )}
       
-      {selectedConnectionDesc && (
+      {selectedConnection && (
         <div className="absolute bottom-8 right-6 bg-blue-600 bg-opacity-90 text-white p-4 rounded-lg max-w-sm shadow-xl z-20">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h4 className="text-sm font-bold mb-1">Connection Info</h4>
-              <p className="text-sm">{selectedConnectionDesc}</p>
+              <h4 className="text-sm font-bold mb-1">{selectedConnection.title || 'Connection Info'}</h4>
+              {selectedConnection.description && <p className="text-sm">{selectedConnection.description}</p>}
             </div>
             <button
-              onClick={() => setSelectedConnectionDesc(null)}
+              onClick={() => setSelectedConnection(null)}
               className="text-white hover:text-gray-200 text-xl leading-none"
             >
               ×
