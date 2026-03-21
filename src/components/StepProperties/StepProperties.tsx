@@ -80,17 +80,23 @@ export const StepProperties = () => {
   }, [selectedStep]);
 
   const handleInputChange = (field: keyof InstructionStep, value: string | number) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    const updated = { ...formData, [field]: value };
+    setFormData(updated);
+    if (selectedStepId && selectedStep) {
+      updateStep(selectedStepId, updated);
+    }
   };
 
   const handleEngravedParamChange = (field: keyof EngravedBlockParams, value: string | number) => {
-    setFormData((prev) => ({
-      ...prev,
-      engravedBlockParams: {
-        ...(prev.engravedBlockParams ?? { text: 'DB', font: 'helvetiker', depth: 0.08, padding: 0.1, face: 'front' }),
-        [field]: value,
-      },
-    }));
+    const updatedParams = {
+      ...(formData.engravedBlockParams ?? { text: 'DB', font: 'helvetiker', depth: 0.08, padding: 0.1, face: 'front' }),
+      [field]: value,
+    };
+    const updated = { ...formData, engravedBlockParams: updatedParams };
+    setFormData(updated);
+    if (selectedStepId && selectedStep) {
+      updateStep(selectedStepId, updated);
+    }
   };
 
   const handleSave = () => {
@@ -119,12 +125,16 @@ export const StepProperties = () => {
   };
 
   const handleShapeSelect = (type: ShapeType, elementId?: string, modelId?: string) => {
-    setFormData((prev) => ({
-      ...prev,
+    const updated = {
+      ...formData,
       shapeType: type,
       custom3dElementId: elementId,
       uploadedModelId: modelId,
-    }));
+    };
+    setFormData(updated);
+    if (selectedStepId && selectedStep) {
+      updateStep(selectedStepId, updated);
+    }
   };
 
   const getShapeButtonLabel = (): string => {
