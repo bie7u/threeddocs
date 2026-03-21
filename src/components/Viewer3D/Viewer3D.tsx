@@ -402,10 +402,11 @@ interface ConnectionTubeProps {
   shapeModelPositionY?: number;
   arrowDirection?: ArrowDirection;
   connectionType?: ConnectionType;
+  shareToken?: string;
   onClick?: () => void;
 }
 
-const ConnectionTube = ({ startPos, endPos, isActive, style = 'standard', shapeType, custom3dElementId, uploadedModelId, shapeModelScale = 1, shapeModelPositionY = 0, arrowDirection, connectionType = 'tube', onClick }: ConnectionTubeProps) => {
+const ConnectionTube = ({ startPos, endPos, isActive, style = 'standard', shapeType, custom3dElementId, uploadedModelId, shapeModelScale = 1, shapeModelPositionY = 0, arrowDirection, connectionType = 'tube', shareToken, onClick }: ConnectionTubeProps) => {
   const tubeRef = useRef<THREE.Mesh>(null);
   const glowRef = useRef<THREE.Mesh>(null);
   const shapeRef = useRef<THREE.Group>(null);
@@ -719,6 +720,7 @@ const ConnectionTube = ({ startPos, endPos, isActive, style = 'standard', shapeT
             uploadedModelId={uploadedModelId}
             modelScale={shapeModelScale}
             modelPositionY={shapeModelPositionY}
+            shareToken={shareToken}
           />
         </group>
       )}
@@ -812,6 +814,7 @@ const UnifiedModel = ({ project, currentStepId, nodePositions, onConnectionClick
           shapeModelPositionY={conn.shapeModelPositionY}
           arrowDirection={conn.arrowDirection}
           connectionType={conn.connectionType}
+          shareToken={shareToken}
           onClick={conn.description && onConnectionClick ? () => onConnectionClick(conn.description as string) : undefined}
         />
       ))}
