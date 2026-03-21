@@ -496,7 +496,7 @@ const ConnectionTube = ({ startPos, endPos, isActive, style = 'standard', shapeT
         return (
           <>
             <mesh ref={tubeRef}>
-              <tubeGeometry args={[path, 20, 0.15, 8, false]} />
+              <tubeGeometry args={[path, 20, 0.08, 8, false]} />
               <meshPhysicalMaterial 
                 color={isActive ? '#60a5fa' : '#93c5fd'}
                 transparent
@@ -508,7 +508,7 @@ const ConnectionTube = ({ startPos, endPos, isActive, style = 'standard', shapeT
               />
             </mesh>
             <mesh>
-              <tubeGeometry args={[path, 20, 0.18, 8, false]} />
+              <tubeGeometry args={[path, 20, 0.1, 8, false]} />
               <meshBasicMaterial 
                 color="#60a5fa"
                 transparent 
@@ -521,7 +521,7 @@ const ConnectionTube = ({ startPos, endPos, isActive, style = 'standard', shapeT
         return (
           <>
             <mesh ref={tubeRef}>
-              <tubeGeometry args={[path, 20, 0.12, 8, false]} />
+              <tubeGeometry args={[path, 20, 0.06, 8, false]} />
               <meshStandardMaterial 
                 color={isActive ? '#fbbf24' : '#fcd34d'}
                 emissive="#fbbf24"
@@ -529,7 +529,7 @@ const ConnectionTube = ({ startPos, endPos, isActive, style = 'standard', shapeT
               />
             </mesh>
             <mesh ref={glowRef}>
-              <tubeGeometry args={[path, 20, 0.25, 8, false]} />
+              <tubeGeometry args={[path, 20, 0.13, 8, false]} />
               <meshBasicMaterial 
                 color="#fbbf24"
                 transparent 
@@ -542,7 +542,7 @@ const ConnectionTube = ({ startPos, endPos, isActive, style = 'standard', shapeT
         return (
           <>
             <mesh ref={tubeRef}>
-              <tubeGeometry args={[path, 20, 0.1, 8, false]} />
+              <tubeGeometry args={[path, 20, 0.05, 8, false]} />
               <meshStandardMaterial 
                 color={isActive ? '#ec4899' : '#f472b6'}
                 emissive={isActive ? '#ec4899' : '#f472b6'}
@@ -550,7 +550,7 @@ const ConnectionTube = ({ startPos, endPos, isActive, style = 'standard', shapeT
               />
             </mesh>
             <mesh ref={glowRef}>
-              <tubeGeometry args={[path, 20, 0.2, 8, false]} />
+              <tubeGeometry args={[path, 20, 0.1, 8, false]} />
               <meshBasicMaterial 
                 color="#ec4899"
                 transparent 
@@ -558,7 +558,7 @@ const ConnectionTube = ({ startPos, endPos, isActive, style = 'standard', shapeT
               />
             </mesh>
             <mesh>
-              <tubeGeometry args={[path, 20, 0.3, 8, false]} />
+              <tubeGeometry args={[path, 20, 0.15, 8, false]} />
               <meshBasicMaterial 
                 color="#ec4899"
                 transparent 
@@ -571,7 +571,7 @@ const ConnectionTube = ({ startPos, endPos, isActive, style = 'standard', shapeT
       default:
         return (
           <mesh ref={tubeRef}>
-            <tubeGeometry args={[path, 20, 0.15, 8, false]} />
+            <tubeGeometry args={[path, 20, 0.08, 8, false]} />
             <meshStandardMaterial 
               color={isActive ? '#60a5fa' : '#4b5563'}
               emissive={isActive ? '#3b82f6' : '#000000'}
