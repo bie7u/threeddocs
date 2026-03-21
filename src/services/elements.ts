@@ -46,9 +46,11 @@ const toApiElementBody = (e: Omit<Custom3DElement, 'id' | 'createdAt'>): ApiElem
 
 // ─── API functions ────────────────────────────────────────────────────────────
 
-/** GET /api/elements — returns all custom 3D elements owned by the user. */
-export const fetchElements = async (): Promise<Custom3DElement[]> => {
-  const res = await apiRequest('/elements/');
+/** GET /api/elements — returns all custom 3D elements owned by the user.
+ *  Pass `search` to filter results server-side via ?search=. */
+export const fetchElements = async (search?: string): Promise<Custom3DElement[]> => {
+  const path = search ? `/elements/?search=${encodeURIComponent(search)}` : '/elements/';
+  const res = await apiRequest(path);
   if (!res.ok) throw new Error('Failed to fetch custom 3D elements');
   return (await res.json() as ApiElement[]).map(fromApi);
 };

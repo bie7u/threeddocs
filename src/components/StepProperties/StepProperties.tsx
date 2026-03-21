@@ -5,6 +5,7 @@ import { RichTextEditor } from '../RichTextEditor';
 import { loadCustom3DElements } from '../../utils/custom3DElements';
 import { loadUploadedModels } from '../../utils/uploadedModels';
 import type { Custom3DElement } from '../../types';
+import { ShapeTypePicker } from '../ShapeTypePicker/ShapeTypePicker';
 
 export const StepProperties = () => {
   const { project, selectedStepId, updateStep, deleteStep, addStep, isGuestMode } = useAppStore();
@@ -16,6 +17,7 @@ export const StepProperties = () => {
   
   const [custom3DElements, setCustom3DElements] = useState<Custom3DElement[]>([]);
   const [uploadedModels, setUploadedModels] = useState<UploadedModel3D[]>([]);
+  const [pickerOpen, setPickerOpen] = useState(false);
 
   useEffect(() => {
     // Guest users have no server-side elements or models — skip API calls to
@@ -116,6 +118,34 @@ export const StepProperties = () => {
     addStep(newStep);
   };
 
+  const handleShapeSelect = (type: ShapeType, elementId?: string, modelId?: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      shapeType: type,
+      custom3dElementId: elementId,
+      uploadedModelId: modelId,
+    }));
+  };
+
+  const getShapeButtonLabel = (): string => {
+    const labels: Partial<Record<ShapeType, string>> = {
+      cube: '📦 Sześcian',
+      sphere: '🔵 Kula',
+      cylinder: '🥫 Walec',
+      cone: '🔺 Stożek',
+      engravedBlock: '🔲 Klocek z tekstem',
+    };
+    if (formData.shapeType === 'custom3dElement') {
+      const el = custom3DElements.find((e) => e.id === formData.custom3dElementId);
+      return `🧩 ${el?.name ?? 'Element 3D'}`;
+    }
+    if (formData.shapeType === 'uploadedModel') {
+      const m = uploadedModels.find((u) => u.id === formData.uploadedModelId);
+      return `📤 ${m?.name ?? 'Wgrany model'}`;
+    }
+    return labels[formData.shapeType ?? 'cube'] ?? '📦 Sześcian';
+  };
+
   return (
     <div className="w-full h-full bg-slate-50 overflow-y-auto">
       {/* Add step button always visible at top */}
@@ -180,91 +210,32 @@ export const StepProperties = () => {
             </div>
             <div className="bg-white rounded-lg border border-slate-200 p-3 shadow-sm">
               <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Typ kształtu</label>
-              <select
-                value={formData.shapeType || 'cube'}
-                onChange={(e) => {
-                  const newType = e.target.value as ShapeType;
-                  setFormData((prev) => ({
-                    ...prev,
-                    shapeType: newType,
-                    // Clear model-specific selections when switching away from those types
-                    ...(newType !== 'custom3dElement' && { custom3dElementId: undefined }),
-                    ...(newType !== 'uploadedModel' && { uploadedModelId: undefined }),
-                  }));
-                }}
-                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              <button
+                type="button"
+                onClick={() => setPickerOpen(true)}
+                className="w-full flex items-center justify-between px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-700 hover:border-blue-400 hover:bg-slate-50 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <option value="cube">📦 Sześcian (Cube)</option>
-                <option value="sphere">🔵 Kula (Sphere)</option>
-                <option value="cylinder">🥫 Walec (Cylinder)</option>
-                <option value="cone">🔺 Stożek (Cone)</option>
-                <option value="engravedBlock">🔲 Grawerowany klocek</option>
-                {custom3DElements.length > 0 && (
-                  <option value="custom3dElement">🧩 Mój element 3D</option>
-                )}
-                {uploadedModels.length > 0 && (
-                  <option value="uploadedModel">📤 Wgrany model 3D</option>
-                )}
-              </select>
+                <span>{getShapeButtonLabel()}</span>
+                <svg className="w-4 h-4 text-slate-400 flex-shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
+                </svg>
+              </button>
             </div>
 
-            {formData.shapeType === 'custom3dElement' && (
-              <div className="bg-white rounded-lg border border-slate-200 p-3 shadow-sm">
-                <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Wybierz element 3D</label>
-                <select
-                  value={formData.custom3dElementId || ''}
-                  onChange={(e) => {
-                    const id = e.target.value;
-                    setFormData((prev) => ({
-                      ...prev,
-                      custom3dElementId: id || undefined,
-                    }));
-                  }}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="">-- wybierz element --</option>
-                  {custom3DElements.map((el) => (
-                    <option key={el.id} value={el.id}>{el.name}</option>
-                  ))}
-                </select>
-                {custom3DElements.length === 0 && (
-                  <p className="mt-1 text-xs text-amber-600">
-                    Brak elementów 3D. Utwórz je w Ustawienia {'>'} Stwórz element 3D.
-                  </p>
-                )}
-              </div>
-            )}
-
-            {formData.shapeType === 'uploadedModel' && (
-              <div className="bg-white rounded-lg border border-slate-200 p-3 shadow-sm">
-                <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Wybierz wgrany model 3D</label>
-                <select
-                  value={formData.uploadedModelId || ''}
-                  onChange={(e) => {
-                    const id = e.target.value;
-                    setFormData((prev) => ({
-                      ...prev,
-                      uploadedModelId: id || undefined,
-                    }));
-                  }}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="">-- wybierz model --</option>
-                  {uploadedModels.map((m) => (
-                    <option key={m.id} value={m.id}>{m.name}</option>
-                  ))}
-                </select>
-                {uploadedModels.length === 0 && (
-                  <p className="mt-1 text-xs text-amber-600">
-                    Brak wgranych modeli. Dodaj je w Ustawienia {'>'} Wgraj element 3D.
-                  </p>
-                )}
-              </div>
+            {pickerOpen && (
+              <ShapeTypePicker
+                currentShapeType={formData.shapeType ?? 'cube'}
+                currentElementId={formData.custom3dElementId}
+                currentModelId={formData.uploadedModelId}
+                isGuestMode={isGuestMode}
+                onSelect={handleShapeSelect}
+                onClose={() => setPickerOpen(false)}
+              />
             )}
 
             {formData.shapeType === 'engravedBlock' && (
               <div className="bg-white rounded-lg border border-slate-200 p-3 shadow-sm space-y-3">
-                <p className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Ustawienia grawerowanego klocka</p>
+                <p className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Ustawienia klocka z tekstem</p>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Tekst <span className="text-gray-400 font-normal">(maks. 3 słów, 24 znaki)</span>
@@ -291,7 +262,7 @@ export const StepProperties = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Głębokość grawerowania <span className="text-gray-400 font-normal">(0.05 – 0.3)</span>
+                    Grubość tekstu <span className="text-gray-400 font-normal">(0.05 – 0.3)</span>
                   </label>
                   <div className="flex items-center gap-3">
                     <input

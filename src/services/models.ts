@@ -27,9 +27,11 @@ const fromApiModel = (m: ApiModel): UploadedModel3D => ({
 
 // ─── API functions ────────────────────────────────────────────────────────────
 
-/** GET /api/models — returns all uploaded 3D models owned by the user. */
-export const fetchModels = async (): Promise<UploadedModel3D[]> => {
-  const res = await apiRequest('/models');
+/** GET /api/models — returns all uploaded 3D models owned by the user.
+ *  Pass `search` to filter results server-side via ?search=. */
+export const fetchModels = async (search?: string): Promise<UploadedModel3D[]> => {
+  const path = search ? `/models?search=${encodeURIComponent(search)}` : '/models';
+  const res = await apiRequest(path);
   if (!res.ok) throw new Error('Failed to fetch uploaded models');
   return (await res.json() as ApiModel[]).map(fromApiModel);
 };
