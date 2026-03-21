@@ -396,6 +396,14 @@ const Settings = ({ onClose }) => {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5">
                       <p className="font-semibold text-gray-800 truncate">{model.name}</p>
+                      {model.systemModel && (
+                        <span className="flex-shrink-0 inline-flex items-center gap-0.5 px-1.5 py-0.5 text-xs font-medium bg-blue-100 text-blue-700 rounded">
+                          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20" aria-label="Model systemowy">
+                            <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
+                          </svg>
+                          Systemowy
+                        </span>
+                      )}
                       {model.description && (
                         <div className="relative group/tooltip flex-shrink-0">
                           <svg className="w-4 h-4 text-indigo-400 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -419,12 +427,14 @@ const Settings = ({ onClose }) => {
                     >
                       Podgląd
                     </button>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); handleDeleteModel(model.id); }}
-                      className="px-3 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600 transition"
-                    >
-                      Usuń
-                    </button>
+                    {!model.systemModel && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); handleDeleteModel(model.id); }}
+                        className="px-3 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600 transition"
+                      >
+                        Usuń
+                      </button>
+                    )}
                   </div>
                 </div>
               ))}

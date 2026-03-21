@@ -41,6 +41,7 @@ export interface UploadedModel3D {
   modelScale: number;
   description?: string;
   createdAt: number;
+  systemModel?: boolean;
 }
 
 export type EngravedBlockFace = 'front' | 'back' | 'left' | 'right' | 'top' | 'bottom';
