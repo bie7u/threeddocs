@@ -20,11 +20,14 @@ export const MyModels = ({ onOpenEditor, onClose }) => {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
 
-  const loadPage = useCallback(async (p) => {
+  // Search state
+  const [search, setSearch] = useState('');
+
+  const loadPage = useCallback(async (p, q) => {
     setLoading(true);
     setLoadError(null);
     try {
-      const result = await fetchProjectsPage(p);
+      const result = await fetchProjectsPage(p, q || undefined);
       setProjects(result.results);
       setTotalCount(result.count);
       setHasNext(result.hasNext);
@@ -37,8 +40,16 @@ export const MyModels = ({ onOpenEditor, onClose }) => {
   }, []);
 
   useEffect(() => {
-    loadPage(page);
-  }, [page, loadPage]);
+    const timer = setTimeout(() => {
+      loadPage(page, search);
+    }, search ? 300 : 0);
+    return () => clearTimeout(timer);
+  }, [page, search, loadPage]);
+
+  const handleSearch = (value) => {
+    setSearch(value);
+    setPage(1);
+  };
 
   const handleOpenEditor = (savedProject) => {
     setProject(savedProject.project, savedProject.nodePositions);
@@ -79,11 +90,11 @@ export const MyModels = ({ onOpenEditor, onClose }) => {
         if (projects.length === 1 && page > 1) {
           setPage((p) => p - 1);
         } else {
-          loadPage(page);
+          loadPage(page, search);
         }
       } catch {
         // deletion failed — reload page to restore the list
-        loadPage(page);
+        loadPage(page, search);
       }
     }
   };
@@ -145,6 +156,24 @@ export const MyModels = ({ onOpenEditor, onClose }) => {
         </div>
       </nav>
 
+      {/* Search bar */}
+      <div className="bg-white border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+          <div className="relative max-w-md">
+            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => handleSearch(e.target.value)}
+              placeholder="Szukaj modeli..."
+              className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+        </div>
+      </div>
+
       {/* Content */}
       <div className="w-full flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         {/* Clipboard fallback: show inline error when clipboard API is unavailable */}
@@ -199,14 +228,22 @@ export const MyModels = ({ onOpenEditor, onClose }) => {
                 />
               </svg>
             </div>
-            <h2 className="text-2xl font-bold text-gray-700 mb-2">Brak modeli</h2>
-            <p className="text-gray-500 mb-6">Nie masz jeszcze żadnych zapisanych modeli 3D.</p>
-            <button
-              onClick={onClose}
-              className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-medium rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all shadow-lg"
-            >
-              Dodaj pierwszy model
-            </button>
+            <h2 className="text-2xl font-bold text-gray-700 mb-2">
+              {search ? 'Brak wyników' : 'Brak modeli'}
+            </h2>
+            <p className="text-gray-500 mb-6">
+              {search
+                ? `Nie znaleziono modeli pasujących do „${search}".`
+                : 'Nie masz jeszcze żadnych zapisanych modeli 3D.'}
+            </p>
+            {!search && (
+              <button
+                onClick={onClose}
+                className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-medium rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all shadow-lg"
+              >
+                Dodaj pierwszy model
+              </button>
+            )}
           </div>
         ) : (
           <>

@@ -75,9 +75,12 @@ export interface ProjectsPage {
 /**
  * GET /api/projects?page=N — returns one page of the user's projects.
  * Pages are 1-indexed; the server uses a fixed page size of 10.
+ * Pass `search` to filter results server-side via ?search=.
  */
-export const fetchProjectsPage = async (page: number = 1): Promise<ProjectsPage> => {
-  const res = await apiRequest(`/projects?page=${page}`);
+export const fetchProjectsPage = async (page: number = 1, search?: string): Promise<ProjectsPage> => {
+  const params = new URLSearchParams({ page: String(page) });
+  if (search) params.set('search', search);
+  const res = await apiRequest(`/projects?${params.toString()}`);
   if (!res.ok) throw new Error('Failed to fetch projects');
   const data = await res.json() as PaginatedProjects;
   return {
