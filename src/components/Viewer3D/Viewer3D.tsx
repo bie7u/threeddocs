@@ -43,6 +43,8 @@ interface ConnectionWithIndices {
   style: ConnectionStyle;
   description?: string;
   shapeType?: ShapeType;
+  custom3dElementId?: string;
+  uploadedModelId?: string;
   arrowDirection?: ArrowDirection;
   connectionType?: ConnectionType;
 }
@@ -392,12 +394,14 @@ interface ConnectionTubeProps {
   style?: 'standard' | 'glass' | 'glow' | 'neon';
   description?: string;
   shapeType?: ShapeType;
+  custom3dElementId?: string;
+  uploadedModelId?: string;
   arrowDirection?: ArrowDirection;
   connectionType?: ConnectionType;
   onClick?: () => void;
 }
 
-const ConnectionTube = ({ startPos, endPos, isActive, style = 'standard', shapeType, arrowDirection, connectionType = 'tube', onClick }: ConnectionTubeProps) => {
+const ConnectionTube = ({ startPos, endPos, isActive, style = 'standard', shapeType, custom3dElementId, uploadedModelId, arrowDirection, connectionType = 'tube', onClick }: ConnectionTubeProps) => {
   const tubeRef = useRef<THREE.Mesh>(null);
   const glowRef = useRef<THREE.Mesh>(null);
   const shapeRef = useRef<THREE.Group>(null);
@@ -707,6 +711,8 @@ const ConnectionTube = ({ startPos, endPos, isActive, style = 'standard', shapeT
             color="#fbbf24"
             emissive="#f59e0b"
             emissiveIntensity={0.5}
+            custom3dElementId={custom3dElementId}
+            uploadedModelId={uploadedModelId}
           />
         </group>
       )}
@@ -754,6 +760,8 @@ const UnifiedModel = ({ project, currentStepId, nodePositions, onConnectionClick
           style: conn.data?.style || 'standard' as ConnectionStyle,
           description: conn.data?.description,
           shapeType: conn.data?.shapeType,
+          custom3dElementId: conn.data?.custom3dElementId,
+          uploadedModelId: conn.data?.uploadedModelId,
           arrowDirection: conn.data?.arrowDirection,
           connectionType: conn.data?.connectionType,
         } as ConnectionWithIndices;
@@ -790,6 +798,8 @@ const UnifiedModel = ({ project, currentStepId, nodePositions, onConnectionClick
           style={conn.style}
           description={conn.description}
           shapeType={conn.shapeType}
+          custom3dElementId={conn.custom3dElementId}
+          uploadedModelId={conn.uploadedModelId}
           arrowDirection={conn.arrowDirection}
           connectionType={conn.connectionType}
           onClick={conn.description && onConnectionClick ? () => onConnectionClick(conn.description as string) : undefined}

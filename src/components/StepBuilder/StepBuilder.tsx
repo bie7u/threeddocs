@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import ReactFlow, {
   type Node,
   type Edge,
@@ -141,6 +142,12 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
     setPickerOpen(false);
   };
 
+  const handleClearShape = () => {
+    setDraftShape(undefined);
+    setDraftCustom3dElementId(undefined);
+    setDraftUploadedModelId(undefined);
+  };
+
   const handleSave = () => {
     if (!project) return;
     const updated = project.connections.map(conn =>
@@ -222,7 +229,7 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
                 </div>
 
                 {/* Connection type + Arrow direction side by side */}
-                <div className={`grid ${draftConnType === 'arrow' ? 'grid-cols-2' : 'grid-cols-1'} gap-2`}>
+                <div className={draftConnType === 'arrow' ? 'grid grid-cols-2 gap-2' : 'grid grid-cols-1 gap-2'}>
                   <div>
                     <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Typ</p>
                     <select
@@ -264,7 +271,7 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
                     {draftShape && (
                       <button
                         type="button"
-                        onClick={() => { setDraftShape(undefined); setDraftCustom3dElementId(undefined); setDraftUploadedModelId(undefined); }}
+                        onClick={handleClearShape}
                         title="Usuń kształt"
                         className="px-2 py-1.5 text-xs border border-slate-200 rounded-lg text-slate-400 hover:text-red-500 hover:border-red-200 hover:bg-red-50 transition-colors focus:outline-none"
                       >
@@ -272,7 +279,7 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
                       </button>
                     )}
                   </div>
-                  {pickerOpen && (
+                  {pickerOpen && createPortal(
                     <ShapeTypePicker
                       currentShapeType={draftShape ?? 'cube'}
                       currentElementId={draftCustom3dElementId}
@@ -280,7 +287,8 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
                       isGuestMode={isGuestMode}
                       onSelect={handleShapeSelect}
                       onClose={() => setPickerOpen(false)}
-                    />
+                    />,
+                    document.body
                   )}
                 </div>
 
