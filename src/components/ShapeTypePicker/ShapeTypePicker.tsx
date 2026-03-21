@@ -18,7 +18,7 @@ const STANDARD_SHAPES: StandardShape[] = [
   { type: 'sphere', label: 'Kula', emoji: '🔵', description: 'Gładka sfera' },
   { type: 'cylinder', label: 'Walec', emoji: '🥫', description: 'Cylinder/walec' },
   { type: 'cone', label: 'Stożek', emoji: '🔺', description: 'Stożek 3D' },
-  { type: 'engravedBlock', label: 'Klocek z tekstem', emoji: '🔲', description: 'Klocek z grawerowanym tekstem' },
+  { type: 'engravedBlock', label: 'Klocek z tekstem', emoji: '🔲', description: 'Podpisany klocek' },
 ];
 
 interface Props {

@@ -262,7 +262,7 @@ export const StepProperties = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Głębokość grawerowania <span className="text-gray-400 font-normal">(0.05 – 0.3)</span>
+                    Grubość tekstu <span className="text-gray-400 font-normal">(0.05 – 0.3)</span>
                   </label>
                   <div className="flex items-center gap-3">
                     <input
