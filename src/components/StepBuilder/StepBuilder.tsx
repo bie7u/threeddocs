@@ -107,6 +107,7 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
   const [draftUploadedModelId,   setDraftUploadedModelId]   = useState<string | undefined>(data?.uploadedModelId);
   const [draftShapeScale,        setDraftShapeScale]        = useState<number>(data?.shapeModelScale ?? 1);
   const [draftShapePosY,         setDraftShapePosY]         = useState<number>(data?.shapeModelPositionY ?? 0);
+  const [draftShapeRotY,         setDraftShapeRotY]         = useState<number>(data?.shapeModelRotationY ?? 0);
   const [draftArrow,             setDraftArrow]             = useState<ArrowDirection>(currentArrowDir);
   const [draftConnType,          setDraftConnType]          = useState<ConnectionType>(currentConnType);
   const [draftEngravedParams,    setDraftEngravedParams]    = useState<EngravedBlockParams>(data?.engravedBlockParams ?? { text: 'DB', font: 'helvetiker', depth: 0.08, padding: 0.1, face: 'front' });
@@ -120,6 +121,7 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
     setDraftUploadedModelId(data?.uploadedModelId);
     setDraftShapeScale(data?.shapeModelScale ?? 1);
     setDraftShapePosY(data?.shapeModelPositionY ?? 0);
+    setDraftShapeRotY(data?.shapeModelRotationY ?? 0);
     setDraftArrow(data?.arrowDirection || 'none');
     setDraftConnType(data?.connectionType || 'tube');
     setDraftEngravedParams(data?.engravedBlockParams ?? { text: 'DB', font: 'helvetiker', depth: 0.08, padding: 0.1, face: 'front' });
@@ -145,6 +147,7 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
               uploadedModelId: draftUploadedModelId,
               shapeModelScale: draftShapeScale,
               shapeModelPositionY: draftShapePosY,
+              shapeModelRotationY: draftShapeRotY,
               arrowDirection: draftArrow,
               connectionType: draftConnType,
               engravedBlockParams: effectiveShapeType === 'engravedBlock' ? draftEngravedParams : undefined,
@@ -154,7 +157,7 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
         : conn
     );
     updateConnections(updated);
-  }, [project, id, draftDesc, draftStyle, draftShape, draftCustom3dElementId, draftUploadedModelId, draftShapeScale, draftShapePosY, draftArrow, draftConnType, draftEngravedParams, updateConnections]);
+  }, [project, id, draftDesc, draftStyle, draftShape, draftCustom3dElementId, draftUploadedModelId, draftShapeScale, draftShapePosY, draftShapeRotY, draftArrow, draftConnType, draftEngravedParams, updateConnections]);
 
   const getShapeButtonLabel = (): string => {
     if (!draftShape) return 'Brak';
@@ -184,7 +187,8 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
     setDraftUploadedModelId(undefined);
     setDraftShapeScale(1);
     setDraftShapePosY(0);
-    commitDraft({ shapeType: undefined, custom3dElementId: undefined, uploadedModelId: undefined, shapeModelScale: 1, shapeModelPositionY: 0, engravedBlockParams: undefined });
+    setDraftShapeRotY(0);
+    commitDraft({ shapeType: undefined, custom3dElementId: undefined, uploadedModelId: undefined, shapeModelScale: 1, shapeModelPositionY: 0, shapeModelRotationY: 0, engravedBlockParams: undefined });
   };
 
   const handleEngravedParamChange = <K extends keyof EngravedBlockParams>(key: K, value: EngravedBlockParams[K]) => {
@@ -380,6 +384,31 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
                           step="0.1"
                           value={draftShapePosY}
                           onChange={e => { const v = parseFloat(e.target.value); setDraftShapePosY(v); commitDraft({ shapeModelPositionY: v }); }}
+                          className="w-14 px-1.5 py-1 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">
+                        Obrót wokół osi <span className="font-normal normal-case text-slate-400">(0 – 360°)</span>
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="range"
+                          min="0"
+                          max="360"
+                          step="1"
+                          value={draftShapeRotY}
+                          onChange={e => { const v = parseFloat(e.target.value); setDraftShapeRotY(v); commitDraft({ shapeModelRotationY: v }); }}
+                          className="flex-1"
+                        />
+                        <input
+                          type="number"
+                          min="0"
+                          max="360"
+                          step="1"
+                          value={draftShapeRotY}
+                          onChange={e => { const v = parseFloat(e.target.value); setDraftShapeRotY(v); commitDraft({ shapeModelRotationY: v }); }}
                           className="w-14 px-1.5 py-1 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                       </div>

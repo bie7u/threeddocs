@@ -63,6 +63,7 @@ export interface ConnectionData {
   uploadedModelId?: string;
   shapeModelScale?: number;
   shapeModelPositionY?: number;
+  shapeModelRotationY?: number;
   arrowDirection?: ArrowDirection;
   connectionType?: ConnectionType;
   engravedBlockParams?: EngravedBlockParams;
@@ -89,6 +90,7 @@ export interface InstructionStep {
   // Upload-model specific: which mesh element this step focuses on
   focusMeshName?: string;
   focusPoint?: [number, number, number];
+  modelRotationY?: number;
 }
 
 export interface GuideStep {
