@@ -11,6 +11,7 @@ interface ApiModel {
   model_data_url: string;
   description: string | null;
   createdAt: number;
+  system_model?: boolean;
 }
 
 // ─── Converters ───────────────────────────────────────────────────────────────
@@ -23,6 +24,7 @@ const fromApiModel = (m: ApiModel): UploadedModel3D => ({
   modelScale: m.model_scale,
   description: m.description ?? undefined,
   createdAt: m.createdAt,
+  systemModel: m.system_model ?? false,
 });
 
 // ─── API functions ────────────────────────────────────────────────────────────

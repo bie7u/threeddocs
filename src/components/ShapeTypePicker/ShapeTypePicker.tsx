@@ -307,7 +307,17 @@ export const ShapeTypePicker = ({
                             <span className="text-lg">📤</span>
                           </div>
                           <div className="min-w-0">
-                            <p className="text-sm font-medium text-slate-700 truncate">{m.name}</p>
+                            <div className="flex items-center gap-1.5">
+                              <p className="text-sm font-medium text-slate-700 truncate">{m.name}</p>
+                              {m.systemModel && (
+                                <span className="flex-shrink-0 inline-flex items-center gap-0.5 px-1.5 py-0.5 text-xs font-medium bg-blue-100 text-blue-700 rounded" aria-label="Model systemowy">
+                                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                                    <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
+                                  </svg>
+                                  Systemowy
+                                </span>
+                              )}
+                            </div>
                             <p className="text-xs text-slate-400 truncate">{m.modelFileName}</p>
                           </div>
                         </div>
