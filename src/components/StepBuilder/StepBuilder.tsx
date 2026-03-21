@@ -105,6 +105,8 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
   const [draftShape,             setDraftShape]             = useState<ShapeType | undefined>(currentShapeType);
   const [draftCustom3dElementId, setDraftCustom3dElementId] = useState<string | undefined>(data?.custom3dElementId);
   const [draftUploadedModelId,   setDraftUploadedModelId]   = useState<string | undefined>(data?.uploadedModelId);
+  const [draftShapeScale,        setDraftShapeScale]        = useState<number>(data?.shapeModelScale ?? 1);
+  const [draftShapePosY,         setDraftShapePosY]         = useState<number>(data?.shapeModelPositionY ?? 0);
   const [draftArrow,             setDraftArrow]             = useState<ArrowDirection>(currentArrowDir);
   const [draftConnType,          setDraftConnType]          = useState<ConnectionType>(currentConnType);
 
@@ -115,6 +117,8 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
     setDraftShape(data?.shapeType);
     setDraftCustom3dElementId(data?.custom3dElementId);
     setDraftUploadedModelId(data?.uploadedModelId);
+    setDraftShapeScale(data?.shapeModelScale ?? 1);
+    setDraftShapePosY(data?.shapeModelPositionY ?? 0);
     setDraftArrow(data?.arrowDirection || 'none');
     setDraftConnType(data?.connectionType || 'tube');
   }, [data]);
@@ -146,13 +150,15 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
     setDraftShape(undefined);
     setDraftCustom3dElementId(undefined);
     setDraftUploadedModelId(undefined);
+    setDraftShapeScale(1);
+    setDraftShapePosY(0);
   };
 
   const handleSave = () => {
     if (!project) return;
     const updated = project.connections.map(conn =>
       conn.id === id
-        ? { ...conn, data: { ...conn.data, description: draftDesc, style: draftStyle, shapeType: draftShape, custom3dElementId: draftCustom3dElementId, uploadedModelId: draftUploadedModelId, arrowDirection: draftArrow, connectionType: draftConnType } }
+        ? { ...conn, data: { ...conn.data, description: draftDesc, style: draftStyle, shapeType: draftShape, custom3dElementId: draftCustom3dElementId, uploadedModelId: draftUploadedModelId, shapeModelScale: draftShapeScale, shapeModelPositionY: draftShapePosY, arrowDirection: draftArrow, connectionType: draftConnType } }
         : conn
     );
     updateConnections(updated);
@@ -291,6 +297,62 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
                     document.body
                   )}
                 </div>
+
+                {/* Shape scale + Y-position (visible only when shape is selected) */}
+                {draftShape && (
+                  <div className="space-y-2">
+                    <div>
+                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">
+                        Skala kształtu <span className="font-normal normal-case text-slate-400">(0.1 – 5.0)</span>
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="range"
+                          min="0.1"
+                          max="5"
+                          step="0.1"
+                          value={draftShapeScale}
+                          onChange={e => setDraftShapeScale(parseFloat(e.target.value))}
+                          className="flex-1"
+                        />
+                        <input
+                          type="number"
+                          min="0.1"
+                          max="5"
+                          step="0.1"
+                          value={draftShapeScale}
+                          onChange={e => setDraftShapeScale(parseFloat(e.target.value))}
+                          className="w-14 px-1.5 py-1 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">
+                        Pozycja Y <span className="font-normal normal-case text-slate-400">(-10 – 10)</span>
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="range"
+                          min="-10"
+                          max="10"
+                          step="0.1"
+                          value={draftShapePosY}
+                          onChange={e => setDraftShapePosY(parseFloat(e.target.value))}
+                          className="flex-1"
+                        />
+                        <input
+                          type="number"
+                          min="-10"
+                          max="10"
+                          step="0.1"
+                          value={draftShapePosY}
+                          onChange={e => setDraftShapePosY(parseFloat(e.target.value))}
+                          className="w-14 px-1.5 py-1 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {/* Description */}
                 <div>

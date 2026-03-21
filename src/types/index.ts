@@ -61,6 +61,8 @@ export interface ConnectionData {
   shapeType?: ShapeType;
   custom3dElementId?: string;
   uploadedModelId?: string;
+  shapeModelScale?: number;
+  shapeModelPositionY?: number;
   arrowDirection?: ArrowDirection;
   connectionType?: ConnectionType;
 }

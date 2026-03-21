@@ -45,6 +45,8 @@ interface ConnectionWithIndices {
   shapeType?: ShapeType;
   custom3dElementId?: string;
   uploadedModelId?: string;
+  shapeModelScale?: number;
+  shapeModelPositionY?: number;
   arrowDirection?: ArrowDirection;
   connectionType?: ConnectionType;
 }
@@ -396,12 +398,14 @@ interface ConnectionTubeProps {
   shapeType?: ShapeType;
   custom3dElementId?: string;
   uploadedModelId?: string;
+  shapeModelScale?: number;
+  shapeModelPositionY?: number;
   arrowDirection?: ArrowDirection;
   connectionType?: ConnectionType;
   onClick?: () => void;
 }
 
-const ConnectionTube = ({ startPos, endPos, isActive, style = 'standard', shapeType, custom3dElementId, uploadedModelId, arrowDirection, connectionType = 'tube', onClick }: ConnectionTubeProps) => {
+const ConnectionTube = ({ startPos, endPos, isActive, style = 'standard', shapeType, custom3dElementId, uploadedModelId, shapeModelScale = 1, shapeModelPositionY = 0, arrowDirection, connectionType = 'tube', onClick }: ConnectionTubeProps) => {
   const tubeRef = useRef<THREE.Mesh>(null);
   const glowRef = useRef<THREE.Mesh>(null);
   const shapeRef = useRef<THREE.Group>(null);
@@ -709,10 +713,12 @@ const ConnectionTube = ({ startPos, endPos, isActive, style = 'standard', shapeT
             shapeType={shapeType}
             size={0.8}
             color="#fbbf24"
-            emissive="#f59e0b"
-            emissiveIntensity={0.5}
+            emissive={shapeType === 'custom3dElement' || shapeType === 'uploadedModel' ? '#000000' : '#f59e0b'}
+            emissiveIntensity={shapeType === 'custom3dElement' || shapeType === 'uploadedModel' ? 0 : 0.5}
             custom3dElementId={custom3dElementId}
             uploadedModelId={uploadedModelId}
+            modelScale={shapeModelScale}
+            modelPositionY={shapeModelPositionY}
           />
         </group>
       )}
@@ -762,6 +768,8 @@ const UnifiedModel = ({ project, currentStepId, nodePositions, onConnectionClick
           shapeType: conn.data?.shapeType,
           custom3dElementId: conn.data?.custom3dElementId,
           uploadedModelId: conn.data?.uploadedModelId,
+          shapeModelScale: conn.data?.shapeModelScale,
+          shapeModelPositionY: conn.data?.shapeModelPositionY,
           arrowDirection: conn.data?.arrowDirection,
           connectionType: conn.data?.connectionType,
         } as ConnectionWithIndices;
@@ -800,6 +808,8 @@ const UnifiedModel = ({ project, currentStepId, nodePositions, onConnectionClick
           shapeType={conn.shapeType}
           custom3dElementId={conn.custom3dElementId}
           uploadedModelId={conn.uploadedModelId}
+          shapeModelScale={conn.shapeModelScale}
+          shapeModelPositionY={conn.shapeModelPositionY}
           arrowDirection={conn.arrowDirection}
           connectionType={conn.connectionType}
           onClick={conn.description && onConnectionClick ? () => onConnectionClick(conn.description as string) : undefined}
