@@ -61,6 +61,19 @@ export const getMe = async (): Promise<AuthUser> => {
   return res.json() as Promise<AuthUser>;
 };
 
+/** POST /api/auth/google/ — exchange a Google ID token for a session; server sets httpOnly cookies. */
+export const loginWithGoogle = async (credential: string): Promise<AuthUser> => {
+  const res = await apiRequest('/auth/google/', {
+    method: 'POST',
+    body: JSON.stringify({ credential }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ message: 'Google login failed' }));
+    throw new Error((err as { message?: string }).message ?? 'Google login failed');
+  }
+  return res.json() as Promise<AuthUser>;
+};
+
 /** POST /api/auth/change-password — changes the password for the current user. */
 export const changePassword = async (currentPassword: string, newPassword: string): Promise<void> => {
   const res = await apiRequest('/auth/change-password', {
