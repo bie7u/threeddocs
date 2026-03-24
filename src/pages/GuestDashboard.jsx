@@ -8,7 +8,7 @@ const GuestDashboard = () => {
   const navigate = useNavigate();
   const { createNewGuestProject, clearGuestMode, project } = useAppStore();
 
-  const [showNewProjectDialog, setShowNewProjectDialog] = useState(false);
+  const [showNewProjectDialog, setShowNewProjectDialog] = useState(true);
   const [showEditor, setShowEditor] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [createError, setCreateError] = useState('');
