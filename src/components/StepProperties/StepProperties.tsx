@@ -20,11 +20,8 @@ export const StepProperties = () => {
   const [pickerOpen, setPickerOpen] = useState(false);
 
   useEffect(() => {
-    // Guest users have no server-side elements or models — skip API calls to
-    // prevent a 401 that would otherwise redirect them to the login page.
-    if (isGuestMode) return;
-    loadCustom3DElements().then(setCustom3DElements).catch(() => setCustom3DElements([]));
-    loadUploadedModels().then(setUploadedModels).catch(() => setUploadedModels([]));
+    loadCustom3DElements(isGuestMode).then(setCustom3DElements).catch(() => setCustom3DElements([]));
+    loadUploadedModels(isGuestMode).then(setUploadedModels).catch(() => setUploadedModels([]));
   }, [isGuestMode]);
   
   const [formData, setFormData] = useState<Partial<InstructionStep>>({

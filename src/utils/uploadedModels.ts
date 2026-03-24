@@ -7,9 +7,10 @@ import {
   deleteModelRequest,
 } from '../services/models';
 
-/** Returns all uploaded 3D models owned by the current user. */
-export async function loadUploadedModels(): Promise<UploadedModel3D[]> {
-  return fetchModels();
+/** Returns all uploaded 3D models owned by the current user.
+ *  Pass `guestMode = true` to use the guest endpoint. */
+export async function loadUploadedModels(guestMode = false): Promise<UploadedModel3D[]> {
+  return fetchModels(undefined, guestMode);
 }
 
 /**

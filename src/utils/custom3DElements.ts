@@ -7,9 +7,10 @@ import {
   deleteElementRequest,
 } from '../services/elements';
 
-/** Returns all custom 3D elements owned by the current user. */
-export async function loadCustom3DElements(): Promise<Custom3DElement[]> {
-  return fetchElements();
+/** Returns all custom 3D elements owned by the current user.
+ *  Pass `guestMode = true` to use the guest endpoint. */
+export async function loadCustom3DElements(guestMode = false): Promise<Custom3DElement[]> {
+  return fetchElements(undefined, guestMode);
 }
 
 /**
