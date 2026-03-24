@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../../store';
 import { StepBuilder } from '../StepBuilder/StepBuilder';
 import { Viewer3D } from '../Viewer3D/Viewer3D';
@@ -14,7 +15,24 @@ interface MainLayoutProps {
   useSampleProjectFallback?: boolean;
 }
 
+const GuestModeBanner = ({ onGoToLogin }: { onGoToLogin: () => void }) => (
+  <div className="bg-gradient-to-r from-yellow-500/90 to-amber-500/90 text-white text-sm px-6 py-2 flex items-center justify-between gap-4 flex-shrink-0 shadow-md">
+    <div className="flex items-center gap-2">
+      <span className="text-base" role="img" aria-label="Tryb gościa">👤</span>
+      <span className="font-medium">Pracujesz w trybie gościa.</span>
+      <span className="hidden sm:inline text-yellow-100">Wszystkie opcje, w tym udostępnianie modelu, są dostępne po zalogowaniu.</span>
+    </div>
+    <button
+      onClick={onGoToLogin}
+      className="flex-shrink-0 px-3 py-1 bg-white/20 hover:bg-white/30 rounded-lg text-xs font-semibold transition-colors border border-white/30"
+    >
+      Zaloguj się
+    </button>
+  </div>
+);
+
 export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, useSampleProjectFallback = true }: MainLayoutProps) => {
+  const navigate = useNavigate();
   const { 
     project, 
     selectedStepId, 
@@ -28,7 +46,13 @@ export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, useSamplePr
     setEditorMode,
     setSelectedStepId,
     isGuestMode,
+    clearGuestMode,
   } = useAppStore();
+
+  const handleGoToLogin = () => {
+    clearGuestMode();
+    navigate('/login');
+  };
 
   useEffect(() => {
     if (!project && useSampleProjectFallback) {
@@ -116,6 +140,7 @@ export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, useSamplePr
             </div>
           </div>
         </div>
+        {isGuestMode && <GuestModeBanner onGoToLogin={handleGoToLogin} />}
         <div className="flex-1 flex overflow-hidden gap-1 p-1">
           <UploadModelEditor />
         </div>
@@ -184,6 +209,8 @@ export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, useSamplePr
           </button>
         </div>
       </div>
+
+      {isGuestMode && <GuestModeBanner onGoToLogin={handleGoToLogin} />}
 
       <div className={`flex-1 flex overflow-hidden gap-0 p-1.5${isResizing ? ' cursor-col-resize select-none' : ''}`}>
         {editorMode === 'guide' ? (
