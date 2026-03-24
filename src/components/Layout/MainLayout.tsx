@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../../store';
 import { StepBuilder } from '../StepBuilder/StepBuilder';
 import { Viewer3D } from '../Viewer3D/Viewer3D';
@@ -28,7 +29,9 @@ export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, useSamplePr
     setEditorMode,
     setSelectedStepId,
     isGuestMode,
+    clearGuestMode,
   } = useAppStore();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!project && useSampleProjectFallback) {
@@ -79,6 +82,30 @@ export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, useSamplePr
     }
   };
 
+  const handleGoToLogin = () => {
+    clearGuestMode();
+    navigate('/login');
+  };
+
+  const GuestBanner = isGuestMode ? (
+    <div className="flex items-center justify-between gap-3 px-6 py-2 bg-yellow-500/10 border-b border-yellow-500/20 text-yellow-200 text-xs flex-shrink-0">
+      <div className="flex items-center gap-2">
+        <svg className="w-4 h-4 text-yellow-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span>
+          <strong className="text-yellow-300">Tryb gościa</strong> — pełne funkcje edytora, w tym udostępnianie modeli, są dostępne po zalogowaniu.
+        </span>
+      </div>
+      <button
+        onClick={handleGoToLogin}
+        className="flex-shrink-0 px-3 py-1 bg-yellow-500/20 hover:bg-yellow-500/30 border border-yellow-500/30 rounded-md text-yellow-200 font-medium transition-colors"
+      >
+        Zaloguj się
+      </button>
+    </div>
+  ) : null;
+
   if (isPreviewMode) {
     if (project?.projectType === 'upload') {
       return <div className="w-screen h-screen"><UploadPreviewMode onGoToEditorPanel={onGoToEditorPanel} /></div>;
@@ -116,6 +143,7 @@ export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, useSamplePr
             </div>
           </div>
         </div>
+        {GuestBanner}
         <div className="flex-1 flex overflow-hidden gap-1 p-1">
           <UploadModelEditor />
         </div>
@@ -184,6 +212,8 @@ export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, useSamplePr
           </button>
         </div>
       </div>
+
+      {GuestBanner}
 
       <div className={`flex-1 flex overflow-hidden gap-0 p-1.5${isResizing ? ' cursor-col-resize select-none' : ''}`}>
         {editorMode === 'guide' ? (
