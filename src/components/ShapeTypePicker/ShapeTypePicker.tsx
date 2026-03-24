@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { fetchElements } from '../../services/elements';
-import { fetchModels } from '../../services/models';
+import { fetchModels, fetchPublicModels } from '../../services/models';
 import type { Custom3DElement, ShapeType, UploadedModel3D } from '../../types';
 import { ModelPreviewModal } from '../ModelPreviewModal/ModelPreviewModal';
 
@@ -70,10 +70,11 @@ export const ShapeTypePicker = ({
 
   // Load models when switching to the models tab
   useEffect(() => {
-    if (activeTab !== 'models' || isGuestMode || modelsLoadedRef.current) return;
+    if (activeTab !== 'models' || modelsLoadedRef.current) return;
     modelsLoadedRef.current = true;
     setModelsLoading(true);
-    fetchModels()
+    const loader = isGuestMode ? fetchPublicModels() : fetchModels();
+    loader
       .then(setModels)
       .catch(() => setModels([]))
       .finally(() => setModelsLoading(false));
@@ -93,6 +94,10 @@ export const ShapeTypePicker = ({
 
   const handleModelSearch = (value: string) => {
     setModelSearch(value);
+    if (isGuestMode) {
+      // Public models are already loaded; filter locally.
+      return;
+    }
     if (modelSearchTimer.current) clearTimeout(modelSearchTimer.current);
     modelSearchTimer.current = setTimeout(() => {
       setModelsLoading(true);
@@ -276,70 +281,72 @@ export const ShapeTypePicker = ({
                     type="text"
                     value={modelSearch}
                     onChange={(e) => handleModelSearch(e.target.value)}
-                    placeholder="Szukaj wgranych modeli..."
+                    placeholder={isGuestMode ? 'Szukaj modeli systemowych...' : 'Szukaj wgranych modeli...'}
                     className="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
 
-                {isGuestMode ? (
-                  <div className="text-center py-8 text-slate-400 text-sm">
-                    Wgrane modele niedostępne w trybie gościa
-                  </div>
-                ) : modelsLoading ? (
+                {modelsLoading ? (
                   <div className="text-center py-8 text-slate-400 text-sm">Ładowanie...</div>
-                ) : models.length === 0 ? (
-                  <div className="text-center py-8 text-slate-400 text-sm">
-                    {modelSearch ? 'Brak wyników wyszukiwania' : 'Brak wgranych modeli 3D. Dodaj je w Ustawienia › Wgraj element 3D.'}
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    {models.map((m) => (
-                      <div
-                        key={m.id}
-                        className={`flex items-center justify-between p-3 rounded-lg border-2 transition-all ${
-                          currentModelId === m.id
-                            ? 'border-blue-500 bg-blue-50'
-                            : 'border-slate-200 bg-white hover:border-slate-300'
-                        }`}
-                      >
-                        <div className="flex items-center gap-3 min-w-0">
-                          <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center flex-shrink-0">
-                            <span className="text-lg">📤</span>
-                          </div>
-                          <div className="min-w-0">
-                            <div className="flex items-center gap-1.5">
-                              <p className="text-sm font-medium text-slate-700 truncate">{m.name}</p>
-                              {m.systemModel && (
-                                <span className="flex-shrink-0 inline-flex items-center gap-0.5 px-1.5 py-0.5 text-xs font-medium bg-blue-100 text-blue-700 rounded" aria-label="Model systemowy">
-                                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                                    <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
-                                  </svg>
-                                  Systemowy
-                                </span>
-                              )}
+                ) : (() => {
+                  const lowerSearch = modelSearch.toLowerCase();
+                  const visibleModels = isGuestMode && modelSearch
+                    ? models.filter(m => m.name.toLowerCase().includes(lowerSearch) || m.modelFileName.toLowerCase().includes(lowerSearch))
+                    : models;
+                  return visibleModels.length === 0 ? (
+                    <div className="text-center py-8 text-slate-400 text-sm">
+                      {modelSearch ? 'Brak wyników wyszukiwania' : isGuestMode ? 'Brak dostępnych modeli systemowych.' : 'Brak wgranych modeli 3D. Dodaj je w Ustawienia › Wgraj element 3D.'}
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {visibleModels.map((m) => (
+                        <div
+                          key={m.id}
+                          className={`flex items-center justify-between p-3 rounded-lg border-2 transition-all ${
+                            currentModelId === m.id
+                              ? 'border-blue-500 bg-blue-50'
+                              : 'border-slate-200 bg-white hover:border-slate-300'
+                          }`}
+                        >
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center flex-shrink-0">
+                              <span className="text-lg">📤</span>
                             </div>
-                            <p className="text-xs text-slate-400 truncate">{m.modelFileName}</p>
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-1.5">
+                                <p className="text-sm font-medium text-slate-700 truncate">{m.name}</p>
+                                {m.systemModel && (
+                                  <span className="flex-shrink-0 inline-flex items-center gap-0.5 px-1.5 py-0.5 text-xs font-medium bg-blue-100 text-blue-700 rounded" aria-label="Model systemowy">
+                                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                                      <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
+                                    </svg>
+                                    Systemowy
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-xs text-slate-400 truncate">{m.modelFileName}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+                            <button
+                              onClick={() => setPreviewModel(m)}
+                              className="px-2.5 py-1.5 text-xs text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+                              title="Podgląd"
+                            >
+                              👁 Podgląd
+                            </button>
+                            <button
+                              onClick={() => handleSelect('uploadedModel', undefined, m.id)}
+                              className="px-2.5 py-1.5 text-xs text-white bg-blue-500 rounded-lg hover:bg-blue-600 transition-colors"
+                            >
+                              Wybierz
+                            </button>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2 flex-shrink-0 ml-2">
-                          <button
-                            onClick={() => setPreviewModel(m)}
-                            className="px-2.5 py-1.5 text-xs text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
-                            title="Podgląd"
-                          >
-                            👁 Podgląd
-                          </button>
-                          <button
-                            onClick={() => handleSelect('uploadedModel', undefined, m.id)}
-                            className="px-2.5 py-1.5 text-xs text-white bg-blue-500 rounded-lg hover:bg-blue-600 transition-colors"
-                          >
-                            Wybierz
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                      ))}
+                    </div>
+                  );
+                })()}
               </div>
             )}
           </div>

@@ -1,5 +1,5 @@
 import type { UploadedModel3D } from '../types';
-import { apiRequest } from './api';
+import { apiRequest, API_BASE } from './api';
 
 // ─── Server shape ─────────────────────────────────────────────────────────────
 
@@ -28,6 +28,13 @@ const fromApiModel = (m: ApiModel): UploadedModel3D => ({
 });
 
 // ─── API functions ────────────────────────────────────────────────────────────
+
+/** GET /api/public-models/ — returns system/public models available without authentication. */
+export const fetchPublicModels = async (): Promise<UploadedModel3D[]> => {
+  const res = await fetch(`${API_BASE}/public-models/`, { credentials: 'omit' });
+  if (!res.ok) throw new Error('Failed to fetch public models');
+  return (await res.json() as ApiModel[]).map(fromApiModel);
+};
 
 /** GET /api/models — returns all uploaded 3D models owned by the user.
  *  Pass `search` to filter results server-side via ?search=. */
