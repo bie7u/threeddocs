@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../../store';
 import { StepBuilder } from '../StepBuilder/StepBuilder';
 import { Viewer3D } from '../Viewer3D/Viewer3D';
@@ -8,6 +9,25 @@ import { GuideBuilder } from '../GuideBuilder/GuideBuilder';
 import { UploadModelEditor, UploadPreviewMode } from '../UploadModelEditor';
 import { sampleProject, sampleNodePositions } from '../../utils/sampleData';
 
+const GuestModeBanner = ({ onLogin }: { onLogin: () => void }) => (
+  <div className="flex items-center justify-between gap-3 px-6 py-2 bg-yellow-50 border-b border-yellow-200 text-sm">
+    <div className="flex items-center gap-2 text-yellow-800">
+      <svg className="w-4 h-4 flex-shrink-0 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+        <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+      </svg>
+      <span>
+        <strong>Tryb gościa</strong> — wszystkie opcje, w tym udostępnianie modelu, są dostępne po zalogowaniu.
+      </span>
+    </div>
+    <button
+      onClick={onLogin}
+      className="flex-shrink-0 px-3 py-1 text-xs font-semibold text-white bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg hover:from-blue-600 hover:to-indigo-700 transition-colors shadow-sm"
+    >
+      Zaloguj się
+    </button>
+  </div>
+);
+
 interface MainLayoutProps {
   onBackToProjectList?: () => void;
   onGoToEditorPanel?: () => void;
@@ -15,6 +35,7 @@ interface MainLayoutProps {
 }
 
 export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, useSampleProjectFallback = true }: MainLayoutProps) => {
+  const navigate = useNavigate();
   const { 
     project, 
     selectedStepId, 
@@ -28,6 +49,7 @@ export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, useSamplePr
     setEditorMode,
     setSelectedStepId,
     isGuestMode,
+    clearGuestMode,
   } = useAppStore();
 
   useEffect(() => {
@@ -116,6 +138,9 @@ export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, useSamplePr
             </div>
           </div>
         </div>
+        {isGuestMode && (
+          <GuestModeBanner onLogin={() => { clearGuestMode(); navigate('/login'); }} />
+        )}
         <div className="flex-1 flex overflow-hidden gap-1 p-1">
           <UploadModelEditor />
         </div>
@@ -184,6 +209,11 @@ export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, useSamplePr
           </button>
         </div>
       </div>
+
+      {/* Guest mode info banner */}
+      {isGuestMode && (
+        <GuestModeBanner onLogin={() => { clearGuestMode(); navigate('/login'); }} />
+      )}
 
       <div className={`flex-1 flex overflow-hidden gap-0 p-1.5${isResizing ? ' cursor-col-resize select-none' : ''}`}>
         {editorMode === 'guide' ? (

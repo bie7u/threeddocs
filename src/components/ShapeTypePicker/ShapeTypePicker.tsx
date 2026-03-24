@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { fetchElements } from '../../services/elements';
-import { fetchModels } from '../../services/models';
+import { fetchModels, fetchPublicModels } from '../../services/models';
 import type { Custom3DElement, ShapeType, UploadedModel3D } from '../../types';
 import { ModelPreviewModal } from '../ModelPreviewModal/ModelPreviewModal';
 
@@ -70,10 +70,11 @@ export const ShapeTypePicker = ({
 
   // Load models when switching to the models tab
   useEffect(() => {
-    if (activeTab !== 'models' || isGuestMode || modelsLoadedRef.current) return;
+    if (activeTab !== 'models' || modelsLoadedRef.current) return;
     modelsLoadedRef.current = true;
     setModelsLoading(true);
-    fetchModels()
+    const loader = isGuestMode ? fetchPublicModels() : fetchModels();
+    loader
       .then(setModels)
       .catch(() => setModels([]))
       .finally(() => setModelsLoading(false));
@@ -210,7 +211,7 @@ export const ShapeTypePicker = ({
 
                 {isGuestMode ? (
                   <div className="text-center py-8 text-slate-400 text-sm">
-                    Elementy 3D niedostępne w trybie gościa
+                    Elementy 3D dostępne po zalogowaniu
                   </div>
                 ) : elementsLoading ? (
                   <div className="text-center py-8 text-slate-400 text-sm">Ładowanie...</div>
@@ -268,28 +269,33 @@ export const ShapeTypePicker = ({
             {/* ── Uploaded 3D Models ───────────────────────────────── */}
             {activeTab === 'models' && (
               <div className="space-y-3">
-                <div className="relative">
-                  <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                  <input
-                    type="text"
-                    value={modelSearch}
-                    onChange={(e) => handleModelSearch(e.target.value)}
-                    placeholder="Szukaj wgranych modeli..."
-                    className="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-
                 {isGuestMode ? (
-                  <div className="text-center py-8 text-slate-400 text-sm">
-                    Wgrane modele niedostępne w trybie gościa
+                  <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg text-xs text-blue-700">
+                    <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
+                    </svg>
+                    Systemowe modele — więcej modeli dostępnych po zalogowaniu
                   </div>
-                ) : modelsLoading ? (
+                ) : (
+                  <div className="relative">
+                    <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    <input
+                      type="text"
+                      value={modelSearch}
+                      onChange={(e) => handleModelSearch(e.target.value)}
+                      placeholder="Szukaj wgranych modeli..."
+                      className="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                )}
+
+                {modelsLoading ? (
                   <div className="text-center py-8 text-slate-400 text-sm">Ładowanie...</div>
                 ) : models.length === 0 ? (
                   <div className="text-center py-8 text-slate-400 text-sm">
-                    {modelSearch ? 'Brak wyników wyszukiwania' : 'Brak wgranych modeli 3D. Dodaj je w Ustawienia › Wgraj element 3D.'}
+                    {isGuestMode ? 'Brak dostępnych modeli systemowych' : (modelSearch ? 'Brak wyników wyszukiwania' : 'Brak wgranych modeli 3D. Dodaj je w Ustawienia › Wgraj element 3D.')}
                   </div>
                 ) : (
                   <div className="space-y-2">

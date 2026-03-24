@@ -1,5 +1,5 @@
 import type { UploadedModel3D } from '../types';
-import { apiRequest } from './api';
+import { API_BASE, apiRequest } from './api';
 
 // ─── Server shape ─────────────────────────────────────────────────────────────
 
@@ -90,4 +90,11 @@ export const updateModelRequest = async (
 export const deleteModelRequest = async (id: string): Promise<void> => {
   const res = await apiRequest(`/models/${id}`, { method: 'DELETE' });
   if (!res.ok) throw new Error('Failed to delete model');
+};
+
+/** GET /api/public-models/ — returns system models available without authentication. */
+export const fetchPublicModels = async (): Promise<UploadedModel3D[]> => {
+  const res = await fetch(`${API_BASE}/public-models/`, { credentials: 'omit' });
+  if (!res.ok) throw new Error('Failed to fetch public models');
+  return (await res.json() as ApiModel[]).map(fromApiModel);
 };
