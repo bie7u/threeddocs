@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { fetchElements } from '../../services/elements';
-import { fetchModels } from '../../services/models';
+import { fetchElements, fetchGuestElements } from '../../services/elements';
+import { fetchModels, fetchGuestModels } from '../../services/models';
 import type { Custom3DElement, ShapeType, UploadedModel3D } from '../../types';
 import { ModelPreviewModal } from '../ModelPreviewModal/ModelPreviewModal';
 
@@ -59,10 +59,10 @@ export const ShapeTypePicker = ({
 
   // Load elements when switching to the elements tab
   useEffect(() => {
-    if (activeTab !== 'elements' || isGuestMode || elementsLoadedRef.current) return;
+    if (activeTab !== 'elements' || elementsLoadedRef.current) return;
     elementsLoadedRef.current = true;
     setElementsLoading(true);
-    fetchElements()
+    (isGuestMode ? fetchGuestElements() : fetchElements())
       .then(setElements)
       .catch(() => setElements([]))
       .finally(() => setElementsLoading(false));
@@ -70,10 +70,10 @@ export const ShapeTypePicker = ({
 
   // Load models when switching to the models tab
   useEffect(() => {
-    if (activeTab !== 'models' || isGuestMode || modelsLoadedRef.current) return;
+    if (activeTab !== 'models' || modelsLoadedRef.current) return;
     modelsLoadedRef.current = true;
     setModelsLoading(true);
-    fetchModels()
+    (isGuestMode ? fetchGuestModels() : fetchModels())
       .then(setModels)
       .catch(() => setModels([]))
       .finally(() => setModelsLoading(false));
@@ -84,7 +84,7 @@ export const ShapeTypePicker = ({
     if (elementSearchTimer.current) clearTimeout(elementSearchTimer.current);
     elementSearchTimer.current = setTimeout(() => {
       setElementsLoading(true);
-      fetchElements(value || undefined)
+      (isGuestMode ? fetchGuestElements(value || undefined) : fetchElements(value || undefined))
         .then(setElements)
         .catch(() => setElements([]))
         .finally(() => setElementsLoading(false));
@@ -96,7 +96,7 @@ export const ShapeTypePicker = ({
     if (modelSearchTimer.current) clearTimeout(modelSearchTimer.current);
     modelSearchTimer.current = setTimeout(() => {
       setModelsLoading(true);
-      fetchModels(value || undefined)
+      (isGuestMode ? fetchGuestModels(value || undefined) : fetchModels(value || undefined))
         .then(setModels)
         .catch(() => setModels([]))
         .finally(() => setModelsLoading(false));
@@ -208,15 +208,11 @@ export const ShapeTypePicker = ({
                   />
                 </div>
 
-                {isGuestMode ? (
-                  <div className="text-center py-8 text-slate-400 text-sm">
-                    Elementy 3D niedostępne w trybie gościa
-                  </div>
-                ) : elementsLoading ? (
+                {elementsLoading ? (
                   <div className="text-center py-8 text-slate-400 text-sm">Ładowanie...</div>
                 ) : elements.length === 0 ? (
                   <div className="text-center py-8 text-slate-400 text-sm">
-                    {elementSearch ? 'Brak wyników wyszukiwania' : 'Brak elementów 3D. Utwórz je w Ustawienia › Stwórz element 3D.'}
+                    {elementSearch ? 'Brak wyników wyszukiwania' : 'Brak elementów 3D.'}
                   </div>
                 ) : (
                   <div className="space-y-2">
@@ -281,15 +277,11 @@ export const ShapeTypePicker = ({
                   />
                 </div>
 
-                {isGuestMode ? (
-                  <div className="text-center py-8 text-slate-400 text-sm">
-                    Wgrane modele niedostępne w trybie gościa
-                  </div>
-                ) : modelsLoading ? (
+                {modelsLoading ? (
                   <div className="text-center py-8 text-slate-400 text-sm">Ładowanie...</div>
                 ) : models.length === 0 ? (
                   <div className="text-center py-8 text-slate-400 text-sm">
-                    {modelSearch ? 'Brak wyników wyszukiwania' : 'Brak wgranych modeli 3D. Dodaj je w Ustawienia › Wgraj element 3D.'}
+                    {modelSearch ? 'Brak wyników wyszukiwania' : 'Brak wgranych modeli 3D.'}
                   </div>
                 ) : (
                   <div className="space-y-2">

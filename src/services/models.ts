@@ -1,5 +1,5 @@
 import type { UploadedModel3D } from '../types';
-import { apiRequest } from './api';
+import { apiRequest, API_BASE } from './api';
 
 // ─── Server shape ─────────────────────────────────────────────────────────────
 
@@ -35,6 +35,17 @@ export const fetchModels = async (search?: string): Promise<UploadedModel3D[]> =
   const path = search ? `/models?search=${encodeURIComponent(search)}` : '/models';
   const res = await apiRequest(path);
   if (!res.ok) throw new Error('Failed to fetch uploaded models');
+  return (await res.json() as ApiModel[]).map(fromApiModel);
+};
+
+/** GET /api/models/guest-models — returns publicly available models (no auth required).
+ *  Pass `search` to filter results server-side via ?search=. */
+export const fetchGuestModels = async (search?: string): Promise<UploadedModel3D[]> => {
+  const path = search
+    ? `/models/guest-models?search=${encodeURIComponent(search)}`
+    : '/models/guest-models';
+  const res = await fetch(`${API_BASE}${path}`, { credentials: 'omit' });
+  if (!res.ok) throw new Error('Failed to fetch guest models');
   return (await res.json() as ApiModel[]).map(fromApiModel);
 };
 

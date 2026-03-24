@@ -1,5 +1,5 @@
 import type { Custom3DElement } from '../types';
-import { apiRequest } from './api';
+import { apiRequest, API_BASE } from './api';
 
 // ─── Server shape ─────────────────────────────────────────────────────────────
 
@@ -52,6 +52,17 @@ export const fetchElements = async (search?: string): Promise<Custom3DElement[]>
   const path = search ? `/elements/?search=${encodeURIComponent(search)}` : '/elements/';
   const res = await apiRequest(path);
   if (!res.ok) throw new Error('Failed to fetch custom 3D elements');
+  return (await res.json() as ApiElement[]).map(fromApi);
+};
+
+/** GET /api/elements/guest-elements — returns publicly available elements (no auth required).
+ *  Pass `search` to filter results server-side via ?search=. */
+export const fetchGuestElements = async (search?: string): Promise<Custom3DElement[]> => {
+  const path = search
+    ? `/elements/guest-elements?search=${encodeURIComponent(search)}`
+    : '/elements/guest-elements';
+  const res = await fetch(`${API_BASE}${path}`, { credentials: 'omit' });
+  if (!res.ok) throw new Error('Failed to fetch guest elements');
   return (await res.json() as ApiElement[]).map(fromApi);
 };
 
