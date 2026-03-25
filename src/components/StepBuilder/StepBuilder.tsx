@@ -544,7 +544,8 @@ const edgeTypes = { default: CustomEdge };
 
 export const StepBuilder = () => {
   const { project, updateConnections, setSelectedStepId, nodePositions, updateNodePosition } = useAppStore();
-  
+  const { language } = useLanguage();
+
   const initialNodes: Node[] = useMemo(() => {
     if (!project) return [];
     return project.steps.map((step, index) => ({
