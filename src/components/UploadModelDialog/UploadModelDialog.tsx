@@ -202,7 +202,7 @@ export const UploadModelDialog = ({ existing, onClose, onSaved }: Props) => {
             {/* File picker */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1">
-                Plik modelu 3D <span className="text-gray-400 font-normal">(.gltf / .glb, maks. 50 MB)</span>
+                Plik modelu 3D <span className="text-gray-400 font-normal">(.gltf / .glb, maks. 10 MB)</span>
               </label>
               <div
                 onClick={() => fileInputRef.current?.click()}

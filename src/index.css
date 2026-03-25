@@ -80,3 +80,10 @@
   margin: 0.5rem 0;
 }
 .rich-text-preview strong { color: #f1f5f9; }
+
+/* Dark scrollbar for PreviewMode description */
+.dark-scrollbar { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.2) rgba(0,0,0,0.2); }
+.dark-scrollbar::-webkit-scrollbar { width: 6px; }
+.dark-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 3px; }
+.dark-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 3px; }
+.dark-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.35); }
