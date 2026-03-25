@@ -14,6 +14,7 @@ export const UploadPreviewMode = ({ onGoToEditorPanel, isPublic }: { onGoToEdito
     viewMode,
     isGuestMode,
   } = useAppStore();
+  const { language } = useLanguage();
   const [showCopyNotification, setShowCopyNotification] = useState(false);
   const [isGeneratingLink, setIsGeneratingLink] = useState(false);
   const [cameraMode, setCameraMode] = useState<'auto' | 'free'>('auto');

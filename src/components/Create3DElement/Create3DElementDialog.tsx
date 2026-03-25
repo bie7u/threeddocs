@@ -4,6 +4,7 @@ import { OrbitControls } from '@react-three/drei';
 import type { Custom3DElement } from '../../types';
 import { saveCustom3DElement } from '../../utils/custom3DElements';
 import { Custom3DShape } from '../Viewer3D/Custom3DShape';
+import { useLanguage } from '../../i18n';
 
 interface Props {
   existing?: Custom3DElement;
@@ -12,6 +13,7 @@ interface Props {
 }
 
 export const Create3DElementDialog = ({ existing, onClose, onSaved }: Props) => {
+  const { language } = useLanguage();
   const [text, setText] = useState(existing?.text ?? '');
   const [color, setColor] = useState(existing?.color ?? '#4299e1');
   const [textureDataUrl, setTextureDataUrl] = useState<string | undefined>(existing?.textureDataUrl);

@@ -2,11 +2,14 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAppStore } from '../../store';
 import { generateShareToken, fetchProjectsPage } from '../../services/projects';
 import { Footer } from '../Footer/Footer';
+import { useLanguage } from '../../i18n';
 
 const PAGE_SIZE = 10;
 
 export const MyModels = ({ onOpenEditor, onClose }) => {
   const { deleteProject, setProject, setPreviewMode } = useAppStore();
+  const { t } = useLanguage();
+  const lt = t.myModels;
   const [copiedId, setCopiedId] = useState(null);
   const [shareError, setShareError] = useState(null);
   const [sharingId, setSharingId] = useState(null);

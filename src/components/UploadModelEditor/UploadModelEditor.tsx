@@ -21,6 +21,7 @@ const DEFAULT_CAM: CameraPosition = { x: 5, y: 5, z: 5, targetX: 0, targetY: 0, 
 
 export const UploadModelEditor = () => {
   const { project, setPreviewMode, addStep, updateStep, deleteStep } = useAppStore();
+  const { language } = useLanguage();
   const [selectedStepId, setSelectedStepId] = useState<string | null>(null);
   const [editingStep, setEditingStep] = useState<EditingState | null>(null);
   const [isAddingStep, setIsAddingStep] = useState(false);

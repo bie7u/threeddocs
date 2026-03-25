@@ -320,6 +320,7 @@ const en = {
     uploadType: 'Uploaded model',
     shareLink: 'Copy link',
     deleteError: 'Failed to delete model.',
+    shareError: 'Failed to generate link. Please try again.',
   },
 
   // Preview mode

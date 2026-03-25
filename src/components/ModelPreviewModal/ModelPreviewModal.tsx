@@ -4,6 +4,7 @@ import { OrbitControls, PerspectiveCamera, useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
 import { Custom3DShape } from '../Viewer3D/Custom3DShape';
 import type { Custom3DElement, UploadedModel3D } from '../../types';
+import { useLanguage } from '../../i18n';
 
 // ── Uploaded-model renderer (mirrors CustomModel/CustomModelRenderer in Viewer3D) ──
 
@@ -81,6 +82,7 @@ interface ModelPreviewModalProps {
 }
 
 export const ModelPreviewModal = ({ element, model, onClose }: ModelPreviewModalProps) => {
+  const { language } = useLanguage();
   // Close on backdrop click
   const handleBackdrop = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) onClose();
@@ -93,7 +95,7 @@ export const ModelPreviewModal = ({ element, model, onClose }: ModelPreviewModal
     return () => window.removeEventListener('keydown', onKey);
   }, [onClose]);
 
-  const title = element?.name ?? model?.name ?? 'Podgląd';
+  const title = element?.name ?? model?.name ?? (language === 'pl' ? 'Podgląd' : 'Preview');
   const description = element?.description ?? model?.description;
 
   return (

@@ -320,6 +320,7 @@ const pl = {
     uploadType: 'Wgrany model',
     shareLink: 'Kopiuj link',
     deleteError: 'Nie udało się usunąć modelu.',
+    shareError: 'Nie udało się wygenerować linku. Spróbuj ponownie.',
   },
 
   // Preview mode

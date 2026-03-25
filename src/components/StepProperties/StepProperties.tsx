@@ -10,6 +10,7 @@ import { ShapeTypePicker } from '../ShapeTypePicker/ShapeTypePicker';
 
 export const StepProperties = () => {
   const { project, selectedStepId, updateStep, deleteStep, addStep, isGuestMode } = useAppStore();
+  const { language } = useLanguage();
   
   const selectedStep = project?.steps.find((step) => step.id === selectedStepId);
   
@@ -109,7 +110,7 @@ export const StepProperties = () => {
   };
 
   const handleDelete = () => {
-    if (selectedStepId && window.confirm(lt.confirmDelete ?? 'Confirm delete')) {
+    if (selectedStepId && window.confirm(language === 'pl' ? 'Czy na pewno chcesz usunąć ten krok?' : 'Are you sure you want to delete this step?')) {
       deleteStep(selectedStepId);
     }
   };

@@ -340,7 +340,7 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
                       <button
                         type="button"
                         onClick={handleClearShape}
-                        title="Usuń kształt"
+                        title={language === "pl" ? "Usuń kształt" : "Remove shape"}
                         className="px-2 py-1.5 text-xs border border-slate-200 rounded-lg text-slate-400 hover:text-red-500 hover:border-red-200 hover:bg-red-50 transition-colors focus:outline-none"
                       >
                         ✕
@@ -519,11 +519,11 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
                   </svg>
-                  Gotowe
+                  {language === "pl" ? "Gotowe" : "Done"}
                 </button>
                 <button
                   onClick={handleDelete}
-                  title="Usuń połączenie"
+                  title={language === "pl" ? "Usuń połączenie" : "Delete connection"}
                   className="px-2.5 py-1.5 bg-red-50 hover:bg-red-100 text-red-500 text-xs font-semibold rounded-lg border border-red-200 transition-all"
                 >
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -652,8 +652,8 @@ export const StepBuilder = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z" />
               </svg>
             </div>
-            <p className="text-slate-500 font-medium text-sm">Brak kroków</p>
-            <p className="text-slate-400 text-xs mt-1">Dodaj krok w panelu po lewej</p>
+            <p className="text-slate-500 font-medium text-sm">{language === "pl" ? "Brak kroków" : "No steps"}</p>
+            <p className="text-slate-400 text-xs mt-1">{language === "pl" ? "Dodaj krok w panelu po lewej" : "Add a step in the left panel"}</p>
           </div>
         </div>
       )}

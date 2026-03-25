@@ -5,6 +5,7 @@ import { useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
 import type { UploadedModel3D } from '../../types';
 import { uploadNewModel, saveUploadedModelMeta } from '../../utils/uploadedModels';
+import { useLanguage } from '../../i18n';
 
 // --- Error Boundary ---
 class ModelErrorBoundary extends Component<
@@ -95,6 +96,7 @@ interface Props {
 }
 
 export const UploadModelDialog = ({ existing, onClose, onSaved }: Props) => {
+  const { language } = useLanguage();
   const [name, setName] = useState(existing?.name ?? '');
   const [modelDataUrl, setModelDataUrl] = useState<string | null>(existing?.modelDataUrl ?? null);
   const [modelFileName, setModelFileName] = useState(existing?.modelFileName ?? '');

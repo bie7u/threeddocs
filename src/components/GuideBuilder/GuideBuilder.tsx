@@ -18,6 +18,7 @@ export const GuideBuilder = () => {
     updateStep,
   } = useAppStore();
 
+  const { language } = useLanguage();
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const dragItemRef = useRef<number | null>(null);
