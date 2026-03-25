@@ -5,6 +5,7 @@ import { useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
 import type { UploadedModel3D } from '../../types';
 import { uploadNewModel, saveUploadedModelMeta } from '../../utils/uploadedModels';
+import { useLanguage } from '../../i18n';
 
 // --- Error Boundary ---
 class ModelErrorBoundary extends Component<
@@ -95,6 +96,7 @@ interface Props {
 }
 
 export const UploadModelDialog = ({ existing, onClose, onSaved }: Props) => {
+  const { language } = useLanguage();
   const [name, setName] = useState(existing?.name ?? '');
   const [modelDataUrl, setModelDataUrl] = useState<string | null>(existing?.modelDataUrl ?? null);
   const [modelFileName, setModelFileName] = useState(existing?.modelFileName ?? '');
@@ -111,12 +113,12 @@ export const UploadModelDialog = ({ existing, onClose, onSaved }: Props) => {
 
     const maxSize = 10 * 1024 * 1024; // 10 MB
     if (file.size > maxSize) {
-      alert('Plik jest za duży (maks. 10 MB).');
+      alert(language === 'pl' ? 'Plik jest za duży (maks. 10 MB).' : 'File is too large (max 10 MB).');
       e.target.value = '';
       return;
     }
     if (!file.name.match(/\.(gltf|glb)$/i)) {
-      alert('Proszę wybrać plik GLTF (.gltf) lub GLB (.glb).');
+      alert(language === 'pl' ? 'Proszę wybrać plik GLTF (.gltf) lub GLB (.glb).' : 'Please select a GLTF (.gltf) or GLB (.glb) file.');
       e.target.value = '';
       return;
     }
@@ -131,7 +133,7 @@ export const UploadModelDialog = ({ existing, onClose, onSaved }: Props) => {
       setIsLoading(false);
     };
     reader.onerror = () => {
-      alert('Nie udało się wczytać pliku.');
+      alert(language === 'pl' ? 'Nie udało się wczytać pliku.' : 'Failed to read file.');
       setIsLoading(false);
     };
     reader.readAsDataURL(file);
@@ -140,11 +142,11 @@ export const UploadModelDialog = ({ existing, onClose, onSaved }: Props) => {
   const handleSave = async () => {
     const trimmedName = name.trim();
     if (!trimmedName) {
-      alert('Proszę podać nazwę modelu.');
+      alert(language === 'pl' ? 'Proszę podać nazwę modelu.' : 'Please enter a model name.');
       return;
     }
     if (!existing && !modelDataUrl) {
-      alert('Proszę wybrać plik modelu 3D.');
+      alert(language === 'pl' ? 'Proszę wybrać plik modelu 3D.' : 'Please select a 3D model file.');
       return;
     }
     setIsSaving(true);
@@ -157,7 +159,7 @@ export const UploadModelDialog = ({ existing, onClose, onSaved }: Props) => {
       }
       onSaved(saved);
     } catch (err) {
-      alert((err as Error).message ?? 'Nie udało się zapisać modelu.');
+      alert((err as Error).message ?? (language === 'pl' ? 'Nie udało się zapisać modelu.' : 'Failed to save model.'));
     } finally {
       setIsSaving(false);
     }
@@ -169,7 +171,7 @@ export const UploadModelDialog = ({ existing, onClose, onSaved }: Props) => {
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-indigo-600 to-blue-500">
           <h2 className="text-xl font-bold text-white">
-            {existing ? 'Edytuj model 3D' : 'Wgraj element 3D'}
+            {existing ? (language === 'pl' ? 'Edytuj model 3D' : 'Edit 3D model') : (language === 'pl' ? 'Wgraj element 3D' : 'Upload 3D element')}
           </h2>
           <button
             onClick={onClose}
@@ -226,7 +228,7 @@ export const UploadModelDialog = ({ existing, onClose, onSaved }: Props) => {
                     </svg>
                     <div>
                       <p className="text-sm font-medium text-green-700">{modelFileName}</p>
-                      <p className="text-xs text-gray-500">{isLoading ? 'Wczytywanie…' : 'Kliknij, aby zmienić plik'}</p>
+                      <p className="text-xs text-gray-500">{isLoading ? (language === 'pl' ? 'Wczytywanie…' : 'Loading…') : (language === 'pl' ? 'Kliknij, aby zmienić plik' : 'Click to change file')}</p>
                     </div>
                   </div>
                 ) : (
@@ -323,7 +325,7 @@ export const UploadModelDialog = ({ existing, onClose, onSaved }: Props) => {
             disabled={isSaving}
             className="px-5 py-2 text-sm font-medium text-white bg-gradient-to-r from-indigo-500 to-blue-600 rounded-lg hover:from-indigo-600 hover:to-blue-700 transition disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            {isSaving ? 'Zapisywanie…' : 'Zapisz model'}
+            {isSaving ? (language === 'pl' ? 'Zapisywanie…' : 'Saving…') : (language === 'pl' ? 'Zapisz model' : 'Save model')}
           </button>
         </div>
       </div>

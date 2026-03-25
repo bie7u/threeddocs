@@ -6,6 +6,8 @@ import { loadCustom3DElements, deleteCustom3DElement } from '../utils/custom3DEl
 import { loadUploadedModels, deleteUploadedModel } from '../utils/uploadedModels';
 import { getMe, changePassword } from '../services/auth';
 import { Footer } from '../components/Footer/Footer';
+import { useLanguage } from '../i18n';
+import { LanguageSwitcher } from '../components/LanguageSwitcher/LanguageSwitcher';
 
 // ─── Account Modal ────────────────────────────────────────────────────────────
 
@@ -18,11 +20,13 @@ const AccountModal = ({ onClose }) => {
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const { t } = useLanguage();
+  const lt = t.settings.account;
 
   useEffect(() => {
     getMe()
       .then(setUser)
-      .catch(() => setUserError('Nie udało się załadować danych konta.'));
+      .catch(() => setUserError(lt.loadError));
   }, []);
 
   const handleChangePassword = async (e) => {
@@ -30,11 +34,11 @@ const AccountModal = ({ onClose }) => {
     setSaveError('');
     setSaveSuccess(false);
     if (newPassword !== confirmPassword) {
-      setSaveError('Nowe hasła nie są zgodne.');
+      setSaveError(lt.passwordMismatch);
       return;
     }
     if (newPassword.length < 8) {
-      setSaveError('Nowe hasło musi mieć co najmniej 8 znaków.');
+      setSaveError(lt.passwordTooShort);
       return;
     }
     setSaving(true);
@@ -45,7 +49,7 @@ const AccountModal = ({ onClose }) => {
       setNewPassword('');
       setConfirmPassword('');
     } catch (err) {
-      setSaveError(err.message ?? 'Zmiana hasła nie powiodła się.');
+      setSaveError(err.message ?? lt.changeError);
     } finally {
       setSaving(false);
     }
@@ -63,7 +67,7 @@ const AccountModal = ({ onClose }) => {
                   d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
             </div>
-            <h2 className="text-lg font-bold text-gray-900">Moje konto</h2>
+            <h2 className="text-lg font-bold text-gray-900">{lt.title}</h2>
           </div>
           <button
             onClick={onClose}
@@ -78,21 +82,21 @@ const AccountModal = ({ onClose }) => {
         <div className="px-6 py-5 space-y-6">
           {/* Account info */}
           <div>
-            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Informacje o koncie</h3>
+            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">{lt.accountInfo}</h3>
             {userError ? (
               <p className="text-sm text-red-500">{userError}</p>
             ) : !user ? (
-              <p className="text-sm text-gray-400">Ładowanie…</p>
+              <p className="text-sm text-gray-400">{lt.loading}</p>
             ) : (
               <div className="bg-gray-50 rounded-xl p-4 space-y-2">
                 {user.name && (
                   <div className="flex items-center gap-3">
-                    <span className="text-xs font-medium text-gray-400 w-14 flex-shrink-0">Imię</span>
+                    <span className="text-xs font-medium text-gray-400 w-14 flex-shrink-0">{lt.nameLabel}</span>
                     <span className="text-sm font-medium text-gray-800">{user.name}</span>
                   </div>
                 )}
                 <div className="flex items-center gap-3">
-                  <span className="text-xs font-medium text-gray-400 w-14 flex-shrink-0">Email</span>
+                  <span className="text-xs font-medium text-gray-400 w-14 flex-shrink-0">{lt.emailLabel}</span>
                   <span className="text-sm font-medium text-gray-800 break-all">{user.email}</span>
                 </div>
               </div>
@@ -101,10 +105,10 @@ const AccountModal = ({ onClose }) => {
 
           {/* Change password */}
           <div>
-            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Zmiana hasła</h3>
+            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">{lt.changePassword}</h3>
             <form onSubmit={handleChangePassword} className="space-y-3">
               <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">Aktualne hasło</label>
+                <label className="block text-xs font-medium text-gray-600 mb-1">{lt.currentPassword}</label>
                 <input
                   type="password"
                   value={currentPassword}
@@ -115,18 +119,18 @@ const AccountModal = ({ onClose }) => {
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">Nowe hasło</label>
+                <label className="block text-xs font-medium text-gray-600 mb-1">{lt.newPassword}</label>
                 <input
                   type="password"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   required
                   className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent"
-                  placeholder="min. 8 znaków"
+                  placeholder={lt.minPassword}
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">Powtórz nowe hasło</label>
+                <label className="block text-xs font-medium text-gray-600 mb-1">{lt.confirmPassword}</label>
                 <input
                   type="password"
                   value={confirmPassword}
@@ -141,7 +145,7 @@ const AccountModal = ({ onClose }) => {
                 <p className="text-xs text-red-500 bg-red-50 px-3 py-2 rounded-lg">{saveError}</p>
               )}
               {saveSuccess && (
-                <p className="text-xs text-green-600 bg-green-50 px-3 py-2 rounded-lg">Hasło zostało zmienione.</p>
+                <p className="text-xs text-green-600 bg-green-50 px-3 py-2 rounded-lg">{lt.successMessage}</p>
               )}
 
               <button
@@ -149,7 +153,7 @@ const AccountModal = ({ onClose }) => {
                 disabled={saving}
                 className="w-full py-2.5 px-4 bg-gradient-to-r from-purple-500 to-indigo-600 text-white text-sm font-medium rounded-lg hover:from-purple-600 hover:to-indigo-700 transition-all disabled:opacity-60 disabled:cursor-not-allowed shadow-md shadow-purple-500/25"
               >
-                {saving ? 'Zapisywanie…' : 'Zmień hasło'}
+                {saving ? lt.saving : lt.saveButton}
               </button>
             </form>
           </div>
@@ -175,6 +179,9 @@ const Settings = ({ onClose }) => {
   const [previewElement, setPreviewElement] = useState(null);
   const [previewModel, setPreviewModel] = useState(null);
 
+  const { t } = useLanguage();
+  const lt = t.settings;
+
   const refreshElements = () => {
     loadCustom3DElements().then(setElements).catch(() => setElements([]));
   };
@@ -189,10 +196,10 @@ const Settings = ({ onClose }) => {
   }, []);
 
   const handleDelete = (id) => {
-    if (!window.confirm('Czy na pewno chcesz usunąć ten element?')) return;
+    if (!window.confirm(lt.confirmDeleteElement)) return;
     deleteCustom3DElement(id)
       .then(refreshElements)
-      .catch((err) => alert(err.message ?? 'Nie udało się usunąć elementu.'));
+      .catch((err) => alert(err.message ?? lt.deleteElementError));
   };
 
   const handleCreate = () => {
@@ -209,10 +216,10 @@ const Settings = ({ onClose }) => {
   };
 
   const handleDeleteModel = (id) => {
-    if (!window.confirm('Czy na pewno chcesz usunąć ten model?')) return;
+    if (!window.confirm(lt.confirmDeleteModel)) return;
     deleteUploadedModel(id)
       .then(refreshModels)
-      .catch((err) => alert(err.message ?? 'Nie udało się usunąć modelu.'));
+      .catch((err) => alert(err.message ?? lt.deleteModelError));
   };
 
   const handleModelSaved = () => {
@@ -230,12 +237,12 @@ const Settings = ({ onClose }) => {
               <button
                 onClick={onClose}
                 className="flex items-center gap-2 px-3 py-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
-                title="Powrót do pulpitu"
+                title={lt.backTooltip}
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
-                <span className="text-sm font-medium">Pulpit</span>
+                <span className="text-sm font-medium">{lt.backToPanel}</span>
               </button>
               <span className="text-gray-300">|</span>
               <div className="flex items-center gap-2">
@@ -245,9 +252,10 @@ const Settings = ({ onClose }) => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
                 </div>
-                <h1 className="text-xl font-bold text-gray-900">Ustawienia</h1>
+                <h1 className="text-xl font-bold text-gray-900">{lt.title}</h1>
               </div>
             </div>
+            <LanguageSwitcher variant="navbar" />
           </div>
         </div>
       </nav>
@@ -255,8 +263,8 @@ const Settings = ({ onClose }) => {
       {/* Main Content */}
       <div className="w-full flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Ustawienia</h2>
-          <p className="text-gray-600">Konfiguruj swoje preferencje i zasoby 3D</p>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">{lt.title}</h2>
+          <p className="text-gray-600">{lt.description}</p>
         </div>
 
         {/* Settings tiles */}
@@ -272,13 +280,13 @@ const Settings = ({ onClose }) => {
                   d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
               </svg>
             </div>
-            <h3 className="text-lg font-semibold text-gray-800 mb-1">Stwórz element 3D</h3>
+            <h3 className="text-lg font-semibold text-gray-800 mb-1">{lt.create3DElement}</h3>
             <p className="text-sm text-gray-600">
-              Utwórz własny kształt 3D z tekstu (maks. 12 znaków)
+              {lt.create3DElementDesc}
             </p>
             <p className="text-xs text-gray-400 mt-1">
-              Elementy: {elements.length}/{MAX_ELEMENTS}
-              {elements.length >= MAX_ELEMENTS && <span className="text-red-500 ml-1">— osiągnięto limit</span>}
+              {lt.elements}: {elements.length}/{MAX_ELEMENTS}
+              {elements.length >= MAX_ELEMENTS && <span className="text-red-500 ml-1">{lt.limitReached}</span>}
             </p>
           </div>
 
@@ -293,13 +301,13 @@ const Settings = ({ onClose }) => {
                   d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
               </svg>
             </div>
-            <h3 className="text-lg font-semibold text-gray-800 mb-1">Wgraj element 3D</h3>
+            <h3 className="text-lg font-semibold text-gray-800 mb-1">{lt.upload3DModel}</h3>
             <p className="text-sm text-gray-600">
-              Wgraj model 3D (.gltf / .glb) i nadaj mu nazwę oraz skalę
+              {lt.upload3DModelDesc}
             </p>
             <p className="text-xs text-gray-400 mt-1">
-              Modele: {userModelsCount}/{MAX_MODELS}
-              {userModelsCount >= MAX_MODELS && <span className="text-red-500 ml-1">— osiągnięto limit</span>}
+              {lt.models}: {userModelsCount}/{MAX_MODELS}
+              {userModelsCount >= MAX_MODELS && <span className="text-red-500 ml-1">{lt.limitReached}</span>}
             </p>
           </div>
 
@@ -314,9 +322,9 @@ const Settings = ({ onClose }) => {
                   d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
             </div>
-            <h3 className="text-lg font-semibold text-gray-800 mb-1">Moje konto</h3>
+            <h3 className="text-lg font-semibold text-gray-800 mb-1">{lt.myAccount}</h3>
             <p className="text-sm text-gray-600">
-              Informacje o koncie i zmiana hasła
+              {lt.myAccountDesc}
             </p>
           </div>
         </div>
@@ -324,7 +332,7 @@ const Settings = ({ onClose }) => {
         {/* Existing custom 3D text elements */}
         {elements.length > 0 && (
           <div className="mt-12">
-            <h3 className="text-xl font-bold text-gray-800 mb-4">Moje elementy 3D ({elements.length})</h3>
+            <h3 className="text-xl font-bold text-gray-800 mb-4">{lt.my3DElements} ({elements.length})</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {elements.map((el) => (
                 <div
@@ -354,7 +362,7 @@ const Settings = ({ onClose }) => {
                       )}
                     </div>
                     <p className="text-xs text-gray-500">
-                      {el.textureDataUrl ? 'Tekstura' : 'Brak tekstury'}
+                      {el.textureDataUrl ? lt.hasTexture : lt.noTexture}
                     </p>
                   </div>
                   <div className="flex flex-col gap-1">
@@ -362,13 +370,13 @@ const Settings = ({ onClose }) => {
                       onClick={(e) => { e.stopPropagation(); setPreviewElement(el); }}
                       className="px-3 py-1 text-xs bg-purple-500 text-white rounded hover:bg-purple-600 transition"
                     >
-                      Podgląd
+                      {lt.preview}
                     </button>
                     <button
                       onClick={(e) => { e.stopPropagation(); handleDelete(el.id); }}
                       className="px-3 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600 transition"
                     >
-                      Usuń
+                      {lt.delete}
                     </button>
                   </div>
                 </div>
@@ -380,7 +388,7 @@ const Settings = ({ onClose }) => {
         {/* Uploaded 3D models */}
         {uploadedModels.length > 0 && (
           <div className="mt-12">
-            <h3 className="text-xl font-bold text-gray-800 mb-4">Wgrane modele 3D ({uploadedModels.length})</h3>
+            <h3 className="text-xl font-bold text-gray-800 mb-4">{lt.uploadedModels} ({uploadedModels.length})</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {uploadedModels.map((model) => (
                 <div
@@ -402,7 +410,7 @@ const Settings = ({ onClose }) => {
                           <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                             <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
                           </svg>
-                          Systemowy
+                          {lt.system}
                         </span>
                       )}
                       {model.description && (
@@ -418,7 +426,7 @@ const Settings = ({ onClose }) => {
                       )}
                     </div>
                     <p className="text-xs text-gray-500">
-                      Skala: {model.modelScale} · {model.modelFileName}
+                      {lt.scale}: {model.modelScale} · {model.modelFileName}
                     </p>
                   </div>
                   <div className="flex flex-col gap-1">
@@ -426,14 +434,14 @@ const Settings = ({ onClose }) => {
                       onClick={(e) => { e.stopPropagation(); setPreviewModel(model); }}
                       className="px-3 py-1 text-xs bg-purple-500 text-white rounded hover:bg-purple-600 transition"
                     >
-                      Podgląd
+                      {lt.preview}
                     </button>
                     {!model.systemModel && (
                       <button
                         onClick={(e) => { e.stopPropagation(); handleDeleteModel(model.id); }}
                         className="px-3 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600 transition"
                       >
-                        Usuń
+                        {lt.delete}
                       </button>
                     )}
                   </div>

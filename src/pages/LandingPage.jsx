@@ -2,91 +2,51 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { probeSession, logout } from '../services/auth';
 import { API_BASE } from '../services/api';
+import { useLanguage } from '../i18n';
+import { LanguageSwitcher } from '../components/LanguageSwitcher/LanguageSwitcher';
+
 const LOGO_SRC = '/logo.svg';
 
-const features = [
-  {
-    icon: (
-      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8}
-          d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18" />
-      </svg>
-    ),
-    gradient: 'from-blue-500 to-indigo-600',
-    title: 'Prezentuj swoje rozwiązania',
-    desc: 'Zamień architekturę, flow danych i mikroserwisy w interaktywny model 3D. Pokaż swój pomysł — zamiast go tłumaczyć przez godzinę na spotkaniu.',
-  },
-  {
-    icon: (
-      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8}
-          d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-      </svg>
-    ),
-    gradient: 'from-green-500 to-emerald-600',
-    title: 'Onboarding bez bólu głowy',
-    desc: 'Nowy developer rozumie cały stos technologiczny już pierwszego dnia — bez przedzierania się przez 200-stronicowe wiki i bez bombardowania seniorów pytaniami.',
-  },
-  {
-    icon: (
-      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8}
-          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-      </svg>
-    ),
-    gradient: 'from-purple-500 to-violet-600',
-    title: 'Runbooki i procedury',
-    desc: 'Deploy, incident response, maintenance — dokumentuj je jako sekwencje kroków z podświetlaniem węzłów. Koniec z wiedzą zamkniętą w głowach senior devów.',
-  },
-  {
-    icon: (
-      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8}
-          d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-      </svg>
-    ),
-    gradient: 'from-pink-500 to-rose-600',
-    title: 'Udostępnij jednym kliknięciem',
-    desc: 'Wygeneruj link i wyślij — bez instalacji, bez logowania po drugiej stronie. Twój model działa od razu w przeglądarce, na każdym urządzeniu.',
-  },
+const featureIcons = [
+  (
+    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8}
+        d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18" />
+    </svg>
+  ),
+  (
+    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8}
+        d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+    </svg>
+  ),
+  (
+    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8}
+        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+    </svg>
+  ),
+  (
+    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8}
+        d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+    </svg>
+  ),
 ];
 
-const steps = [
-  {
-    num: '01',
-    title: 'Zbuduj interaktywny model',
-    desc: 'Dodaj węzły — serwery, serwisy, bazy danych — połącz je strzałkami i nadaj każdemu kolor. Twoja architektura IT w 3D gotowa w kilka minut.',
-    color: 'text-blue-600',
-    bg: 'bg-blue-50',
-    border: 'border-blue-200',
-  },
-  {
-    num: '02',
-    title: 'Podziel wiedzę na kroki',
-    desc: 'Do każdego węzła dodaj krótki opis — jeden krok, jedna informacja. Ułóż je w sekwencję, którą odbiorca przejdzie samodzielnie, we własnym tempie.',
-    color: 'text-purple-600',
-    bg: 'bg-purple-50',
-    border: 'border-purple-200',
-  },
-  {
-    num: '03',
-    title: 'Udostępnij — zero instalacji',
-    desc: 'Kliknij „Share", skopiuj link i wyślij. Odbiorca otwiera model w przeglądarce — bez rejestracji, bez instalowania czegokolwiek, na każdym urządzeniu.',
-    color: 'text-green-600',
-    bg: 'bg-green-50',
-    border: 'border-green-200',
-  },
+const featureGradients = [
+  'from-blue-500 to-indigo-600',
+  'from-green-500 to-emerald-600',
+  'from-purple-500 to-violet-600',
+  'from-pink-500 to-rose-600',
 ];
 
-const useCases = [
-  { emoji: '🖥️', label: 'Architektura systemów' },
-  { emoji: '💡', label: 'Prezentacja rozwiązania' },
-  { emoji: '🚀', label: 'Onboarding deweloperów' },
-  { emoji: '📋', label: 'Runbooki i playbooki' },
-  { emoji: '🔐', label: 'Dokumentacja bezpieczeństwa' },
-  { emoji: '🔄', label: 'Procesy CI/CD' },
-  { emoji: '🧩', label: 'Mapa mikroserwisów' },
-  { emoji: '🎯', label: 'Pitch techniczny' },
+const useCaseEmojis = ['🖥️', '💡', '🚀', '📋', '🔐', '🔄', '🧩', '🎯'];
+
+const stepColors = [
+  { color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-200' },
+  { color: 'text-purple-600', bg: 'bg-purple-50', border: 'border-purple-200' },
+  { color: 'text-green-600', bg: 'bg-green-50', border: 'border-green-200' },
 ];
 
 const StatCard = ({ value, label, textColor, gradientFrom, note }) => (
@@ -104,6 +64,9 @@ const StatCard = ({ value, label, textColor, gradientFrom, note }) => (
 
 const LandingPage = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
+  const lt = t.landing;
+
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [stats, setStats] = useState(null);
 
@@ -124,6 +87,30 @@ const LandingPage = () => {
     setIsLoggedIn(false);
   };
 
+  const features = [
+    { icon: featureIcons[0], gradient: featureGradients[0], title: lt.features.feature1Title, desc: lt.features.feature1Desc },
+    { icon: featureIcons[1], gradient: featureGradients[1], title: lt.features.feature2Title, desc: lt.features.feature2Desc },
+    { icon: featureIcons[2], gradient: featureGradients[2], title: lt.features.feature3Title, desc: lt.features.feature3Desc },
+    { icon: featureIcons[3], gradient: featureGradients[3], title: lt.features.feature4Title, desc: lt.features.feature4Desc },
+  ];
+
+  const steps = [
+    { num: '01', title: lt.howItWorks.step1Title, desc: lt.howItWorks.step1Desc, ...stepColors[0] },
+    { num: '02', title: lt.howItWorks.step2Title, desc: lt.howItWorks.step2Desc, ...stepColors[1] },
+    { num: '03', title: lt.howItWorks.step3Title, desc: lt.howItWorks.step3Desc, ...stepColors[2] },
+  ];
+
+  const useCases = [
+    { emoji: useCaseEmojis[0], label: lt.useCases.case1 },
+    { emoji: useCaseEmojis[1], label: lt.useCases.case2 },
+    { emoji: useCaseEmojis[2], label: lt.useCases.case3 },
+    { emoji: useCaseEmojis[3], label: lt.useCases.case4 },
+    { emoji: useCaseEmojis[4], label: lt.useCases.case5 },
+    { emoji: useCaseEmojis[5], label: lt.useCases.case6 },
+    { emoji: useCaseEmojis[6], label: lt.useCases.case7 },
+    { emoji: useCaseEmojis[7], label: lt.useCases.case8 },
+  ];
+
   return (
     <div className="min-h-screen bg-white">
       {/* ── Navigation ─────────────────────────────────────────────────── */}
@@ -138,19 +125,20 @@ const LandingPage = () => {
 
             {/* CTA buttons */}
             <div className="flex items-center gap-3">
+              <LanguageSwitcher variant="navbar" />
               {isLoggedIn ? (
                 <>
                   <button
                     onClick={() => navigate('/dashboard')}
                     className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
                   >
-                    Moje konto
+                    {lt.nav.myAccount}
                   </button>
                   <button
                     onClick={handleLogout}
                     className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 rounded-lg shadow-md hover:shadow-lg transition-all"
                   >
-                    Wyloguj się
+                    {lt.nav.logout}
                   </button>
                 </>
               ) : (
@@ -159,13 +147,13 @@ const LandingPage = () => {
                     onClick={() => navigate('/login')}
                     className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
                   >
-                    Zaloguj się
+                    {lt.nav.login}
                   </button>
                   <button
                     onClick={() => navigate('/guest')}
                     className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 rounded-lg shadow-md hover:shadow-lg transition-all"
                   >
-                    Wypróbuj za darmo
+                    {lt.nav.tryFree}
                   </button>
                 </>
               )}
@@ -176,25 +164,21 @@ const LandingPage = () => {
 
       {/* ── Hero ─────────────────────────────────────────────────────────── */}
       <section className="relative overflow-hidden bg-gradient-to-br from-blue-50 via-white to-purple-50 pt-20 pb-24">
-        {/* Background blobs */}
         <div className="absolute -top-40 -left-40 w-96 h-96 bg-blue-200 rounded-full opacity-20 blur-3xl pointer-events-none" />
         <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-purple-200 rounded-full opacity-20 blur-3xl pointer-events-none" />
 
         <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <span className="inline-block mb-4 px-4 py-1.5 bg-blue-100 text-blue-700 text-sm font-semibold rounded-full">
-            ⚡ Narzędzie dla developerów i architektów IT
+            {lt.hero.badge}
           </span>
           <h1 className="text-5xl sm:text-6xl font-extrabold text-gray-900 leading-tight mb-6">
-            Pokaż swój system.{' '}
+            {lt.hero.title}{' '}
             <span className="bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
-              Przestań go tylko opisywać.
+              {lt.hero.titleHighlight}
             </span>
           </h1>
           <p className="text-xl text-gray-600 mb-10 max-w-2xl mx-auto leading-relaxed">
-            ThreeDocsy to narzędzie dla ludzi, którzy chcą szybko i efektownie
-            zaprezentować swoje rozwiązania, wizje i architekturę.
-            Interaktywne bloki zamiast suchych PDF-ów —
-            jedna&nbsp;rzecz na raz, zero przeciążenia informacyjnego.
+            {lt.hero.description}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             {isLoggedIn ? (
@@ -203,13 +187,13 @@ const LandingPage = () => {
                   onClick={() => navigate('/dashboard')}
                   className="px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 rounded-2xl shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-0.5"
                 >
-                  Przejdź do dashboardu
+                  {lt.hero.goToDashboard}
                 </button>
                 <button
                   onClick={handleLogout}
                   className="px-8 py-4 text-lg font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:border-blue-400 hover:text-blue-600 rounded-2xl shadow-lg hover:shadow-xl transition-all"
                 >
-                  Wyloguj się
+                  {lt.nav.logout}
                 </button>
               </>
             ) : (
@@ -218,13 +202,13 @@ const LandingPage = () => {
                   onClick={() => navigate('/guest')}
                   className="px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 rounded-2xl shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-0.5"
                 >
-                  Utwórz model za darmo — bez rejestracji
+                  {lt.hero.createFree}
                 </button>
                 <button
                   onClick={() => navigate('/login')}
                   className="px-8 py-4 text-lg font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:border-blue-400 hover:text-blue-600 rounded-2xl shadow-lg hover:shadow-xl transition-all"
                 >
-                  Mam już konto
+                  {lt.hero.haveAccount}
                 </button>
               </>
             )}
@@ -232,36 +216,14 @@ const LandingPage = () => {
 
           {/* Trust badges */}
           <div className="mt-12 flex flex-wrap justify-center gap-6 text-sm text-gray-500">
-            <div className="flex items-center gap-2">
-              <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-              </svg>
-              Bez rejestracji
-            </div>
-            <div className="flex items-center gap-2">
-              <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-              </svg>
-              Dla IT i programistów
-            </div>
-            <div className="flex items-center gap-2">
-              <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-              </svg>
-              Linki do udostępnienia
-            </div>
-            <div className="flex items-center gap-2">
-              <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-              </svg>
-              Działa w przeglądarce
-            </div>
-            <div className="flex items-center gap-2">
-              <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-              </svg>
-              🧠 Interaktywna nauka
-            </div>
+            {[lt.hero.noRegistration, lt.hero.forIT, lt.hero.shareLinks, lt.hero.worksInBrowser, lt.hero.interactiveLearning].map((badge) => (
+              <div key={badge} className="flex items-center gap-2">
+                <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+                {badge}
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -271,15 +233,13 @@ const LandingPage = () => {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <span className="inline-block mb-3 px-4 py-1.5 bg-purple-900/50 text-purple-300 text-sm font-semibold rounded-full">
-              🧠 Nauka przez działanie
+              {lt.whyInteractive.badge}
             </span>
             <h2 className="text-4xl font-extrabold text-white mb-4">
-              Dlaczego interaktywność bije dokumentację?
+              {lt.whyInteractive.title}
             </h2>
             <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-              PDF-y i wiki leżą nieprzeczytane. ThreeDocsy sprawia, że odbiorca
-              sam odkrywa system — krok po kroku, we własnym tempie.
-              Efekt? Mniej pytań do Ciebie, szybszy onboarding, lepsze zrozumienie.
+              {lt.whyInteractive.description}
             </p>
           </div>
 
@@ -288,12 +248,11 @@ const LandingPage = () => {
               <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center text-2xl mb-5 shadow-lg">
                 🧠
               </div>
-              <h3 className="text-white font-bold text-xl mb-3">Aktywna eksploracja</h3>
+              <h3 className="text-white font-bold text-xl mb-3">{lt.whyInteractive.card1Title}</h3>
               <p className="text-gray-400 text-sm leading-relaxed">
-                Klikanie, obracanie modelu i nawigacja krok po kroku angażują pamięć
-                przestrzenną i motoryczną.{' '}
+                {lt.whyInteractive.card1Description}{' '}
                 <span className="text-blue-400 font-semibold">
-                  Interaktywna nauka angażuje bardziej niż pasywne czytanie.
+                  {lt.whyInteractive.card1Highlight}
                 </span>
               </p>
             </div>
@@ -302,14 +261,13 @@ const LandingPage = () => {
               <div className="w-14 h-14 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center text-2xl mb-5 shadow-lg">
                 📌
               </div>
-              <h3 className="text-white font-bold text-xl mb-3">Jeden krok = jedna informacja</h3>
+              <h3 className="text-white font-bold text-xl mb-3">{lt.whyInteractive.card2Title}</h3>
               <p className="text-gray-400 text-sm leading-relaxed">
-                Każdy krok zawiera dokładnie jedną myśl. Odbiorca nie jest przytłoczony —
-                {' '}
+                {lt.whyInteractive.card2Description}{' '}
                 <span className="text-green-400 font-semibold">
-                  żadnej ściany tekstu,
+                  {lt.whyInteractive.card2Highlight}
                 </span>{' '}
-                tylko konkretny węzeł i jego rola w systemie.
+                {lt.whyInteractive.card2Description2}
               </p>
             </div>
 
@@ -317,14 +275,13 @@ const LandingPage = () => {
               <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-violet-600 rounded-xl flex items-center justify-center text-2xl mb-5 shadow-lg">
                 🎯
               </div>
-              <h3 className="text-white font-bold text-xl mb-3">3D angażuje bardziej</h3>
+              <h3 className="text-white font-bold text-xl mb-3">{lt.whyInteractive.card3Title}</h3>
               <p className="text-gray-400 text-sm leading-relaxed">
-                Model 3D to nie tylko efekt wizualny — sama jego obecność
-                sprawia, że odbiorca zostaje dłużej i{' '}
+                {lt.whyInteractive.card3Description}{' '}
                 <span className="text-purple-400 font-semibold">
-                  buduje trwałą mentalną mapę systemu
+                  {lt.whyInteractive.card3Highlight}
                 </span>{' '}
-                zamiast zapamiętywać losowe fragmenty wiki.
+                {lt.whyInteractive.card3Description2}
               </p>
             </div>
           </div>
@@ -336,10 +293,10 @@ const LandingPage = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-extrabold text-gray-900 mb-4">
-              Wszystko czego potrzebuje Twój zespół IT
+              {lt.features.sectionTitle}
             </h2>
             <p className="text-xl text-gray-500 max-w-2xl mx-auto">
-              Od interaktywnego modelu systemu po gotowy link do prezentacji — w kilka minut.
+              {lt.features.sectionDescription}
             </p>
           </div>
 
@@ -365,10 +322,10 @@ const LandingPage = () => {
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-extrabold text-gray-900 mb-4">
-              Jak to działa?
+              {lt.howItWorks.title}
             </h2>
             <p className="text-xl text-gray-500">
-              Trzy kroki od pustego płótna do gotowej interaktywnej prezentacji.
+              {lt.howItWorks.description}
             </p>
           </div>
 
@@ -389,10 +346,10 @@ const LandingPage = () => {
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-extrabold text-gray-900 mb-4">
-              Dla kogo jest ThreeDocsy?
+              {lt.useCases.title}
             </h2>
             <p className="text-xl text-gray-500 max-w-2xl mx-auto">
-              Dla każdego programisty i zespołu IT, który ma coś do pokazania — i chce być rozumiany.
+              {lt.useCases.description}
             </p>
           </div>
 
@@ -411,10 +368,11 @@ const LandingPage = () => {
           {/* Testimonial-style highlight */}
           <div className="mt-16 bg-gradient-to-r from-blue-600 to-purple-700 rounded-3xl p-10 text-center text-white shadow-2xl">
             <p className="text-2xl font-semibold mb-2 leading-snug">
-              „Zamiast tłumaczyć architekturę godzinami na spotkaniach —<br />
-              wysyłam link. Każdy rozumie od razu."
+              {lt.useCases.quote.split('\n').map((line, i, arr) => (
+                <span key={i}>{line}{i < arr.length - 1 && <br />}</span>
+              ))}
             </p>
-            <p className="text-blue-200 text-sm mt-4">— Przykładowe zastosowanie: senior developer w zespole productowym</p>
+            <p className="text-blue-200 text-sm mt-4">{lt.useCases.quoteAuthor}</p>
           </div>
         </div>
       </section>
@@ -423,71 +381,67 @@ const LandingPage = () => {
       <section className="py-24 bg-gradient-to-br from-indigo-950 via-slate-900 to-purple-950">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <span className="inline-block mb-3 px-4 py-1.5 bg-yellow-400/15 text-yellow-300 text-sm font-semibold rounded-full">
-            🌱 Gramy w otwarte karty
+            {lt.stats.badge}
           </span>
           <h2 className="text-4xl font-extrabold text-white mb-4">
-            Mała społeczność?{' '}
+            {lt.stats.title}{' '}
             <span className="bg-gradient-to-r from-yellow-300 to-orange-400 bg-clip-text text-transparent">
-              To Twoja przewaga.
+              {lt.stats.titleHighlight}
             </span>
           </h2>
           <p className="text-gray-400 text-lg max-w-2xl mx-auto mb-14">
-            Nie ukrywamy liczb — nawet gdy są małe. Jesteś jednym z pierwszych użytkowników,
-            co oznacza, że Twoje sugestie realnie kształtują produkt.
-            Każda opinia trafia bezpośrednio do twórców.
+            {lt.stats.description}
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-12">
             <StatCard
               value={stats !== null ? stats.users_count : null}
-              label="Zarejestrowanych użytkowników"
+              label={lt.stats.registeredUsers}
               textColor="text-blue-300"
               gradientFrom="from-blue-600"
               note={
                 <span>
-                  Twoja opinia to{' '}
+                  {lt.stats.userNote1}{' '}
                   <span className="text-blue-400 font-semibold">
                     {stats !== null && stats.users_count > 0
-                      ? `1/${stats.users_count} głosu`
-                      : 'realny głos'}
+                      ? `1/${stats.users_count} ${lt.stats.userNote2}`
+                      : lt.stats.userNote3}
                   </span>{' '}
-                  w kierunku produktu
+                  {lt.stats.userNote4}
                 </span>
               }
             />
             <StatCard
               value={stats !== null ? stats.projects_count : null}
-              label="Stworzonych modeli"
+              label={lt.stats.createdModels}
               textColor="text-purple-300"
               gradientFrom="from-purple-600"
               note={
                 <span>
-                  Każdy zaczął od zera —{' '}
-                  <span className="text-purple-400 font-semibold">tak jak Ty zaraz</span>
+                  {lt.stats.modelsNote1}{' '}
+                  <span className="text-purple-400 font-semibold">{lt.stats.modelsNote2}</span>
                 </span>
               }
             />
             <StatCard
               value={stats !== null ? stats.project_shared_count : null}
-              label="Udostępnionych prezentacji"
+              label={lt.stats.sharedPresentations}
               textColor="text-green-300"
               gradientFrom="from-green-600"
               note={
                 <span>
-                  Wiedza{' '}
-                  <span className="text-green-400 font-semibold">już krąży</span>{' '}
-                  w zespołach
+                  {lt.stats.sharedNote1}{' '}
+                  <span className="text-green-400 font-semibold">{lt.stats.sharedNote2}</span>{' '}
+                  {lt.stats.sharedNote3}
                 </span>
               }
             />
           </div>
 
           <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-2xl p-6 text-left max-w-2xl mx-auto">
-            <p className="text-yellow-200 font-semibold mb-2">💡 Dlaczego pokazujemy te liczby?</p>
+            <p className="text-yellow-200 font-semibold mb-2">{lt.stats.whyTitle}</p>
             <p className="text-gray-400 text-sm leading-relaxed">
-              Wierzymy, że transparentność buduje zaufanie. Mała liczba użytkowników to nie
-              słabość — to szansa. Dołącz teraz i współtwórz narzędzie od podstaw.
-              Twoje potrzeby usłyszymy jako jedne z pierwszych.
+              {lt.stats.whyDescription}
             </p>
           </div>
         </div>
@@ -498,10 +452,10 @@ const LandingPage = () => {
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <img src={LOGO_SRC} alt="ThreeDocsy logo" className="w-20 h-20 mx-auto mb-6" />
           <h2 className="text-4xl font-extrabold text-gray-900 mb-4">
-            Gotowy pokazać swój system?
+            {lt.cta.title}
           </h2>
           <p className="text-xl text-gray-600 mb-8">
-            Stwórz pierwszy interaktywny model IT w 5 minut — za darmo, bez rejestracji.
+            {lt.cta.description}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             {isLoggedIn ? (
@@ -510,13 +464,13 @@ const LandingPage = () => {
                   onClick={() => navigate('/dashboard')}
                   className="px-10 py-4 text-lg font-bold text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 rounded-2xl shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-0.5"
                 >
-                  Przejdź do dashboardu
+                  {lt.hero.goToDashboard}
                 </button>
                 <button
                   onClick={handleLogout}
                   className="px-10 py-4 text-lg font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:border-purple-400 hover:text-purple-600 rounded-2xl shadow-lg transition-all"
                 >
-                  Wyloguj się
+                  {lt.nav.logout}
                 </button>
               </>
             ) : (
@@ -525,13 +479,13 @@ const LandingPage = () => {
                   onClick={() => navigate('/guest')}
                   className="px-10 py-4 text-lg font-bold text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 rounded-2xl shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-0.5"
                 >
-                  Zacznij teraz — za darmo
+                  {lt.cta.startNow}
                 </button>
                 <button
                   onClick={() => navigate('/login')}
                   className="px-10 py-4 text-lg font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:border-purple-400 hover:text-purple-600 rounded-2xl shadow-lg transition-all"
                 >
-                  Zaloguj się
+                  {lt.nav.login}
                 </button>
               </>
             )}
@@ -547,7 +501,7 @@ const LandingPage = () => {
             <span className="font-bold">ThreeDocsy</span>
           </div>
           <p className="text-sm">
-            © {new Date().getFullYear()} ThreeDocsy — interaktywna dokumentacja IT
+            {lt.footer.copyright.replace('{{year}}', String(new Date().getFullYear()))}
           </p>
         </div>
       </footer>

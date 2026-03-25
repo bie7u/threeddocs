@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { fetchElements } from '../../services/elements';
+import { useLanguage } from '../../i18n';
 import { fetchModels, fetchPublicModels } from '../../services/models';
 import type { Custom3DElement, ShapeType, UploadedModel3D } from '../../types';
 import { ModelPreviewModal } from '../ModelPreviewModal/ModelPreviewModal';
@@ -8,17 +9,17 @@ type Tab = 'standard' | 'elements' | 'models';
 
 interface StandardShape {
   type: ShapeType;
-  label: string;
+  label: { pl: string; en: string };
   emoji: string;
-  description: string;
+  description: { pl: string; en: string };
 }
 
 const STANDARD_SHAPES: StandardShape[] = [
-  { type: 'cube', label: 'Sześcian', emoji: '📦', description: 'Prosty sześcian 3D' },
-  { type: 'sphere', label: 'Kula', emoji: '🔵', description: 'Gładka sfera' },
-  { type: 'cylinder', label: 'Walec', emoji: '🥫', description: 'Cylinder/walec' },
-  { type: 'cone', label: 'Stożek', emoji: '🔺', description: 'Stożek 3D' },
-  { type: 'engravedBlock', label: 'Klocek z tekstem', emoji: '🔲', description: 'Podpisany klocek' },
+  { type: 'cube', label: { pl: 'Sześcian', en: 'Cube' }, emoji: '📦', description: { pl: 'Prosty sześcian 3D', en: 'Simple 3D cube' } },
+  { type: 'sphere', label: { pl: 'Kula', en: 'Sphere' }, emoji: '🔵', description: { pl: 'Gładka sfera', en: 'Smooth sphere' } },
+  { type: 'cylinder', label: { pl: 'Walec', en: 'Cylinder' }, emoji: '🥫', description: { pl: 'Cylinder/walec', en: 'Cylinder' } },
+  { type: 'cone', label: { pl: 'Stożek', en: 'Cone' }, emoji: '🔺', description: { pl: 'Stożek 3D', en: '3D cone' } },
+  { type: 'engravedBlock', label: { pl: 'Klocek z tekstem', en: 'Engraved block' }, emoji: '🔲', description: { pl: 'Podpisany klocek', en: 'Labeled block' } },
 ];
 
 interface Props {
@@ -43,6 +44,7 @@ export const ShapeTypePicker = ({
     currentShapeType === 'uploadedModel' ? 'models' : 'standard';
 
   const [activeTab, setActiveTab] = useState<Tab>(initialTab);
+  const { language } = useLanguage();
   const [elements, setElements] = useState<Custom3DElement[]>([]);
   const [models, setModels] = useState<UploadedModel3D[]>([]);
   const [elementSearch, setElementSearch] = useState('');
@@ -127,9 +129,9 @@ export const ShapeTypePicker = ({
   };
 
   const tabLabels: Record<Tab, string> = {
-    standard: 'Standardowe modele',
-    elements: 'Elementy 3D',
-    models: 'Wgrane modele 3D',
+    standard: language === 'pl' ? 'Standardowe modele' : 'Standard shapes',
+    elements: language === 'pl' ? 'Elementy 3D' : '3D Elements',
+    models: language === 'pl' ? 'Wgrane modele 3D' : 'Uploaded 3D models',
   };
 
   return (
@@ -141,11 +143,11 @@ export const ShapeTypePicker = ({
         <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 overflow-hidden flex flex-col max-h-[80vh]">
           {/* Header */}
           <div className="flex items-center justify-between px-5 py-4 bg-gradient-to-r from-blue-500 to-indigo-600 flex-shrink-0">
-            <h2 className="text-white font-semibold text-lg">Wybierz typ kształtu</h2>
+            <h2 className="text-white font-semibold text-lg">{language === 'pl' ? 'Wybierz typ kształtu' : 'Select shape type'}</h2>
             <button
               onClick={onClose}
               className="text-white/80 hover:text-white transition-colors"
-              aria-label="Zamknij"
+              aria-label={language === 'pl' ? 'Zamknij' : 'Close'}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -186,8 +188,8 @@ export const ShapeTypePicker = ({
                     }`}
                   >
                     <span className="text-3xl">{shape.emoji}</span>
-                    <span className="text-sm font-medium text-slate-700">{shape.label}</span>
-                    <span className="text-xs text-slate-400 text-center">{shape.description}</span>
+                    <span className="text-sm font-medium text-slate-700">{shape.label[language as 'pl' | 'en'] ?? shape.label.en}</span>
+                    <span className="text-xs text-slate-400 text-center">{shape.description[language as 'pl' | 'en'] ?? shape.description.en}</span>
                   </button>
                 ))}
               </div>
@@ -204,20 +206,20 @@ export const ShapeTypePicker = ({
                     type="text"
                     value={elementSearch}
                     onChange={(e) => handleElementSearch(e.target.value)}
-                    placeholder="Szukaj elementów 3D..."
+                    placeholder={language === "pl" ? "Szukaj elementów 3D..." : "Search 3D elements..."}
                     className="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
 
                 {isGuestMode ? (
                   <div className="text-center py-8 text-slate-400 text-sm">
-                    Elementy 3D niedostępne w trybie gościa
+                    {language === "pl" ? "Elementy 3D niedostępne w trybie gościa" : "3D elements not available in guest mode"}
                   </div>
                 ) : elementsLoading ? (
-                  <div className="text-center py-8 text-slate-400 text-sm">Ładowanie...</div>
+                  <div className="text-center py-8 text-slate-400 text-sm">{language === "pl" ? "Ładowanie..." : "Loading..."}</div>
                 ) : elements.length === 0 ? (
                   <div className="text-center py-8 text-slate-400 text-sm">
-                    {elementSearch ? 'Brak wyników wyszukiwania' : 'Brak elementów 3D. Utwórz je w Ustawienia › Stwórz element 3D.'}
+                    {elementSearch ? (language === 'pl' ? 'Brak wyników wyszukiwania' : 'No results found') : (language === 'pl' ? 'Brak elementów 3D. Utwórz je w Ustawienia › Stwórz element 3D.' : 'No 3D elements. Create them in Settings › Create 3D element.')}
                   </div>
                 ) : (
                   <div className="space-y-2">
@@ -248,9 +250,9 @@ export const ShapeTypePicker = ({
                           <button
                             onClick={() => setPreviewElement(el)}
                             className="px-2.5 py-1.5 text-xs text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
-                            title="Podgląd"
+                            title={language === "pl" ? "Podgląd" : "Preview"}
                           >
-                            👁 Podgląd
+                            {language === "pl" ? "👁 Podgląd" : "👁 Preview"}
                           </button>
                           <button
                             onClick={() => handleSelect('custom3dElement', el.id)}
@@ -278,17 +280,17 @@ export const ShapeTypePicker = ({
                       type="text"
                       value={modelSearch}
                       onChange={(e) => handleModelSearch(e.target.value)}
-                      placeholder="Szukaj wgranych modeli..."
+                      placeholder={language === "pl" ? "Szukaj wgranych modeli..." : "Search uploaded models..."}
                       className="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   </div>
                 )}
 
                 {modelsLoading ? (
-                  <div className="text-center py-8 text-slate-400 text-sm">Ładowanie...</div>
+                  <div className="text-center py-8 text-slate-400 text-sm">{language === "pl" ? "Ładowanie..." : "Loading..."}</div>
                 ) : models.length === 0 ? (
                   <div className="text-center py-8 text-slate-400 text-sm">
-                    {isGuestMode ? 'Brak dostępnych modeli systemowych.' : (modelSearch ? 'Brak wyników wyszukiwania' : 'Brak wgranych modeli 3D. Dodaj je w Ustawienia › Wgraj element 3D.')}
+                    {isGuestMode ? (language === 'pl' ? 'Brak dostępnych modeli systemowych.' : 'No system models available.') : (modelSearch ? (language === 'pl' ? 'Brak wyników wyszukiwania' : 'No results found') : (language === 'pl' ? 'Brak wgranych modeli 3D. Dodaj je w Ustawienia.' : 'No uploaded 3D models. Add them in Settings.'))}
                   </div>
                 ) : (
                   <div className="space-y-2">
@@ -324,9 +326,9 @@ export const ShapeTypePicker = ({
                           <button
                             onClick={() => setPreviewModel(m)}
                             className="px-2.5 py-1.5 text-xs text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
-                            title="Podgląd"
+                            title={language === "pl" ? "Podgląd" : "Preview"}
                           >
-                            👁 Podgląd
+                            {language === "pl" ? "👁 Podgląd" : "👁 Preview"}
                           </button>
                           <button
                             onClick={() => handleSelect('uploadedModel', undefined, m.id)}

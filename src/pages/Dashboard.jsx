@@ -8,12 +8,16 @@ import { useAppStore } from '../store';
 import { getMe } from '../services/auth';
 import { logout } from '../services/auth';
 import { Footer } from '../components/Footer/Footer';
+import { useLanguage } from '../i18n';
+import { LanguageSwitcher } from '../components/LanguageSwitcher/LanguageSwitcher';
 
 const Dashboard = () => {
   const MAX_PROJECTS = 30;
 
   const navigate = useNavigate();
   const { createNewProject, loadProjects, projectsCount } = useAppStore();
+  const { t } = useLanguage();
+  const lt = t.dashboard;
 
   const [showNewProjectDialog, setShowNewProjectDialog] = useState(false);
   const [showEditor, setShowEditor] = useState(false);
@@ -47,7 +51,7 @@ const Dashboard = () => {
       setShowNewProjectDialog(false);
       setShowEditor(true);
     } catch (err) {
-      setCreateError(err instanceof Error ? err.message : 'Nie udało się utworzyć projektu');
+      setCreateError(err instanceof Error ? err.message : lt.createProjectError);
     } finally {
       setIsCreating(false);
     }
@@ -105,12 +109,13 @@ const Dashboard = () => {
               <img src="/logo.svg" alt="ThreeDocsy logo" className="h-9 w-auto" />
               <span className="text-xl font-bold text-gray-900">ThreeDocsy</span>
             </div>
-            <div>
+            <div className="flex items-center gap-3">
+              <LanguageSwitcher variant="navbar" />
               <button
                 onClick={handleLogout}
                 className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 rounded-lg transition duration-150"
               >
-                Wyloguj się
+                {lt.logout}
               </button>
             </div>
           </div>
@@ -121,10 +126,10 @@ const Dashboard = () => {
       <div className="w-full flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Witaj w panelu ThreeDocsy
+            {lt.welcome}
           </h1>
           <p className="text-xl text-gray-600 mb-8">
-            Twoje środowisko jest gotowe
+            {lt.subtitle}
           </p>
           
           {/* Dashboard Tiles */}
@@ -149,8 +154,8 @@ const Dashboard = () => {
                   />
                 </svg>
               </div>
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">Moje modele</h3>
-              <p className="text-sm text-gray-600">Przeglądaj swoje modele 3D</p>
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">{lt.myModels}</h3>
+              <p className="text-sm text-gray-600">{lt.myModelsDescription}</p>
             </div>
 
             {/* Dodaj nowy model (Add new model) */}
@@ -173,11 +178,11 @@ const Dashboard = () => {
                   />
                 </svg>
               </div>
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">Dodaj nowy model</h3>
-              <p className="text-sm text-gray-600">Wgraj nowy model 3D</p>
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">{lt.addNewModel}</h3>
+              <p className="text-sm text-gray-600">{lt.addNewModelDescription}</p>
               <p className="text-xs text-gray-400 mt-1">
-                Projekty: {projectsCount}/{MAX_PROJECTS}
-                {projectsCount >= MAX_PROJECTS && <span className="text-red-500 ml-1">— osiągnięto limit</span>}
+                {lt.projects}: {projectsCount}/{MAX_PROJECTS}
+                {projectsCount >= MAX_PROJECTS && <span className="text-red-500 ml-1">{lt.limitReached}</span>}
               </p>
             </div>
 
@@ -207,8 +212,8 @@ const Dashboard = () => {
                   />
                 </svg>
               </div>
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">Ustawienia</h3>
-              <p className="text-sm text-gray-600">Konfiguruj swoje preferencje</p>
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">{lt.settings}</h3>
+              <p className="text-sm text-gray-600">{lt.settingsDescription}</p>
             </div>
           </div>
         </div>

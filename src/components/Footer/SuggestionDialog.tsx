@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { postSuggestion } from '../../services/suggestions';
+import { useLanguage } from '../../i18n';
 
 interface SuggestionDialogProps {
   onClose: () => void;
@@ -10,6 +11,8 @@ export const SuggestionDialog = ({ onClose }: SuggestionDialogProps) => {
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState('');
   const [sent, setSent] = useState(false);
+  const { t } = useLanguage();
+  const lt = t.suggestion;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,7 +23,7 @@ export const SuggestionDialog = ({ onClose }: SuggestionDialogProps) => {
       await postSuggestion(content.trim());
       setSent(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Nie udało się wysłać sugestii');
+      setError(err instanceof Error ? err.message : lt.sendError);
     } finally {
       setIsSending(false);
     }
@@ -31,11 +34,11 @@ export const SuggestionDialog = ({ onClose }: SuggestionDialogProps) => {
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg">
         {/* Header */}
         <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 rounded-t-2xl px-6 py-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-white">Zgłoś sugestię</h2>
+          <h2 className="text-lg font-semibold text-white">{lt.title}</h2>
           <button
             onClick={onClose}
             className="text-slate-400 hover:text-white transition-colors"
-            aria-label="Zamknij"
+            aria-label={lt.closeAriaLabel}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -52,24 +55,24 @@ export const SuggestionDialog = ({ onClose }: SuggestionDialogProps) => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <p className="text-gray-800 font-medium text-lg">Dziękujemy za sugestię!</p>
-              <p className="text-gray-500 text-sm mt-1">Twoja opinia pomoże nam ulepszać system.</p>
+              <p className="text-gray-800 font-medium text-lg">{lt.successTitle}</p>
+              <p className="text-gray-500 text-sm mt-1">{lt.successDescription}</p>
               <button
                 onClick={onClose}
                 className="mt-6 px-6 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 rounded-lg transition duration-150"
               >
-                Zamknij
+                {lt.close}
               </button>
             </div>
           ) : (
             <form onSubmit={handleSubmit}>
               <p className="text-gray-600 text-sm mb-4">
-                Masz pomysł na ulepszenie systemu? Opisz co można zmienić lub poprawić.
+                {lt.description}
               </p>
               <textarea
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                placeholder="Wpisz swoją sugestię..."
+                placeholder={lt.placeholder}
                 rows={5}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent resize-none"
                 disabled={isSending}
@@ -84,14 +87,14 @@ export const SuggestionDialog = ({ onClose }: SuggestionDialogProps) => {
                   disabled={isSending}
                   className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors"
                 >
-                  Anuluj
+                  {lt.cancel}
                 </button>
                 <button
                   type="submit"
                   disabled={isSending || !content.trim()}
                   className="px-5 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 rounded-lg transition duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isSending ? 'Wysyłanie...' : 'Wyślij'}
+                  {isSending ? lt.sending : lt.send}
                 </button>
               </div>
             </form>

@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { useAppStore } from '../../store';
+import { useLanguage } from '../../i18n';
 import type { InstructionStep, ShapeType, EngravedBlockParams, UploadedModel3D } from '../../types';
 import { RichTextEditor } from '../RichTextEditor';
 import { loadCustom3DElements } from '../../utils/custom3DElements';
@@ -9,6 +10,7 @@ import { ShapeTypePicker } from '../ShapeTypePicker/ShapeTypePicker';
 
 export const StepProperties = () => {
   const { project, selectedStepId, updateStep, deleteStep, addStep, isGuestMode } = useAppStore();
+  const { language } = useLanguage();
   
   const selectedStep = project?.steps.find((step) => step.id === selectedStepId);
   
@@ -108,7 +110,7 @@ export const StepProperties = () => {
   };
 
   const handleDelete = () => {
-    if (selectedStepId && window.confirm('Czy na pewno chcesz usunąć ten krok?')) {
+    if (selectedStepId && window.confirm(language === 'pl' ? 'Czy na pewno chcesz usunąć ten krok?' : 'Are you sure you want to delete this step?')) {
       deleteStep(selectedStepId);
     }
   };
@@ -116,8 +118,8 @@ export const StepProperties = () => {
   const handleAddNewStep = () => {
     const newStep: InstructionStep = {
       id: `step-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
-      title: 'Nowy krok',
-      description: 'Dodaj opis tutaj',
+      title: language === 'pl' ? 'Nowy krok' : 'New step',
+      description: '',
       modelPath: 'box',
       cameraPosition: { x: 5, y: 5, z: 5, targetX: 0, targetY: 0, targetZ: 0 },
       highlightColor: '#4299e1',
@@ -169,7 +171,7 @@ export const StepProperties = () => {
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
           </svg>
-          Dodaj nowy krok
+          {language === 'pl' ? 'Dodaj nowy krok' : 'Add new step'}
         </button>
       </div>
 
@@ -181,14 +183,14 @@ export const StepProperties = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5" />
               </svg>
             </div>
-            <p className="text-slate-500 text-sm font-medium">Żaden krok nie jest zaznaczony</p>
-            <p className="text-slate-400 text-xs mt-1">Kliknij węzeł na kanwie lub dodaj nowy krok</p>
+            <p className="text-slate-500 text-sm font-medium">{language === 'pl' ? 'Żaden krok nie jest zaznaczony' : 'No step selected'}</p>
+            <p className="text-slate-400 text-xs mt-1">{language === 'pl' ? 'Kliknij węzeł na kanwie lub dodaj nowy krok' : 'Click a node on the canvas or add a new step'}</p>
           </div>
         ) : (
           <div className="space-y-3 mt-2">
             <div className="bg-white rounded-lg border border-slate-200 p-3 shadow-sm">
               <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide">Tytuł kroku</label>
+                <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide">{language === 'pl' ? 'Tytuł kroku' : 'Step title'}</label>
                 <span className="text-xs text-slate-400">{(formData.title || '').length}/200</span>
               </div>
               <input
@@ -209,7 +211,7 @@ export const StepProperties = () => {
               />
             </div>
             <div className="bg-white rounded-lg border border-slate-200 p-3 shadow-sm">
-              <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Kolor podświetlenia</label>
+              <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">{language === 'pl' ? 'Kolor podświetlenia' : 'Highlight colour'}</label>
               <div className="flex items-center gap-2">
                 <input
                   type="color"
@@ -255,7 +257,7 @@ export const StepProperties = () => {
                 <p className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Ustawienia klocka z tekstem</p>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Tekst <span className="text-gray-400 font-normal">(maks. 3 słów, 24 znaki)</span>
+                    {language === 'pl' ? <>Tekst <span className="text-gray-400 font-normal">(maks. 3 słów, 24 znaki)</span></> : <>Text <span className="text-gray-400 font-normal">(max 3 words, 24 chars)</span></>}
                   </label>
                   <input
                     type="text"
@@ -332,7 +334,7 @@ export const StepProperties = () => {
 
             <div className="bg-white rounded-lg border border-slate-200 p-3 shadow-sm">
               <label htmlFor="model-scale" className="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">
-                Skala <span className="text-slate-400 font-normal normal-case">(0.1 – 5.0)</span>
+                {language === 'pl' ? <>Skala <span className="text-slate-400 font-normal normal-case">(0.1 – 5.0)</span></> : <>Scale <span className="text-slate-400 font-normal normal-case">(0.1 – 5.0)</span></>}
               </label>
               <div className="flex items-center gap-3">
                 <input
@@ -359,7 +361,7 @@ export const StepProperties = () => {
 
             <div className="bg-white rounded-lg border border-slate-200 p-3 shadow-sm">
               <label htmlFor="model-position-y" className="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">
-                Pozycja Y <span className="text-slate-400 font-normal normal-case">(-10 – 10, góra/dół)</span>
+                {language === 'pl' ? <>Pozycja Y <span className="text-slate-400 font-normal normal-case">(-10 – 10, góra/dół)</span></> : <>Position Y <span className="text-slate-400 font-normal normal-case">(-10 – 10, up/down)</span></>}
               </label>
               <div className="flex items-center gap-3">
                 <input
@@ -386,7 +388,7 @@ export const StepProperties = () => {
 
             <div className="bg-white rounded-lg border border-slate-200 p-3 shadow-sm">
               <label htmlFor="model-rotation-y" className="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">
-                Obrót wokół własnej osi <span className="text-slate-400 font-normal normal-case">(0 – 360°)</span>
+                {language === 'pl' ? <>Obrót wokół własnej osi <span className="text-slate-400 font-normal normal-case">(0 – 360°)</span></> : <>Rotation around own axis <span className="text-slate-400 font-normal normal-case">(0 – 360°)</span></>}
               </label>
               <div className="flex items-center gap-3">
                 <input
@@ -416,13 +418,13 @@ export const StepProperties = () => {
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
-                Zapisz zmiany
+                {language === "pl" ? "Zapisz zmiany" : "Save changes"}
               </button>
               <button onClick={handleDelete} className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-red-50 text-red-600 border border-red-200 rounded-lg hover:bg-red-100 transition-all font-medium text-sm">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
-                Usuń krok
+                {language === "pl" ? "Usuń krok" : "Delete step"}
               </button>
             </div>
 
