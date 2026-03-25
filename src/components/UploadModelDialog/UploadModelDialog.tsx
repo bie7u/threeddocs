@@ -109,9 +109,9 @@ export const UploadModelDialog = ({ existing, onClose, onSaved }: Props) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const maxSize = 50 * 1024 * 1024; // 50 MB
+    const maxSize = 10 * 1024 * 1024; // 10 MB
     if (file.size > maxSize) {
-      alert('Plik jest za duży (maks. 50 MB).');
+      alert('Plik jest za duży (maks. 10 MB).');
       e.target.value = '';
       return;
     }

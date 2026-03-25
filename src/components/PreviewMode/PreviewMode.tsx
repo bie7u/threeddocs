@@ -189,11 +189,11 @@ export const PreviewMode = ({ onGoToEditorPanel, isPublic, shareToken }: { onGoT
             <h3 className="text-lg font-bold mb-1">{currentStep.title}</h3>
             {isHtmlContent(currentStep.description) ? (
               <div
-                className="text-sm text-slate-300 leading-relaxed rich-text-preview"
+                className="text-sm text-slate-300 leading-relaxed rich-text-preview max-h-48 overflow-y-auto"
                 dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(currentStep.description) }}
               />
             ) : (
-              <p className="text-sm text-slate-300 leading-relaxed">{currentStep.description}</p>
+              <p className="text-sm text-slate-300 leading-relaxed max-h-48 overflow-y-auto">{currentStep.description}</p>
             )}
           </div>
         </div>

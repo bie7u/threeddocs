@@ -28,9 +28,9 @@ export const NewProjectDialog = ({ onClose, onCreateProject, isCreating = false,
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const maxSize = 50 * 1024 * 1024;
+    const maxSize = 10 * 1024 * 1024;
     if (file.size > maxSize) {
-      alert('Rozmiar pliku przekracza limit 50 MB. Wybierz mniejszy plik.');
+      alert('Rozmiar pliku przekracza limit 10 MB. Wybierz mniejszy plik.');
       e.target.value = '';
       return;
     }
