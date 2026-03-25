@@ -2,6 +2,7 @@ import type { UploadedModel3D } from '../types';
 import {
   fetchModels,
   fetchModelById,
+  fetchPublicModelById,
   uploadModelRequest,
   updateModelRequest,
   deleteModelRequest,
@@ -45,9 +46,13 @@ export async function deleteUploadedModel(id: string): Promise<void> {
 }
 
 /** Returns a single uploaded model, or undefined if not found.
- *  Pass `projectUuid` when calling from a public share-link view. */
-export async function getUploadedModelById(id: string, projectUuid?: string): Promise<UploadedModel3D | undefined> {
+ *  Pass `projectUuid` when calling from a public share-link view.
+ *  Pass `isGuestMode` to route to the public /api/public-models/:id/ endpoint. */
+export async function getUploadedModelById(id: string, projectUuid?: string, isGuestMode?: boolean): Promise<UploadedModel3D | undefined> {
   try {
+    if (isGuestMode) {
+      return await fetchPublicModelById(id);
+    }
     return await fetchModelById(id, projectUuid);
   } catch {
     return undefined;
