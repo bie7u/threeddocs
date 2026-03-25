@@ -180,13 +180,17 @@ export const PreviewMode = ({ onGoToEditorPanel, isPublic, shareToken }: { onGoT
         </div>
       </div>
 
-      <div className="absolute top-24 left-6 bg-black/40 backdrop-blur-md text-white px-6 py-4 rounded-xl shadow-2xl border border-white/10 max-w-md z-10">
-        <div className="flex items-start gap-3">
+      <div className="absolute top-24 left-6 bg-black/40 backdrop-blur-md text-white px-6 py-4 rounded-xl shadow-2xl border border-white/10 max-w-md z-10 flex flex-col max-h-[calc(100vh-14rem)]">
+        <div className="flex items-start gap-3 flex-shrink-0">
           <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center flex-shrink-0 shadow-lg">
             <span className="text-lg font-bold">{currentPreviewStepIndex + 1}</span>
           </div>
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             <h3 className="text-lg font-bold mb-1">{currentStep.title}</h3>
+          </div>
+        </div>
+        {currentStep.description && (
+          <div className="flex-1 overflow-y-auto dark-scrollbar mt-2 min-h-0">
             {isHtmlContent(currentStep.description) ? (
               <div
                 className="text-sm text-slate-300 leading-relaxed rich-text-preview"
@@ -196,7 +200,7 @@ export const PreviewMode = ({ onGoToEditorPanel, isPublic, shareToken }: { onGoT
               <p className="text-sm text-slate-300 leading-relaxed">{currentStep.description}</p>
             )}
           </div>
-        </div>
+        )}
       </div>
 
       <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-10">
