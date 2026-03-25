@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAppStore } from '../../store';
+import { useLanguage } from '../../i18n';
 import { UploadedModelCanvas } from '../UploadModelEditor/UploadedModelCanvas';
 import type { MeshHighlight } from '../UploadModelEditor/UploadedModelCanvas';
 import { generateShareToken } from '../../services/projects';
@@ -21,7 +22,7 @@ export const UploadPreviewMode = ({ onGoToEditorPanel, isPublic }: { onGoToEdito
     return (
       <div className="w-full h-full flex items-center justify-center bg-gray-100">
         <div className="text-center">
-          <p className="text-gray-500 mb-4">Brak modelu do podglądu</p>
+          <p className="text-gray-500 mb-4">{language === "pl" ? "Brak modelu do podglądu" : "No model to preview"}</p>
           <button onClick={() => setPreviewMode(false)} className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
             Wyjdź z podglądu
           </button>
@@ -36,7 +37,7 @@ export const UploadPreviewMode = ({ onGoToEditorPanel, isPublic }: { onGoToEdito
     return (
       <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-900 to-slate-800">
         <div className="text-center text-white">
-          <p className="text-lg mb-4">Brak kroków do wyświetlenia</p>
+          <p className="text-lg mb-4">{language === "pl" ? "Brak kroków do wyświetlenia" : "No steps to display"}</p>
           <button onClick={() => setPreviewMode(false)} className="px-4 py-2 bg-blue-500 hover:bg-blue-600 rounded-lg transition">
             Wyjdź z podglądu
           </button>
@@ -81,7 +82,7 @@ export const UploadPreviewMode = ({ onGoToEditorPanel, isPublic }: { onGoToEdito
         alert(`Skopiuj ten link: ${shareUrl}`);
       }
     } catch {
-      alert('Nie udało się wygenerować linku. Spróbuj ponownie.');
+      alert(language === 'pl' ? 'Nie udało się wygenerować linku. Spróbuj ponownie.' : 'Failed to generate link. Please try again.');
     } finally {
       setIsGeneratingLink(false);
     }
@@ -132,7 +133,7 @@ export const UploadPreviewMode = ({ onGoToEditorPanel, isPublic }: { onGoToEdito
 
           <div className="flex items-center gap-3 bg-gradient-to-r from-green-500/20 to-emerald-600/20 backdrop-blur-sm px-6 py-2 rounded-xl border border-green-400/30 shadow-xl">
             <div className="w-2 h-2 bg-green-400 rounded-full motion-safe:animate-pulse" aria-hidden="true"></div>
-            <span className="text-sm font-bold text-white">Podgląd modelu</span>
+            <span className="text-sm font-bold text-white">{language === "pl" ? "Podgląd modelu" : "Model preview"}</span>
           </div>
 
           <div className="flex items-center gap-3">
@@ -141,7 +142,7 @@ export const UploadPreviewMode = ({ onGoToEditorPanel, isPublic }: { onGoToEdito
                 <div className="relative group">
                   <button
                     disabled
-                    aria-label="Udostępnij link – Zarejestrowani użytkownicy mogą udostępniać model innym generując link"
+                    aria-label={language === 'pl' ? 'Udostępnij link' : 'Share link'}
                     className="flex items-center gap-2 px-5 py-2 bg-gray-600/50 text-gray-400 rounded-xl cursor-not-allowed font-medium opacity-70"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -150,7 +151,7 @@ export const UploadPreviewMode = ({ onGoToEditorPanel, isPublic }: { onGoToEdito
                     Udostępnij link
                   </button>
                   <div className="absolute right-0 top-full mt-2 w-72 bg-slate-800 text-white text-xs rounded-lg px-3 py-2 shadow-xl z-50 hidden group-hover:block border border-white/10 pointer-events-none">
-                    Zarejestrowani użytkownicy mogą udostępniać model innym generując link
+                    {language === "pl" ? "Zarejestrowani użytkownicy mogą udostępniać model innym generując link" : "Registered users can share their model with others by generating a link"}
                   </div>
                 </div>
               ) : (
@@ -164,7 +165,7 @@ export const UploadPreviewMode = ({ onGoToEditorPanel, isPublic }: { onGoToEdito
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
                     </svg>
                   )}
-                  {isGeneratingLink ? 'Generowanie...' : 'Udostępnij link'}
+                  {isGeneratingLink ? (language === 'pl' ? 'Generowanie...' : 'Generating...') : (language === 'pl' ? 'Udostępnij link' : 'Share link')}
                 </button>
               )
             )}
@@ -173,7 +174,7 @@ export const UploadPreviewMode = ({ onGoToEditorPanel, isPublic }: { onGoToEdito
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                 </svg>
-                Przejdź do panelu edytora
+                {language === "pl" ? "Przejdź do panelu edytora" : "Go to editor panel"}
               </button>
             )}
             {!isPublic && (

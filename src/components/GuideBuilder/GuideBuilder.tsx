@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import { useAppStore } from '../../store';
+import { useLanguage } from '../../i18n';
 import { Viewer3D } from '../Viewer3D/Viewer3D';
 import { RichTextEditor } from '../RichTextEditor';
 import type { GuideStep } from '../../types';
@@ -24,7 +25,7 @@ export const GuideBuilder = () => {
   if (!project) {
     return (
       <div className="w-full h-full flex items-center justify-center text-slate-500">
-        Brak projektu.
+        {language === 'pl' ? 'Brak projektu.' : 'No project.'}
       </div>
     );
   }
@@ -82,7 +83,7 @@ export const GuideBuilder = () => {
               onClick={handleAddAll}
               className="w-full py-1.5 text-xs font-semibold text-orange-700 bg-orange-100 hover:bg-orange-200 rounded-lg transition-all border border-orange-200"
             >
-              ＋ Dodaj wszystkie
+              {language === 'pl' ? '＋ Dodaj wszystkie' : '＋ Add all'}
             </button>
           )}
         </div>
@@ -96,8 +97,8 @@ export const GuideBuilder = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                 </svg>
               </div>
-              <p className="text-sm font-medium text-slate-500">Brak kroków w modelu</p>
-              <p className="text-xs text-slate-400 mt-1">Przełącz się na Model Builder, aby dodać kroki.</p>
+              <p className="text-sm font-medium text-slate-500">{language === 'pl' ? 'Brak kroków w modelu' : 'No steps in model'}</p>
+              <p className="text-xs text-slate-400 mt-1">{language === 'pl' ? 'Przełącz się na Model Builder, aby dodać kroki.' : 'Switch to Model Builder to add steps.'}</p>
             </div>
           )}
           {project.steps.map((step) => {
@@ -125,7 +126,7 @@ export const GuideBuilder = () => {
                 <button
                   onClick={(e) => { e.stopPropagation(); if (!inGuide) addGuideStep(step.id); }}
                   disabled={inGuide}
-                  title={inGuide ? 'Już w przewodniku' : 'Dodaj do przewodnika'}
+                  title={inGuide ? (language === 'pl' ? 'Już w przewodniku' : 'Already in guide') : (language === 'pl' ? 'Dodaj do przewodnika' : 'Add to guide')}
                   className={`w-7 h-7 flex items-center justify-center rounded-lg text-sm font-bold transition-all flex-shrink-0 ${
                     inGuide
                       ? 'bg-green-100 text-green-600 cursor-default ring-1 ring-green-300'
@@ -153,7 +154,7 @@ export const GuideBuilder = () => {
               </div>
               <div>
                 <h2 className="font-bold text-slate-800 text-sm">Podgląd 3D</h2>
-                <p className="text-xs text-slate-400">Wybierz krok, aby skupić kamerę</p>
+                <p className="text-xs text-slate-400">{language === 'pl' ? 'Wybierz krok, aby skupić kamerę' : 'Select a step to focus camera'}</p>
               </div>
             </div>
             {selectedStep && (
@@ -174,7 +175,7 @@ export const GuideBuilder = () => {
             {!selectedStepId && (
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <div className="bg-black/50 backdrop-blur-sm text-white px-5 py-3 rounded-xl shadow-2xl border border-white/10 text-center">
-                  <p className="text-sm font-medium">Wybierz krok, aby zobaczyć podgląd</p>
+                  <p className="text-sm font-medium">{language === 'pl' ? 'Wybierz krok, aby zobaczyć podgląd' : 'Select a step to see preview'}</p>
                 </div>
               </div>
             )}
@@ -191,7 +192,7 @@ export const GuideBuilder = () => {
                 </svg>
               </div>
               <div>
-                <h2 className="font-bold text-slate-800 text-sm">Edytuj krok</h2>
+                <h2 className="font-bold text-slate-800 text-sm">{language === 'pl' ? 'Edytuj krok' : 'Edit step'}</h2>
                 <p className="text-xs text-slate-400">Zmiany zapisują się automatycznie</p>
               </div>
             </div>
@@ -247,7 +248,7 @@ export const GuideBuilder = () => {
               onClick={handleClearGuide}
               className="w-full py-1.5 text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-all border border-red-200"
             >
-              ✕ Usuń wszystkie
+              {language === 'pl' ? '✕ Usuń wszystkie' : '✕ Remove all'}
             </button>
           )}
         </div>
@@ -261,8 +262,8 @@ export const GuideBuilder = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
                 </svg>
               </div>
-              <p className="text-sm font-medium text-slate-500">Przewodnik jest pusty</p>
-              <p className="text-xs text-slate-400 mt-1">Dodaj kroki z listy po lewej stronie.</p>
+              <p className="text-sm font-medium text-slate-500">{language === 'pl' ? 'Przewodnik jest pusty' : 'Guide is empty'}</p>
+              <p className="text-xs text-slate-400 mt-1">{language === 'pl' ? 'Dodaj kroki z listy po lewej stronie.' : 'Add steps from the list on the left.'}</p>
             </div>
           )}
           {guide.map((gs, index) => {
@@ -306,7 +307,7 @@ export const GuideBuilder = () => {
                 <span className="flex-1 text-sm font-medium text-slate-700 truncate">{step.title}</span>
                 <button
                   onClick={(e) => { e.stopPropagation(); removeGuideStep(gs.id); }}
-                  title="Usuń z przewodnika"
+                  title={language === 'pl' ? 'Usuń z przewodnika' : 'Remove from guide'}
                   className="w-6 h-6 flex items-center justify-center rounded-lg text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all flex-shrink-0"
                 >
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -322,7 +323,7 @@ export const GuideBuilder = () => {
           <div className="px-3 py-2 border-t border-slate-100 bg-slate-50 flex-shrink-0 flex items-center justify-center gap-2">
             <div className="w-2 h-2 rounded-full bg-purple-400" />
             <p className="text-xs text-slate-500 font-medium">
-              {guide.length} {guide.length === 1 ? 'krok' : guide.length < 5 ? 'kroki' : 'kroków'} w przewodniku
+              {guide.length} {guide.length === 1 ? (language === 'pl' ? 'krok' : 'step') : (language === 'pl' ? (guide.length < 5 ? 'kroki' : 'kroków') : 'steps')} {language === 'pl' ? 'w przewodniku' : 'in guide'}
             </p>
           </div>
         )}

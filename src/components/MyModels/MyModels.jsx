@@ -33,7 +33,7 @@ export const MyModels = ({ onOpenEditor, onClose }) => {
       setHasNext(result.hasNext);
       setHasPrevious(result.hasPrevious);
     } catch {
-      setLoadError('{lt.loadError}');
+      setLoadError(lt.loadError);
     } finally {
       setLoading(false);
     }
@@ -76,7 +76,7 @@ export const MyModels = ({ onOpenEditor, onClose }) => {
         setShareError(shareUrl);
       }
     } catch {
-      setShareError(lt.deleteError);
+      setShareError(lt.shareError);
     } finally {
       setSharingId(null);
     }

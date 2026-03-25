@@ -239,7 +239,7 @@ export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, onGoToLogin
             <div
               className="flex-shrink-0 w-1.5 cursor-col-resize relative group"
               onMouseDown={handleResizeStart}
-              title="{lt.resizeHandle}"
+              title={lt.resizeHandle}
             >
               <div className={`absolute inset-y-0 left-1/2 w-0.5 -translate-x-1/2 rounded-full transition-colors ${isResizing ? 'bg-blue-400' : 'bg-transparent group-hover:bg-blue-400'}`} />
             </div>

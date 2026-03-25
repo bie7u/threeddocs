@@ -183,10 +183,10 @@ export const NewProjectDialog = ({ onClose, onCreateProject, isCreating = false,
                 </div>
                 <div>
                   <p className={`text-sm font-semibold ${selectedType === 'builder' ? 'text-blue-700' : 'text-green-700'}`}>
-                    {selectedType === 'builder' ? '{lt.selectedBuildLabel}' : '{lt.selectedUploadLabel}'}
+                    {selectedType === 'builder' ? lt.selectedBuildLabel : lt.selectedUploadLabel}
                   </p>
                   <p className="text-xs text-slate-500">
-                    {selectedType === 'builder' ? '{lt.selectedBuildSubLabel}' : 'Import modelu {lt.uploadTag1}'}
+                    {selectedType === 'builder' ? lt.selectedBuildSubLabel : lt.selectedUploadSubLabel}
                   </p>
                 </div>
               </div>
@@ -198,7 +198,7 @@ export const NewProjectDialog = ({ onClose, onCreateProject, isCreating = false,
                   value={projectName}
                   onChange={(e) => setProjectName(e.target.value)}
                   className="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                  placeholder="{lt.projectNamePlaceholder}"
+                  placeholder={lt.projectNamePlaceholder}
                   autoFocus
                 />
               </div>
@@ -262,7 +262,7 @@ export const NewProjectDialog = ({ onClose, onCreateProject, isCreating = false,
                   disabled={!canCreate || isCreating}
                   className={`flex-1 px-4 py-2.5 rounded-xl text-sm font-bold text-white transition-all ${canCreate && !isCreating ? 'bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 shadow-lg shadow-blue-500/30' : 'bg-slate-300 cursor-not-allowed'}`}
                 >
-                  {isCreating ? '{lt.creating}' : '{lt.create}'}
+                  {isCreating ? lt.creating : lt.create}
                 </button>
               </div>
             </div>

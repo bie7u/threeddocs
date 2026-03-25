@@ -19,6 +19,7 @@ import ReactFlow, {
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { useAppStore } from '../../store';
+import { useLanguage } from '../../i18n';
 import type { InstructionStep, ConnectionData, ConnectionStyle, ShapeType, ArrowDirection, ConnectionType, EngravedBlockParams } from '../../types';
 import { ShapeTypePicker } from '../ShapeTypePicker/ShapeTypePicker';
 
@@ -66,29 +67,46 @@ const StepNode = ({ data, selected }: NodeProps<InstructionStep>) => {
 };
 
 // ─── Connection styles ────────────────────────────────────────────────────────
-const CONNECTION_STYLES: { value: ConnectionStyle; label: string; color: string; textColor: string }[] = [
-  { value: 'standard', label: 'Standard', color: '#64748b', textColor: '#fff' },
-  { value: 'glass',    label: 'Szklane',  color: '#60a5fa', textColor: '#fff' },
-  { value: 'glow',     label: 'Złote',    color: '#fbbf24', textColor: '#1e1e1e' },
-  { value: 'neon',     label: 'Neonowe',  color: '#ec4899', textColor: '#fff' },
+const CONNECTION_STYLE_LABELS: Record<string, { pl: string; en: string }> = {
+  standard: { pl: 'Standard', en: 'Standard' },
+  glass:    { pl: 'Szklane',  en: 'Glass' },
+  glow:     { pl: 'Złote',    en: 'Glow' },
+  neon:     { pl: 'Neonowe',  en: 'Neon' },
+};
+const CONNECTION_STYLES_BASE: { value: ConnectionStyle; color: string; textColor: string }[] = [
+  { value: 'standard', color: '#64748b', textColor: '#fff' },
+  { value: 'glass',    color: '#60a5fa', textColor: '#fff' },
+  { value: 'glow',     color: '#fbbf24', textColor: '#1e1e1e' },
+  { value: 'neon',     color: '#ec4899', textColor: '#fff' },
 ];
 
-const ARROW_DIRS: { value: ArrowDirection; label: string }[] = [
-  { value: 'none',          label: '— Brak' },
-  { value: 'forward',       label: '→ Naprzód' },
-  { value: 'backward',      label: '← Wstecz' },
-  { value: 'bidirectional', label: '↔ Dwukierunkowe' },
+const ARROW_DIR_LABELS: Record<string, { pl: string; en: string }> = {
+  none:          { pl: '— Brak',          en: '— None' },
+  forward:       { pl: '→ Naprzód',       en: '→ Forward' },
+  backward:      { pl: '← Wstecz',        en: '← Backward' },
+  bidirectional: { pl: '↔ Dwukierunkowe', en: '↔ Bidirectional' },
+};
+const ARROW_DIRS_BASE: { value: ArrowDirection }[] = [
+  { value: 'none' },
+  { value: 'forward' },
+  { value: 'backward' },
+  { value: 'bidirectional' },
 ];
 
-const CONN_TYPES: { value: ConnectionType; label: string }[] = [
-  { value: 'tube',  label: '🔩 Rura' },
-  { value: 'arrow', label: '➡ Strzałka' },
+const CONN_TYPE_LABELS: Record<string, { pl: string; en: string }> = {
+  tube:  { pl: '🔩 Rura',     en: '🔩 Tube' },
+  arrow: { pl: '➡ Strzałka', en: '➡ Arrow' },
+};
+const CONN_TYPES_BASE: { value: ConnectionType }[] = [
+  { value: 'tube' },
+  { value: 'arrow' },
 ];
 
 
 // ─── Inline connection editor rendered on the edge label ──────────────────────
 const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<ConnectionData>) => {
   const { updateConnections, project, isGuestMode } = useAppStore();
+  const { language } = useLanguage();
   const [open, setOpen] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [edgePath, labelX, labelY] = getBezierPath({ sourceX, sourceY, targetX, targetY });
@@ -130,6 +148,9 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
     setDraftEngravedParams(data?.engravedBlockParams ?? { text: 'DB', font: 'helvetiker', depth: 0.08, padding: 0.1, face: 'front' });
   }, [data]);
 
+  const CONNECTION_STYLES = CONNECTION_STYLES_BASE.map(s => ({ ...s, label: CONNECTION_STYLE_LABELS[s.value]?.[language] ?? s.value }));
+  const ARROW_DIRS = ARROW_DIRS_BASE.map(s => ({ ...s, label: ARROW_DIR_LABELS[s.value]?.[language] ?? s.value }));
+  const CONN_TYPES = CONN_TYPES_BASE.map(s => ({ ...s, label: CONN_TYPE_LABELS[s.value]?.[language] ?? s.value }));
   const styleInfo = CONNECTION_STYLES.find(s => s.value === currentStyle) || CONNECTION_STYLES[0];
 
   // Helper that immediately commits the provided overrides merged with current draft state
@@ -164,7 +185,7 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
   }, [project, id, draftTitle, draftDesc, draftStyle, draftShape, draftCustom3dElementId, draftUploadedModelId, draftShapeScale, draftShapePosY, draftShapeRotY, draftArrow, draftConnType, draftEngravedParams, updateConnections]);
 
   const getShapeButtonLabel = (): string => {
-    if (!draftShape) return 'Brak';
+    if (!draftShape) return language === 'pl' ? 'Brak' : 'None';
     const labels: Partial<Record<ShapeType, string>> = {
       cube: '📦 Sześcian',
       sphere: '🔵 Kula',
@@ -207,7 +228,7 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
 
   const handleDelete = () => {
     if (!project) return;
-    if (!window.confirm('Usunąć to połączenie?')) return;
+    if (!window.confirm(language === 'pl' ? 'Usunąć to połączenie?' : 'Delete this connection?')) return;
     updateConnections(project.connections.filter(conn => conn.id !== id));
   };
 
@@ -228,7 +249,7 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
           {!open ? (
             <button
               onClick={() => setOpen(true)}
-              title="Edytuj połączenie"
+              title={language === 'pl' ? 'Edytuj połączenie' : 'Edit connection'}
               className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold shadow-md hover:scale-105 active:scale-95 transition-transform"
               style={{ backgroundColor: styleInfo.color, color: styleInfo.textColor }}
             >
@@ -245,7 +266,7 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
             <div className="bg-white rounded-xl shadow-2xl border border-slate-200 w-72 overflow-hidden">
               {/* Header */}
               <div className="flex items-center justify-between px-3 py-2 bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
-                <span className="text-xs font-bold text-slate-700 uppercase tracking-wide">Edytuj połączenie</span>
+                <span className="text-xs font-bold text-slate-700 uppercase tracking-wide">{language === 'pl' ? 'Edytuj połączenie' : 'Edit connection'}</span>
                 <button
                   onClick={() => setOpen(false)}
                   className="w-5 h-5 flex items-center justify-center rounded hover:bg-slate-200 text-slate-500 transition"
@@ -259,7 +280,7 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
               <div className="p-3 space-y-3">
                 {/* Style swatches */}
                 <div>
-                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Styl wizualny</p>
+                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">{language === 'pl' ? 'Styl wizualny' : 'Visual style'}</p>
                   <div className="flex gap-1.5">
                     {CONNECTION_STYLES.map(s => (
                       <button
@@ -278,7 +299,7 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
                 {/* Connection type + Arrow direction side by side */}
                 <div className={draftConnType === 'arrow' ? 'grid grid-cols-2 gap-2' : 'grid grid-cols-1 gap-2'}>
                   <div>
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Typ</p>
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">{language === 'pl' ? 'Typ' : 'Type'}</p>
                     <select
                       value={draftConnType}
                       onChange={e => { setDraftConnType(e.target.value as ConnectionType); commitDraft({ connectionType: e.target.value as ConnectionType }); }}
@@ -289,7 +310,7 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
                   </div>
                   {draftConnType === 'arrow' && (
                     <div>
-                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Kierunek</p>
+                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">{language === 'pl' ? 'Kierunek' : 'Direction'}</p>
                       <select
                         value={draftArrow}
                         onChange={e => { setDraftArrow(e.target.value as ArrowDirection); commitDraft({ arrowDirection: e.target.value as ArrowDirection }); }}
@@ -303,7 +324,7 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
 
                 {/* Shape type picker */}
                 <div>
-                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Typ kształtu</p>
+                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">{language === 'pl' ? 'Typ kształtu' : 'Shape type'}</p>
                   <div className="flex gap-1.5">
                     <button
                       type="button"

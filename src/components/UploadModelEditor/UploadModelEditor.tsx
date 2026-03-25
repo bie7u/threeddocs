@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
 import { useAppStore } from '../../store';
+import { useLanguage } from '../../i18n';
 import { UploadedModelCanvas } from './UploadedModelCanvas';
 import { RichTextEditor } from '../RichTextEditor';
 import { stripHtmlTags } from '../../utils/html';
@@ -87,7 +88,7 @@ export const UploadModelEditor = () => {
   const handleCancelEdit = () => { setEditingStep(null); setIsAddingStep(false); setIsPickMode(false); };
 
   const handleDeleteStep = (stepId: string) => {
-    if (window.confirm('Czy na pewno chcesz usunąć ten krok?')) {
+    if (window.confirm(language === 'pl' ? 'Czy na pewno chcesz usunąć ten krok?' : 'Are you sure you want to delete this step?')) {
       deleteStep(stepId);
       if (selectedStepId === stepId) { setSelectedStepId(null); setEditingStep(null); }
     }
@@ -109,20 +110,20 @@ export const UploadModelEditor = () => {
               </div>
               <div>
                 <h2 className="font-bold text-slate-800 text-base">Model 3D</h2>
-                <p className="text-xs text-slate-500">{isPickMode ? 'Tryb wyboru — kliknij element modelu' : 'Obracaj kamerą swobodnie'}</p>
+                <p className="text-xs text-slate-500">{isPickMode ? (language === 'pl' ? 'Tryb wyboru — kliknij element modelu' : 'Pick mode') : (language === 'pl' ? 'Obracaj kamerą swobodnie' : 'Rotate camera freely')}</p>
               </div>
             </div>
             {editingStep && !isPickMode && (
               <button
                 onClick={handleCaptureCamera}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${editingStep.cameraCaptured ? 'bg-green-100 text-green-700 border border-green-300' : 'bg-slate-700 text-white hover:bg-slate-600'}`}
-                title="Zapisz obecną pozycję kamery dla tego kroku"
+                title={language === 'pl' ? 'Zapisz obecną pozycję kamery dla tego kroku' : 'Save camera position for this step'}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
-                {editingStep.cameraCaptured ? '✓ Kamera zapisana' : 'Zapisz kamerę'}
+                {editingStep.cameraCaptured ? (language === 'pl' ? '✓ Kamera zapisana' : '✓ Camera saved') : (language === 'pl' ? 'Zapisz kamerę' : 'Save camera')}
               </button>
             )}
           </div>
@@ -151,8 +152,8 @@ export const UploadModelEditor = () => {
                 </svg>
               </div>
               <div>
-                <h2 className="font-bold text-slate-800 text-base">Kroki dokumentacji</h2>
-                <p className="text-xs text-slate-500">{project.steps.length} kroków</p>
+                <h2 className="font-bold text-slate-800 text-base">{language === 'pl' ? 'Kroki dokumentacji' : 'Documentation steps'}</h2>
+                <p className="text-xs text-slate-500">{project.steps.length} {language === 'pl' ? 'kroków' : 'steps'}</p>
               </div>
             </div>
             <button
@@ -175,18 +176,18 @@ export const UploadModelEditor = () => {
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              <span className="text-sm font-medium">Dodaj nowy krok</span>
+              <span className="text-sm font-medium">{language === 'pl' ? 'Dodaj nowy krok' : 'Add new step'}</span>
             </button>
           )}
 
           {editingStep && (
             <div className="border border-blue-300 rounded-lg p-4 bg-blue-50 space-y-3">
               <div className="flex items-center justify-between">
-                <h3 className="font-semibold text-slate-800 text-sm">{isAddingStep ? 'Nowy krok' : 'Edytuj krok'}</h3>
+                <h3 className="font-semibold text-slate-800 text-sm">{isAddingStep ? (language === 'pl' ? 'Nowy krok' : 'New step') : (language === 'pl' ? 'Edytuj krok' : 'Edit step')}</h3>
                 {isPickMode ? (
-                  <span className="text-xs text-blue-600 font-medium animate-pulse">← Kliknij element…</span>
+                  <span className="text-xs text-blue-600 font-medium animate-pulse">{language === "pl" ? "← Kliknij element…" : "← Click element…"}</span>
                 ) : (
-                  <button onClick={handleEnterPickMode} className="text-xs text-blue-600 hover:text-blue-800 font-medium underline" title="Kliknij ponownie element modelu 3D">
+                  <button onClick={handleEnterPickMode} className="text-xs text-blue-600 hover:text-blue-800 font-medium underline" title={language === "pl" ? "Kliknij ponownie element modelu 3D" : "Click model element again"}>
                     {editingStep.focusMeshName ? '🔄 Zmień element' : '🎯 Wybierz element'}
                   </button>
                 )}
@@ -205,13 +206,13 @@ export const UploadModelEditor = () => {
                   <svg className="w-4 h-4 text-amber-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  <span className="text-xs text-amber-700">Brak wybranego elementu — krok będzie ogólny</span>
+                  <span className="text-xs text-amber-700">{language === 'pl' ? 'Brak wybranego elementu — krok będzie ogólny' : 'No element selected — step will be general'}</span>
                 </div>
               )}
 
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label className="block text-xs font-medium text-slate-600">Tytuł</label>
+                  <label className="block text-xs font-medium text-slate-600">{language === 'pl' ? 'Tytuł' : 'Title'}</label>
                   <span className="text-xs text-slate-400">{editingStep.title.length}/200</span>
                 </div>
                 <input
@@ -219,7 +220,7 @@ export const UploadModelEditor = () => {
                   value={editingStep.title}
                   onChange={(e) => setEditingStep((prev) => prev ? { ...prev, title: e.target.value } : prev)}
                   className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Tytuł kroku…"
+                  placeholder={language === 'pl' ? 'Tytuł kroku…' : 'Step title…'}
                   autoFocus={!isPickMode}
                   maxLength={200}
                 />
@@ -251,14 +252,14 @@ export const UploadModelEditor = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
                 {editingStep.cameraCaptured
-                  ? <span className="text-green-600 font-medium">✓ Pozycja kamery zapisana</span>
+                  ? <span className="text-green-600 font-medium">{language === 'pl' ? '✓ Pozycja kamery zapisana' : '✓ Camera position saved'}</span>
                   : <span>Ustaw kamerę i kliknij „Zapisz kamerę" powyżej</span>
                 }
               </div>
 
               <div className="flex gap-2">
-                <button onClick={handleSaveStep} disabled={!editingStep.title.trim()} className="flex-1 px-3 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition disabled:bg-gray-300 disabled:cursor-not-allowed">Zapisz krok</button>
-                <button onClick={handleCancelEdit} className="flex-1 px-3 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-300 transition">Anuluj</button>
+                <button onClick={handleSaveStep} disabled={!editingStep.title.trim()} className="flex-1 px-3 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition disabled:bg-gray-300 disabled:cursor-not-allowed">{language === 'pl' ? 'Zapisz krok' : 'Save step'}</button>
+                <button onClick={handleCancelEdit} className="flex-1 px-3 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-300 transition">{language === 'pl' ? 'Anuluj' : 'Cancel'}</button>
               </div>
             </div>
           )}
@@ -268,7 +269,7 @@ export const UploadModelEditor = () => {
               <svg className="w-12 h-12 mx-auto mb-3 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
               </svg>
-              <p className="text-sm">Brak kroków</p>
+              <p className="text-sm">{language === 'pl' ? 'Brak kroków' : 'No steps'}</p>
               <p className="text-xs mt-1">Kliknij „Dodaj nowy krok" powyżej</p>
             </div>
           )}
@@ -299,12 +300,12 @@ export const UploadModelEditor = () => {
                 </div>
               </div>
               <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button onClick={(e) => { e.stopPropagation(); openEditForm(step); }} className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition" title="Edytuj krok">
+                <button onClick={(e) => { e.stopPropagation(); openEditForm(step); }} className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition" title={language === 'pl' ? 'Edytuj krok' : 'Edit step'}>
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                   </svg>
                 </button>
-                <button onClick={(e) => { e.stopPropagation(); handleDeleteStep(step.id); }} className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition" title="Usuń krok">
+                <button onClick={(e) => { e.stopPropagation(); handleDeleteStep(step.id); }} className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition" title={language === 'pl' ? 'Usuń krok' : 'Delete step'}>
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                   </svg>

@@ -40,13 +40,13 @@ export const Create3DElementDialog = ({ existing, onClose, onSaved }: Props) => 
     if (!file) return;
     const validTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
     if (!validTypes.includes(file.type)) {
-      alert('Proszę wybrać obraz PNG, JPG lub WebP.');
+      alert(language === 'pl' ? 'Proszę wybrać obraz PNG, JPG lub WebP.' : 'Please select a PNG, JPG or WebP image.');
       e.target.value = '';
       return;
     }
     const maxSize = 5 * 1024 * 1024;
     if (file.size > maxSize) {
-      alert('Plik jest za duży (maks. 5MB).');
+      alert(language === 'pl' ? 'Plik jest za duży (maks. 5MB).' : 'File is too large (max 5MB).');
       e.target.value = '';
       return;
     }
@@ -70,7 +70,7 @@ export const Create3DElementDialog = ({ existing, onClose, onSaved }: Props) => 
   const handleSave = async () => {
     const trimmed = text.trim();
     if (!trimmed) {
-      alert('Proszę wpisać tekst (maks. 12 znaków).');
+      alert(language === 'pl' ? 'Proszę wpisać tekst (maks. 12 znaków).' : 'Please enter text (max 12 characters).');
       return;
     }
     setIsSaving(true);
@@ -90,7 +90,7 @@ export const Create3DElementDialog = ({ existing, onClose, onSaved }: Props) => 
       const saved = await saveCustom3DElement(payload, !existing);
       onSaved(saved);
     } catch (err) {
-      alert((err as Error).message ?? 'Nie udało się zapisać elementu.');
+      alert((err as Error).message ?? (language === 'pl' ? 'Nie udało się zapisać elementu.' : 'Failed to save element.'));
     } finally {
       setIsSaving(false);
     }
@@ -102,7 +102,7 @@ export const Create3DElementDialog = ({ existing, onClose, onSaved }: Props) => 
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-blue-600 to-purple-600">
           <h2 className="text-xl font-bold text-white">
-            {existing ? 'Edytuj element 3D' : 'Stwórz element 3D'}
+            {existing ? (language === 'pl' ? 'Edytuj element 3D' : 'Edit 3D element') : (language === 'pl' ? 'Stwórz element 3D' : 'Create 3D element')}
           </h2>
           <button
             onClick={onClose}
@@ -166,7 +166,7 @@ export const Create3DElementDialog = ({ existing, onClose, onSaved }: Props) => 
               {textureDataUrl && (
                 <div className="mt-2 flex items-center gap-2">
                   <img src={textureDataUrl} alt="Podgląd tekstury" className="w-10 h-10 object-cover rounded border border-gray-200" />
-                  <span className="text-xs text-gray-600 truncate max-w-[140px]">{textureFileName || 'Tekstura'}</span>
+                  <span className="text-xs text-gray-600 truncate max-w-[140px]">{textureFileName || (language === 'pl' ? 'Tekstura' : 'Texture')}</span>
                   <button
                     onClick={handleRemoveTexture}
                     className="text-xs text-red-500 hover:text-red-700 transition"
@@ -218,7 +218,7 @@ export const Create3DElementDialog = ({ existing, onClose, onSaved }: Props) => 
             disabled={isSaving}
             className="px-5 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg hover:from-blue-600 hover:to-purple-700 transition disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            {isSaving ? 'Zapisywanie…' : 'Zapisz element'}
+            {isSaving ? (language === 'pl' ? 'Zapisywanie…' : 'Saving…') : (language === 'pl' ? 'Zapisz element' : 'Save element')}
           </button>
         </div>
       </div>
