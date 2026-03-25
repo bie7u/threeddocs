@@ -84,7 +84,7 @@ export const updateElementRequest = async (
   id: string,
   element: Omit<Custom3DElement, 'id' | 'createdAt'>,
 ): Promise<Custom3DElement> => {
-  const res = await apiRequest(`/elements/${id}`, {
+  const res = await apiRequest(`/elements/${id}/`, {
     method: 'PUT',
     body: JSON.stringify(toApiElementBody(element)),
   });
@@ -94,6 +94,6 @@ export const updateElementRequest = async (
 
 /** DELETE /api/elements/:id — deletes the element. */
 export const deleteElementRequest = async (id: string): Promise<void> => {
-  const res = await apiRequest(`/elements/${id}`, { method: 'DELETE' });
+  const res = await apiRequest(`/elements/${id}/`, { method: 'DELETE' });
   if (!res.ok) throw new Error('Failed to delete custom 3D element');
 };

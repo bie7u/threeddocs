@@ -60,7 +60,7 @@ export const uploadModelRequest = async (
   modelScale: number,
   description?: string,
 ): Promise<UploadedModel3D> => {
-  const res = await apiRequest('/models', {
+  const res = await apiRequest('/models/', {
     method: 'POST',
     body: JSON.stringify({ name, model_file_name: modelFileName, model_scale: modelScale, model_data_url: modelDataUrl, description: description ?? null }),
   });
@@ -78,7 +78,7 @@ export const updateModelRequest = async (
   modelScale: number,
   description?: string,
 ): Promise<UploadedModel3D> => {
-  const res = await apiRequest(`/models/${id}`, {
+  const res = await apiRequest(`/models/${id}/`, {
     method: 'PUT',
     body: JSON.stringify({ name, model_scale: modelScale, description: description ?? null }),
   });
@@ -88,7 +88,7 @@ export const updateModelRequest = async (
 
 /** DELETE /api/models/:id — deletes the model record and its stored file. */
 export const deleteModelRequest = async (id: string): Promise<void> => {
-  const res = await apiRequest(`/models/${id}`, { method: 'DELETE' });
+  const res = await apiRequest(`/models/${id}/`, { method: 'DELETE' });
   if (!res.ok) throw new Error('Failed to delete model');
 };
 
