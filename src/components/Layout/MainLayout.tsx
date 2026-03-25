@@ -11,10 +11,11 @@ import { sampleProject, sampleNodePositions } from '../../utils/sampleData';
 interface MainLayoutProps {
   onBackToProjectList?: () => void;
   onGoToEditorPanel?: () => void;
+  onGoToLogin?: () => void;
   useSampleProjectFallback?: boolean;
 }
 
-export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, useSampleProjectFallback = true }: MainLayoutProps) => {
+export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, onGoToLogin, useSampleProjectFallback = true }: MainLayoutProps) => {
   const { 
     project, 
     selectedStepId, 
@@ -184,6 +185,25 @@ export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, useSamplePr
           </button>
         </div>
       </div>
+
+      {/* Guest mode banner */}
+      {isGuestMode && (
+        <div className="bg-amber-50 border-b border-amber-200 px-6 py-2 flex items-center justify-between gap-4 flex-shrink-0">
+          <div className="flex items-center gap-2 text-amber-800 text-sm">
+            <span className="text-base">👤</span>
+            <span className="font-medium">Tryb gościa</span>
+            <span className="text-amber-700">— zapis projektów, udostępnianie modeli i wszystkie opcje są dostępne po zalogowaniu.</span>
+          </div>
+          {onGoToLogin && (
+            <button
+              onClick={onGoToLogin}
+              className="flex-shrink-0 px-4 py-1.5 bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-xs font-semibold rounded-lg hover:from-blue-600 hover:to-indigo-700 transition-all shadow"
+            >
+              Zaloguj się
+            </button>
+          )}
+        </div>
+      )}
 
       <div className={`flex-1 flex overflow-hidden gap-0 p-1.5${isResizing ? ' cursor-col-resize select-none' : ''}`}>
         {editorMode === 'guide' ? (
