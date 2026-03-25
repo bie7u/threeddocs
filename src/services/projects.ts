@@ -109,7 +109,7 @@ export const fetchProject = async (id: string): Promise<SavedProject> => {
  * Returns the token string.
  */
 export const generateShareToken = async (id: string): Promise<string> => {
-  const res = await apiRequest(`/projects/${id}/share`, { method: 'POST' });
+  const res = await apiRequest(`/projects/${id}/share/`, { method: 'POST' });
   if (!res.ok) throw new Error('Failed to generate share link');
   const data = await res.json() as { shareToken: string };
   return data.shareToken;
@@ -120,7 +120,7 @@ export const generateShareToken = async (id: string): Promise<string> => {
  * Used by the SharedView page for publicly shared links.
  */
 export const fetchPublicProject = async (shareToken: string): Promise<SavedProject> => {
-  const res = await fetch(`${API_BASE}/projects/shared/${shareToken}`, {
+  const res = await fetch(`${API_BASE}/shared/${shareToken}`, {
     credentials: 'omit',
   });
   if (!res.ok) throw new Error('Project not found');
@@ -169,7 +169,7 @@ export const updateGuestProject = async (
  * The server assigns `id` and `lastModified`; the client must NOT send them.
  */
 export const createProject = async (data: SavedProject): Promise<SavedProject> => {
-  const res = await apiRequest('/projects', {
+  const res = await apiRequest('/projects/', {
     method: 'POST',
     body: JSON.stringify(toApiProjectBody(data)),
   });
@@ -179,7 +179,7 @@ export const createProject = async (data: SavedProject): Promise<SavedProject> =
 
 /** PUT /api/projects/:id — fully replaces the project and returns it. */
 export const updateProject = async (id: string, data: SavedProject): Promise<SavedProject> => {
-  const res = await apiRequest(`/projects/${id}`, {
+  const res = await apiRequest(`/projects/${id}/`, {
     method: 'PUT',
     body: JSON.stringify(toApiProjectBody(data)),
   });
@@ -189,6 +189,6 @@ export const updateProject = async (id: string, data: SavedProject): Promise<Sav
 
 /** DELETE /api/projects/:id — deletes the project. */
 export const deleteProjectRequest = async (id: string): Promise<void> => {
-  const res = await apiRequest(`/projects/${id}`, { method: 'DELETE' });
+  const res = await apiRequest(`/projects/${id}/`, { method: 'DELETE' });
   if (!res.ok) throw new Error('Failed to delete project');
 };
