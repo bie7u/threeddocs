@@ -4,6 +4,7 @@ import { OrbitControls } from '@react-three/drei';
 import type { Custom3DElement } from '../../types';
 import { saveCustom3DElement } from '../../utils/custom3DElements';
 import { Custom3DShape } from '../Viewer3D/Custom3DShape';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   existing?: Custom3DElement;
@@ -12,6 +13,7 @@ interface Props {
 }
 
 export const Create3DElementDialog = ({ existing, onClose, onSaved }: Props) => {
+  const { t } = useTranslation();
   const [text, setText] = useState(existing?.text ?? '');
   const [color, setColor] = useState(existing?.color ?? '#4299e1');
   const [textureDataUrl, setTextureDataUrl] = useState<string | undefined>(existing?.textureDataUrl);
@@ -40,13 +42,13 @@ export const Create3DElementDialog = ({ existing, onClose, onSaved }: Props) => 
     if (!file) return;
     const validTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
     if (!validTypes.includes(file.type)) {
-      alert('Proszę wybrać obraz PNG, JPG lub WebP.');
+      alert(t('create3DElement.errorInvalidImage'));
       e.target.value = '';
       return;
     }
     const maxSize = 5 * 1024 * 1024;
     if (file.size > maxSize) {
-      alert('Plik jest za duży (maks. 5MB).');
+      alert(t('create3DElement.errorImageTooLarge'));
       e.target.value = '';
       return;
     }
@@ -70,7 +72,7 @@ export const Create3DElementDialog = ({ existing, onClose, onSaved }: Props) => 
   const handleSave = async () => {
     const trimmed = text.trim();
     if (!trimmed) {
-      alert('Proszę wpisać tekst (maks. 12 znaków).');
+      alert(t('create3DElement.errorNoText'));
       return;
     }
     setIsSaving(true);
@@ -90,7 +92,7 @@ export const Create3DElementDialog = ({ existing, onClose, onSaved }: Props) => 
       const saved = await saveCustom3DElement(payload, !existing);
       onSaved(saved);
     } catch (err) {
-      alert((err as Error).message ?? 'Nie udało się zapisać elementu.');
+      alert((err as Error).message ?? t('create3DElement.errorSave'));
     } finally {
       setIsSaving(false);
     }
@@ -102,12 +104,12 @@ export const Create3DElementDialog = ({ existing, onClose, onSaved }: Props) => 
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-blue-600 to-purple-600">
           <h2 className="text-xl font-bold text-white">
-            {existing ? 'Edytuj element 3D' : 'Stwórz element 3D'}
+            {existing ? t('create3DElement.titleEdit') : t('create3DElement.titleCreate')}
           </h2>
           <button
             onClick={onClose}
             className="text-white/80 hover:text-white transition"
-            aria-label="Zamknij"
+            aria-label={t('create3DElement.closeAriaLabel')}
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -121,14 +123,14 @@ export const Create3DElementDialog = ({ existing, onClose, onSaved }: Props) => 
             {/* Text */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1">
-                Tekst <span className="text-gray-400 font-normal">(maks. 12 znaków)</span>
+                {t('create3DElement.textLabel')} <span className="text-gray-400 font-normal">{t('create3DElement.textHint')}</span>
               </label>
               <input
                 type="text"
                 value={text}
                 onChange={handleTextChange}
                 maxLength={12}
-                placeholder="np. ABC"
+                placeholder={t('create3DElement.textPlaceholder')}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <p className="mt-1 text-xs text-gray-400">{text.length}/12</p>
@@ -136,7 +138,7 @@ export const Create3DElementDialog = ({ existing, onClose, onSaved }: Props) => 
 
             {/* Color */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">Kolor wypełnienia</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">{t('create3DElement.colorLabel')}</label>
               <div className="flex items-center gap-3">
                 <input
                   type="color"

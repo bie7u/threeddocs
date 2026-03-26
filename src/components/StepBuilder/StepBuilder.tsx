@@ -21,6 +21,7 @@ import 'reactflow/dist/style.css';
 import { useAppStore } from '../../store';
 import type { InstructionStep, ConnectionData, ConnectionStyle, ShapeType, ArrowDirection, ConnectionType, EngravedBlockParams } from '../../types';
 import { ShapeTypePicker } from '../ShapeTypePicker/ShapeTypePicker';
+import { useTranslation } from 'react-i18next';
 
 // Custom node component
 const StepNode = ({ data, selected }: NodeProps<InstructionStep>) => {
@@ -65,30 +66,29 @@ const StepNode = ({ data, selected }: NodeProps<InstructionStep>) => {
   );
 };
 
-// ─── Connection styles ────────────────────────────────────────────────────────
-const CONNECTION_STYLES: { value: ConnectionStyle; label: string; color: string; textColor: string }[] = [
-  { value: 'standard', label: 'Standard', color: '#64748b', textColor: '#fff' },
-  { value: 'glass',    label: 'Szklane',  color: '#60a5fa', textColor: '#fff' },
-  { value: 'glow',     label: 'Złote',    color: '#fbbf24', textColor: '#1e1e1e' },
-  { value: 'neon',     label: 'Neonowe',  color: '#ec4899', textColor: '#fff' },
-];
-
-const ARROW_DIRS: { value: ArrowDirection; label: string }[] = [
-  { value: 'none',          label: '— Brak' },
-  { value: 'forward',       label: '→ Naprzód' },
-  { value: 'backward',      label: '← Wstecz' },
-  { value: 'bidirectional', label: '↔ Dwukierunkowe' },
-];
-
-const CONN_TYPES: { value: ConnectionType; label: string }[] = [
-  { value: 'tube',  label: '🔩 Rura' },
-  { value: 'arrow', label: '➡ Strzałka' },
-];
-
-
 // ─── Inline connection editor rendered on the edge label ──────────────────────
 const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<ConnectionData>) => {
+  const { t } = useTranslation();
   const { updateConnections, project, isGuestMode } = useAppStore();
+
+  const CONNECTION_STYLES: { value: ConnectionStyle; label: string; color: string; textColor: string }[] = [
+    { value: 'standard', label: t('stepBuilder.connectionStyleStandard'), color: '#64748b', textColor: '#fff' },
+    { value: 'glass',    label: t('stepBuilder.connectionStyleGlass'),    color: '#60a5fa', textColor: '#fff' },
+    { value: 'glow',     label: t('stepBuilder.connectionStyleGlow'),     color: '#fbbf24', textColor: '#1e1e1e' },
+    { value: 'neon',     label: t('stepBuilder.connectionStyleNeon'),     color: '#ec4899', textColor: '#fff' },
+  ];
+
+  const ARROW_DIRS: { value: ArrowDirection; label: string }[] = [
+    { value: 'none',          label: t('stepBuilder.arrowNone') },
+    { value: 'forward',       label: t('stepBuilder.arrowForward') },
+    { value: 'backward',      label: t('stepBuilder.arrowBackward') },
+    { value: 'bidirectional', label: t('stepBuilder.arrowBidirectional') },
+  ];
+
+  const CONN_TYPES: { value: ConnectionType; label: string }[] = [
+    { value: 'tube',  label: t('stepBuilder.connTypeTube') },
+    { value: 'arrow', label: t('stepBuilder.connTypeArrow') },
+  ];
   const [open, setOpen] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [edgePath, labelX, labelY] = getBezierPath({ sourceX, sourceY, targetX, targetY });
@@ -164,15 +164,15 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
   }, [project, id, draftTitle, draftDesc, draftStyle, draftShape, draftCustom3dElementId, draftUploadedModelId, draftShapeScale, draftShapePosY, draftShapeRotY, draftArrow, draftConnType, draftEngravedParams, updateConnections]);
 
   const getShapeButtonLabel = (): string => {
-    if (!draftShape) return 'Brak';
+    if (!draftShape) return t('stepBuilder.shapeNone');
     const labels: Partial<Record<ShapeType, string>> = {
-      cube: '📦 Sześcian',
-      sphere: '🔵 Kula',
-      cylinder: '🥫 Walec',
-      cone: '🔺 Stożek',
-      engravedBlock: '🔲 Klocek z tekstem',
-      custom3dElement: '🧩 Element 3D',
-      uploadedModel: '📤 Wgrany model',
+      cube: t('stepBuilder.shapeCube'),
+      sphere: t('stepBuilder.shapeSphere'),
+      cylinder: t('stepBuilder.shapeCylinder'),
+      cone: t('stepBuilder.shapeCone'),
+      engravedBlock: t('stepBuilder.shapeEngraved'),
+      custom3dElement: t('stepBuilder.shapeCustom3D'),
+      uploadedModel: t('stepBuilder.shapeUploaded'),
     };
     return labels[draftShape] ?? draftShape;
   };
@@ -207,7 +207,7 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
 
   const handleDelete = () => {
     if (!project) return;
-    if (!window.confirm('Usunąć to połączenie?')) return;
+    if (!window.confirm(t('stepBuilder.deleteConnectionConfirm'))) return;
     updateConnections(project.connections.filter(conn => conn.id !== id));
   };
 
@@ -245,7 +245,7 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
             <div className="bg-white rounded-xl shadow-2xl border border-slate-200 w-72 overflow-hidden">
               {/* Header */}
               <div className="flex items-center justify-between px-3 py-2 bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
-                <span className="text-xs font-bold text-slate-700 uppercase tracking-wide">Edytuj połączenie</span>
+                <span className="text-xs font-bold text-slate-700 uppercase tracking-wide">{t('stepBuilder.editConnection')}</span>
                 <button
                   onClick={() => setOpen(false)}
                   className="w-5 h-5 flex items-center justify-center rounded hover:bg-slate-200 text-slate-500 transition"
@@ -259,7 +259,7 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
               <div className="p-3 space-y-3">
                 {/* Style swatches */}
                 <div>
-                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Styl wizualny</p>
+                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">{t('stepBuilder.visualStyle')}</p>
                   <div className="flex gap-1.5">
                     {CONNECTION_STYLES.map(s => (
                       <button
@@ -278,7 +278,7 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
                 {/* Connection type + Arrow direction side by side */}
                 <div className={draftConnType === 'arrow' ? 'grid grid-cols-2 gap-2' : 'grid grid-cols-1 gap-2'}>
                   <div>
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Typ</p>
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">{t('stepBuilder.type')}</p>
                     <select
                       value={draftConnType}
                       onChange={e => { setDraftConnType(e.target.value as ConnectionType); commitDraft({ connectionType: e.target.value as ConnectionType }); }}
@@ -289,7 +289,7 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
                   </div>
                   {draftConnType === 'arrow' && (
                     <div>
-                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Kierunek</p>
+                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">{t('stepBuilder.direction')}</p>
                       <select
                         value={draftArrow}
                         onChange={e => { setDraftArrow(e.target.value as ArrowDirection); commitDraft({ arrowDirection: e.target.value as ArrowDirection }); }}
@@ -303,7 +303,7 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
 
                 {/* Shape type picker */}
                 <div>
-                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Typ kształtu</p>
+                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">{t('stepBuilder.shapeTypeLabel')}</p>
                   <div className="flex gap-1.5">
                     <button
                       type="button"
@@ -319,7 +319,7 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
                       <button
                         type="button"
                         onClick={handleClearShape}
-                        title="Usuń kształt"
+                        title={t('stepBuilder.removeShape')}
                         className="px-2 py-1.5 text-xs border border-slate-200 rounded-lg text-slate-400 hover:text-red-500 hover:border-red-200 hover:bg-red-50 transition-colors focus:outline-none"
                       >
                         ✕
@@ -344,7 +344,7 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
                   <div className="space-y-2">
                     <div>
                       <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">
-                        Skala kształtu <span className="font-normal normal-case text-slate-400">(0.1 – 5.0)</span>
+                        {t('stepBuilder.shapeScale')} <span className="font-normal normal-case text-slate-400">(0.1 – 5.0)</span>
                       </p>
                       <div className="flex items-center gap-2">
                         <input
@@ -369,7 +369,7 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
                     </div>
                     <div>
                       <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">
-                        Pozycja Y <span className="font-normal normal-case text-slate-400">(-10 – 10)</span>
+                        {t('stepBuilder.positionY')} <span className="font-normal normal-case text-slate-400">(-10 – 10)</span>
                       </p>
                       <div className="flex items-center gap-2">
                         <input
@@ -394,7 +394,7 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
                     </div>
                     <div>
                       <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">
-                        Obrót wokół osi <span className="font-normal normal-case text-slate-400">(0 – 360°)</span>
+                        {t('stepBuilder.rotationY')} <span className="font-normal normal-case text-slate-400">(0 – 360°)</span>
                       </p>
                       <div className="flex items-center gap-2">
                         <input
@@ -423,9 +423,9 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
                 {/* Engraved block settings */}
                 {draftShape === 'engravedBlock' && (
                   <div className="space-y-2 border border-slate-200 rounded-lg p-2 bg-slate-50">
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Ustawienia klocka z tekstem</p>
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">{t('stepProperties.engravedSettings')}</p>
                     <div>
-                      <p className="text-xs font-semibold text-slate-500 mb-1">Tekst <span className="font-normal text-slate-400">(maks. 24 znaki)</span></p>
+                      <p className="text-xs font-semibold text-slate-500 mb-1">{t('stepProperties.engravedTextLabel')} <span className="font-normal text-slate-400">{t('stepProperties.engravedTextHint')}</span></p>
                       <input
                         type="text"
                         value={draftEngravedParams.text}
@@ -435,19 +435,19 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
                       />
                     </div>
                     <div>
-                      <p className="text-xs font-semibold text-slate-500 mb-1">Czcionka</p>
+                      <p className="text-xs font-semibold text-slate-500 mb-1">{t('stepProperties.engravedFontLabel')}</p>
                       <select
                         value={draftEngravedParams.font}
                         onChange={e => handleEngravedParamChange('font', e.target.value as EngravedBlockParams['font'])}
                         className="w-full px-2 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                       >
-                        <option value="helvetiker">Sans (Helvetiker)</option>
-                        <option value="optimer">Serif (Optimer)</option>
-                        <option value="gentilis">Mono (Gentilis)</option>
+                        <option value="helvetiker">{t('stepProperties.engravedFontSans')}</option>
+                        <option value="optimer">{t('stepProperties.engravedFontSerif')}</option>
+                        <option value="gentilis">{t('stepProperties.engravedFontMono')}</option>
                       </select>
                     </div>
                     <div>
-                      <p className="text-xs font-semibold text-slate-500 mb-1">Grubość <span className="font-normal text-slate-400">(0.05–0.3)</span></p>
+                      <p className="text-xs font-semibold text-slate-500 mb-1">{t('stepProperties.engravedDepthLabel')} <span className="font-normal text-slate-400">(0.05–0.3)</span></p>
                       <div className="flex items-center gap-2">
                         <input type="range" min="0.05" max="0.3" step="0.01" value={draftEngravedParams.depth} onChange={e => handleEngravedParamChange('depth', parseFloat(e.target.value))} className="flex-1" />
                         <input type="number" min="0.05" max="0.3" step="0.01" value={draftEngravedParams.depth} onChange={e => handleEngravedParamChange('depth', parseFloat(e.target.value))} className="w-14 px-1.5 py-1 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
@@ -459,14 +459,14 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
                 {/* Title */}
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Tytuł (opcjonalnie)</p>
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">{t('stepBuilder.titleOptional')}</p>
                     <span className="text-xs text-slate-400">{draftTitle.length}/50</span>
                   </div>
                   <input
                     type="text"
                     value={draftTitle}
                     onChange={e => { setDraftTitle(e.target.value); commitDraft({ title: e.target.value }); }}
-                    placeholder="Tytuł połączenia…"
+                    placeholder={t('stepBuilder.titlePlaceholder')}
                     maxLength={50}
                     className="w-full px-2 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
@@ -475,14 +475,14 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
                 {/* Description */}
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Opis (opcjonalnie)</p>
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">{t('stepBuilder.descOptional')}</p>
                     <span className="text-xs text-slate-400">{draftDesc.length}/500</span>
                   </div>
                   <textarea
                     value={draftDesc}
                     onChange={e => { setDraftDesc(e.target.value); commitDraft({ description: e.target.value }); }}
                     rows={2}
-                    placeholder="Opis połączenia…"
+                    placeholder={t('stepBuilder.descPlaceholder')}
                     maxLength={500}
                     className="w-full px-2 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                   />
@@ -498,11 +498,11 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
                   </svg>
-                  Gotowe
+                  {t('stepBuilder.done')}
                 </button>
                 <button
                   onClick={handleDelete}
-                  title="Usuń połączenie"
+                  title={t('stepBuilder.deleteEdge')}
                   className="px-2.5 py-1.5 bg-red-50 hover:bg-red-100 text-red-500 text-xs font-semibold rounded-lg border border-red-200 transition-all"
                 >
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
