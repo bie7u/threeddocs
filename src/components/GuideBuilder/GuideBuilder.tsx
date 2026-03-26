@@ -3,8 +3,10 @@ import { useAppStore } from '../../store';
 import { Viewer3D } from '../Viewer3D/Viewer3D';
 import { RichTextEditor } from '../RichTextEditor';
 import type { GuideStep } from '../../types';
+import { useTranslation } from 'react-i18next';
 
 export const GuideBuilder = () => {
+  const { t } = useTranslation();
   const {
     project,
     nodePositions,
@@ -24,7 +26,7 @@ export const GuideBuilder = () => {
   if (!project) {
     return (
       <div className="w-full h-full flex items-center justify-center text-slate-500">
-        Brak projektu.
+        {t('guideBuilder.noProject')}
       </div>
     );
   }
@@ -73,8 +75,8 @@ export const GuideBuilder = () => {
               </svg>
             </div>
             <div>
-              <h2 className="font-bold text-slate-800 text-sm">Kroki modelu</h2>
-              <p className="text-xs text-slate-500">Kliknij + aby dodać do przewodnika</p>
+              <h2 className="font-bold text-slate-800 text-sm">{t('guideBuilder.modelStepsTitle')}</h2>
+              <p className="text-xs text-slate-500">{t('guideBuilder.modelStepsSubtitle')}</p>
             </div>
           </div>
           {project.steps.length > 0 && (
@@ -82,7 +84,7 @@ export const GuideBuilder = () => {
               onClick={handleAddAll}
               className="w-full py-1.5 text-xs font-semibold text-orange-700 bg-orange-100 hover:bg-orange-200 rounded-lg transition-all border border-orange-200"
             >
-              ＋ Dodaj wszystkie
+              {t('guideBuilder.addAllBtn')}
             </button>
           )}
         </div>
@@ -96,8 +98,8 @@ export const GuideBuilder = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                 </svg>
               </div>
-              <p className="text-sm font-medium text-slate-500">Brak kroków w modelu</p>
-              <p className="text-xs text-slate-400 mt-1">Przełącz się na Model Builder, aby dodać kroki.</p>
+              <p className="text-sm font-medium text-slate-500">{t('guideBuilder.noSteps')}</p>
+              <p className="text-xs text-slate-400 mt-1">{t('guideBuilder.noStepsHint')}</p>
             </div>
           )}
           {project.steps.map((step) => {
@@ -125,7 +127,7 @@ export const GuideBuilder = () => {
                 <button
                   onClick={(e) => { e.stopPropagation(); if (!inGuide) addGuideStep(step.id); }}
                   disabled={inGuide}
-                  title={inGuide ? 'Już w przewodniku' : 'Dodaj do przewodnika'}
+                  title={inGuide ? t('guideBuilder.alreadyInGuide') : t('guideBuilder.addToGuide')}
                   className={`w-7 h-7 flex items-center justify-center rounded-lg text-sm font-bold transition-all flex-shrink-0 ${
                     inGuide
                       ? 'bg-green-100 text-green-600 cursor-default ring-1 ring-green-300'
@@ -152,8 +154,8 @@ export const GuideBuilder = () => {
                 </svg>
               </div>
               <div>
-                <h2 className="font-bold text-slate-800 text-sm">Podgląd 3D</h2>
-                <p className="text-xs text-slate-400">Wybierz krok, aby skupić kamerę</p>
+                <h2 className="font-bold text-slate-800 text-sm">{t('guideBuilder.preview3DTitle')}</h2>
+                <p className="text-xs text-slate-400">{t('guideBuilder.preview3DSubtitle')}</p>
               </div>
             </div>
             {selectedStep && (
@@ -174,7 +176,7 @@ export const GuideBuilder = () => {
             {!selectedStepId && (
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <div className="bg-black/50 backdrop-blur-sm text-white px-5 py-3 rounded-xl shadow-2xl border border-white/10 text-center">
-                  <p className="text-sm font-medium">Wybierz krok, aby zobaczyć podgląd</p>
+                  <p className="text-sm font-medium">{t('guideBuilder.selectStepHint')}</p>
                 </div>
               </div>
             )}
@@ -191,14 +193,14 @@ export const GuideBuilder = () => {
                 </svg>
               </div>
               <div>
-                <h2 className="font-bold text-slate-800 text-sm">Edytuj krok</h2>
-                <p className="text-xs text-slate-400">Zmiany zapisują się automatycznie</p>
+                <h2 className="font-bold text-slate-800 text-sm">{t('guideBuilder.editStepTitle')}</h2>
+                <p className="text-xs text-slate-400">{t('guideBuilder.editStepSubtitle')}</p>
               </div>
             </div>
             <div className="p-3 space-y-3 overflow-y-auto max-h-64">
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide">Tytuł</label>
+                  <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide">{t('guideBuilder.titleLabel')}</label>
                   <span className="text-xs text-slate-400">{selectedStep.title.length}/200</span>
                 </div>
                 <input
@@ -210,7 +212,7 @@ export const GuideBuilder = () => {
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1">Opis</label>
+                <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1">{t('guideBuilder.descLabel')}</label>
                 <RichTextEditor
                   value={selectedStep.description}
                   onChange={(value) => updateStep(selectedStep.id, { description: value })}
@@ -233,8 +235,8 @@ export const GuideBuilder = () => {
               </svg>
             </div>
             <div className="flex-1 min-w-0">
-              <h2 className="font-bold text-slate-800 text-sm">Kroki przewodnika</h2>
-              <p className="text-xs text-slate-500">Przeciągnij, aby zmienić kolejność</p>
+              <h2 className="font-bold text-slate-800 text-sm">{t('guideBuilder.guideStepsTitle')}</h2>
+              <p className="text-xs text-slate-500">{t('guideBuilder.guideStepsSubtitle')}</p>
             </div>
             {guide.length > 0 && (
               <span className="flex-shrink-0 w-6 h-6 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 text-white text-xs font-bold flex items-center justify-center shadow">
@@ -247,7 +249,7 @@ export const GuideBuilder = () => {
               onClick={handleClearGuide}
               className="w-full py-1.5 text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-all border border-red-200"
             >
-              ✕ Usuń wszystkie
+              {t('guideBuilder.removeAllBtn')}
             </button>
           )}
         </div>
@@ -261,8 +263,8 @@ export const GuideBuilder = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
                 </svg>
               </div>
-              <p className="text-sm font-medium text-slate-500">Przewodnik jest pusty</p>
-              <p className="text-xs text-slate-400 mt-1">Dodaj kroki z listy po lewej stronie.</p>
+              <p className="text-sm font-medium text-slate-500">{t('guideBuilder.emptyGuide')}</p>
+              <p className="text-xs text-slate-400 mt-1">{t('guideBuilder.emptyGuideHint')}</p>
             </div>
           )}
           {guide.map((gs, index) => {
@@ -306,7 +308,7 @@ export const GuideBuilder = () => {
                 <span className="flex-1 text-sm font-medium text-slate-700 truncate">{step.title}</span>
                 <button
                   onClick={(e) => { e.stopPropagation(); removeGuideStep(gs.id); }}
-                  title="Usuń z przewodnika"
+                  title={t('guideBuilder.removeFromGuide')}
                   className="w-6 h-6 flex items-center justify-center rounded-lg text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all flex-shrink-0"
                 >
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -322,7 +324,7 @@ export const GuideBuilder = () => {
           <div className="px-3 py-2 border-t border-slate-100 bg-slate-50 flex-shrink-0 flex items-center justify-center gap-2">
             <div className="w-2 h-2 rounded-full bg-purple-400" />
             <p className="text-xs text-slate-500 font-medium">
-              {guide.length} {guide.length === 1 ? 'krok' : guide.length < 5 ? 'kroki' : 'kroków'} w przewodniku
+            {guide.length} {guide.length === 1 ? t('guideBuilder.stepCountOne') : guide.length < 5 ? t('guideBuilder.stepCountFew') : t('guideBuilder.stepCountMany')}
             </p>
           </div>
         )}

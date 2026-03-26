@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { register } from '../services/auth';
+import { useTranslation } from 'react-i18next';
 
 const Register = () => {
+  const { t } = useTranslation();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -18,7 +20,7 @@ const Register = () => {
     setError('');
 
     if (password !== confirmPassword) {
-      setError('Hasła nie są zgodne');
+      setError(t('register.errorPasswordMatch'));
       return;
     }
 
@@ -27,7 +29,7 @@ const Register = () => {
       await register(email, password, name);
       navigate('/dashboard');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Nie udało się utworzyć konta');
+      setError(err instanceof Error ? err.message : t('register.errorDefault'));
     } finally {
       setIsLoading(false);
     }
@@ -47,10 +49,10 @@ const Register = () => {
             <img src="/logo.svg" alt="ThreeDocsy logo" className="h-16 w-auto" />
           </div>
           <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">
-            ThreeDocsy
+            {t('register.title')}
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Utwórz nowe konto
+            {t('register.subtitle')}
           </p>
         </div>
 
@@ -79,12 +81,12 @@ const Register = () => {
               fill="#EA4335"
             />
           </svg>
-          Zarejestruj się przez Google
+          {t('register.googleButton')}
         </button>
 
         {googleInfo && (
           <div className="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-lg text-sm text-center">
-            Rejestracja przez Google będzie dostępna wkrótce.
+            {t('register.googleSoon')}
           </div>
         )}
 
@@ -94,7 +96,7 @@ const Register = () => {
             <div className="w-full border-t border-gray-200" />
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="px-3 bg-white text-gray-400">lub przez email</span>
+            <span className="px-3 bg-white text-gray-400">{t('register.orEmail')}</span>
           </div>
         </div>
 
@@ -102,7 +104,7 @@ const Register = () => {
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div>
             <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-              Imię <span className="text-gray-400 font-normal">(opcjonalnie)</span>
+              {t('register.nameLabel')} <span className="text-gray-400 font-normal">{t('register.nameOptional')}</span>
             </label>
             <input
               id="name"
@@ -112,13 +114,13 @@ const Register = () => {
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="appearance-none relative block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150"
-              placeholder="Jan Kowalski"
+              placeholder={t('register.namePlaceholder')}
             />
           </div>
 
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-              Adres email
+              {t('register.emailLabel')}
             </label>
             <input
               id="email"
@@ -129,13 +131,13 @@ const Register = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="appearance-none relative block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150"
-              placeholder="jan@przykład.pl"
+              placeholder={t('register.emailPlaceholder')}
             />
           </div>
 
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-              Hasło
+              {t('register.passwordLabel')}
             </label>
             <input
               id="password"
@@ -146,13 +148,13 @@ const Register = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="appearance-none relative block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150"
-              placeholder="Min. 8 znaków"
+              placeholder={t('register.passwordPlaceholder')}
             />
           </div>
 
           <div>
             <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700 mb-1">
-              Powtórz hasło
+              {t('register.confirmPasswordLabel')}
             </label>
             <input
               id="confirm-password"
@@ -163,7 +165,7 @@ const Register = () => {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               className="appearance-none relative block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150"
-              placeholder="Powtórz hasło"
+              placeholder={t('register.confirmPasswordPlaceholder')}
             />
           </div>
 
@@ -178,15 +180,15 @@ const Register = () => {
             disabled={isLoading}
             className="w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 shadow-lg disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            {isLoading ? 'Tworzenie konta…' : 'Utwórz konto'}
+            {isLoading ? t('register.submitLoading') : t('register.submit')}
           </button>
         </form>
 
         {/* Link to Login */}
         <p className="text-center text-sm text-gray-600">
-          Masz już konto?{' '}
+          {t('register.hasAccount')}{' '}
           <Link to="/login" className="font-medium text-blue-600 hover:text-blue-500">
-            Zaloguj się
+            {t('register.login')}
           </Link>
         </p>
       </div>
