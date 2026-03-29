@@ -7,6 +7,8 @@ const Register = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [acceptedPrivacy, setAcceptedPrivacy] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
@@ -19,6 +21,11 @@ const Register = () => {
 
     if (password !== confirmPassword) {
       setError('Hasła nie są zgodne');
+      return;
+    }
+
+    if (!acceptedTerms || !acceptedPrivacy) {
+      setError('Musisz zaakceptować Regulamin oraz Politykę prywatności');
       return;
     }
 
@@ -165,6 +172,50 @@ const Register = () => {
               className="appearance-none relative block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150"
               placeholder="Powtórz hasło"
             />
+          </div>
+
+          {/* Terms & Privacy checkboxes */}
+          <div className="space-y-3">
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={acceptedTerms}
+                onChange={(e) => setAcceptedTerms(e.target.checked)}
+                className="mt-0.5 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 shrink-0"
+              />
+              <span className="text-sm text-gray-700">
+                Akceptuję{' '}
+                <Link
+                  to="/terms"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-medium text-blue-600 hover:text-blue-500"
+                >
+                  Regulamin
+                </Link>{' '}
+                korzystania z aplikacji
+              </span>
+            </label>
+
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={acceptedPrivacy}
+                onChange={(e) => setAcceptedPrivacy(e.target.checked)}
+                className="mt-0.5 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 shrink-0"
+              />
+              <span className="text-sm text-gray-700">
+                Akceptuję{' '}
+                <Link
+                  to="/privacy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-medium text-blue-600 hover:text-blue-500"
+                >
+                  Politykę prywatności
+                </Link>
+              </span>
+            </label>
           </div>
 
           {error && (
