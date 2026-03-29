@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { useTranslation } from '../../i18n';
 
 interface NewProjectDialogProps {
   onClose: () => void;
@@ -10,6 +11,7 @@ interface NewProjectDialogProps {
 type ProjectType = 'builder' | 'upload';
 
 export const NewProjectDialog = ({ onClose, onCreateProject, isCreating = false, createError = '' }: NewProjectDialogProps) => {
+  const { t } = useTranslation();
   const [step, setStep] = useState<'choose-type' | 'configure'>('choose-type');
   const [selectedType, setSelectedType] = useState<ProjectType | null>(null);
   const [projectName, setProjectName] = useState('');
@@ -30,13 +32,13 @@ export const NewProjectDialog = ({ onClose, onCreateProject, isCreating = false,
 
     const maxSize = 10 * 1024 * 1024;
     if (file.size > maxSize) {
-      alert('Rozmiar pliku przekracza limit 10 MB. Wybierz mniejszy plik.');
+      alert(t('dialogs.fileTooLarge'));
       e.target.value = '';
       return;
     }
 
     if (!file.name.match(/\.(gltf|glb)$/i)) {
-      alert('Nieprawidłowy typ pliku. Wybierz plik GLTF (.gltf) lub GLB (.glb).');
+      alert(t('dialogs.invalidFileType'));
       e.target.value = '';
       return;
     }
@@ -52,7 +54,7 @@ export const NewProjectDialog = ({ onClose, onCreateProject, isCreating = false,
       setIsUploading(false);
     };
     reader.onerror = () => {
-      alert('Nie udało się odczytać pliku. Spróbuj ponownie.');
+      alert(t('dialogs.fileReadError'));
       setIsUploading(false);
     };
     reader.readAsDataURL(file);
@@ -79,8 +81,8 @@ export const NewProjectDialog = ({ onClose, onCreateProject, isCreating = false,
                 </svg>
               </div>
               <div>
-                <h2 className="text-lg font-bold text-white">Dodaj nowy model</h2>
-                <p className="text-xs text-slate-400">Wybierz sposób tworzenia dokumentacji</p>
+                <h2 className="text-lg font-bold text-white">{t('dialogs.newProject')}</h2>
+                <p className="text-xs text-slate-400">{t('dialogs.chooseMethod')}</p>
               </div>
             </div>
             <button onClick={onClose} className="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-white transition-colors rounded-lg hover:bg-slate-700">

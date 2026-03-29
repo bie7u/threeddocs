@@ -8,6 +8,8 @@ import { useAppStore } from '../store';
 import { getMe } from '../services/auth';
 import { logout } from '../services/auth';
 import { Footer } from '../components/Footer/Footer';
+import { LanguageSwitcher } from '../components/LanguageSwitcher/LanguageSwitcher';
+import { useTranslation } from '../i18n';
 
 const Dashboard = () => {
   const MAX_PROJECTS = 30;
@@ -22,6 +24,7 @@ const Dashboard = () => {
   const [authChecked, setAuthChecked] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [createError, setCreateError] = useState('');
+  const { t } = useTranslation();
 
   useEffect(() => {
     getMe()
@@ -47,7 +50,7 @@ const Dashboard = () => {
       setShowNewProjectDialog(false);
       setShowEditor(true);
     } catch (err) {
-      setCreateError(err instanceof Error ? err.message : 'Nie udało się utworzyć projektu');
+      setCreateError(err instanceof Error ? err.message : t('dialogs.createFailed'));
     } finally {
       setIsCreating(false);
     }
@@ -110,9 +113,10 @@ const Dashboard = () => {
                 onClick={handleLogout}
                 className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 rounded-lg transition duration-150"
               >
-                Wyloguj się
+                {t('dashboard.logout')}
               </button>
             </div>
+            <LanguageSwitcher />
           </div>
         </div>
       </nav>
@@ -121,10 +125,10 @@ const Dashboard = () => {
       <div className="w-full flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Witaj w panelu ThreeDocsy
+            {t('dashboard.welcome')}
           </h1>
           <p className="text-xl text-gray-600 mb-8">
-            Twoje środowisko jest gotowe
+            {t('dashboard.ready')}
           </p>
           
           {/* Dashboard Tiles */}
@@ -149,8 +153,8 @@ const Dashboard = () => {
                   />
                 </svg>
               </div>
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">Moje modele</h3>
-              <p className="text-sm text-gray-600">Przeglądaj swoje modele 3D</p>
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">{t('dashboard.myModels')}</h3>
+              <p className="text-sm text-gray-600">{t('dashboard.browseModels')}</p>
             </div>
 
             {/* Dodaj nowy model (Add new model) */}
@@ -173,11 +177,11 @@ const Dashboard = () => {
                   />
                 </svg>
               </div>
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">Dodaj nowy model</h3>
-              <p className="text-sm text-gray-600">Wgraj nowy model 3D</p>
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">{t('dashboard.addModel')}</h3>
+              <p className="text-sm text-gray-600">{t('dashboard.uploadModel')}</p>
               <p className="text-xs text-gray-400 mt-1">
-                Projekty: {projectsCount}/{MAX_PROJECTS}
-                {projectsCount >= MAX_PROJECTS && <span className="text-red-500 ml-1">— osiągnięto limit</span>}
+                {t('dashboard.projectsCount', { count: projectsCount, max: MAX_PROJECTS })}
+                {projectsCount >= MAX_PROJECTS && <span className="text-red-500 ml-1">{t('dashboard.limitReached')}</span>}
               </p>
             </div>
 
@@ -207,8 +211,8 @@ const Dashboard = () => {
                   />
                 </svg>
               </div>
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">Ustawienia</h3>
-              <p className="text-sm text-gray-600">Konfiguruj swoje preferencje</p>
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">{t('dashboard.settings')}</h3>
+              <p className="text-sm text-gray-600">{t('dashboard.configurePrefs')}</p>
             </div>
           </div>
         </div>

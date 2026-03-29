@@ -2,81 +2,9 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { probeSession, logout } from '../services/auth';
 import { API_BASE } from '../services/api';
+import { LanguageSwitcher } from '../components/LanguageSwitcher/LanguageSwitcher';
+import { useTranslation } from '../i18n';
 const LOGO_SRC = '/logo.svg';
-
-const features = [
-  {
-    icon: (
-      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8}
-          d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18" />
-      </svg>
-    ),
-    gradient: 'from-blue-500 to-indigo-600',
-    title: 'Prezentuj swoje rozwiązania',
-    desc: 'Zamień architekturę, flow danych i mikroserwisy w interaktywny model 3D. Pokaż swój pomysł — zamiast go tłumaczyć przez godzinę na spotkaniu.',
-  },
-  {
-    icon: (
-      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8}
-          d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-      </svg>
-    ),
-    gradient: 'from-green-500 to-emerald-600',
-    title: 'Onboarding bez bólu głowy',
-    desc: 'Nowy developer rozumie cały stos technologiczny już pierwszego dnia — bez przedzierania się przez 200-stronicowe wiki i bez bombardowania seniorów pytaniami.',
-  },
-  {
-    icon: (
-      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8}
-          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-      </svg>
-    ),
-    gradient: 'from-purple-500 to-violet-600',
-    title: 'Runbooki i procedury',
-    desc: 'Deploy, incident response, maintenance — dokumentuj je jako sekwencje kroków z podświetlaniem węzłów. Koniec z wiedzą zamkniętą w głowach senior devów.',
-  },
-  {
-    icon: (
-      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8}
-          d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-      </svg>
-    ),
-    gradient: 'from-pink-500 to-rose-600',
-    title: 'Udostępnij jednym kliknięciem',
-    desc: 'Wygeneruj link i wyślij — bez instalacji, bez logowania po drugiej stronie. Twój model działa od razu w przeglądarce, na każdym urządzeniu.',
-  },
-];
-
-const steps = [
-  {
-    num: '01',
-    title: 'Zbuduj interaktywny model',
-    desc: 'Dodaj węzły — serwery, serwisy, bazy danych — połącz je strzałkami i nadaj każdemu kolor. Twoja architektura IT w 3D gotowa w kilka minut.',
-    color: 'text-blue-600',
-    bg: 'bg-blue-50',
-    border: 'border-blue-200',
-  },
-  {
-    num: '02',
-    title: 'Podziel wiedzę na kroki',
-    desc: 'Do każdego węzła dodaj krótki opis — jeden krok, jedna informacja. Ułóż je w sekwencję, którą odbiorca przejdzie samodzielnie, we własnym tempie.',
-    color: 'text-purple-600',
-    bg: 'bg-purple-50',
-    border: 'border-purple-200',
-  },
-  {
-    num: '03',
-    title: 'Udostępnij — zero instalacji',
-    desc: 'Kliknij „Share", skopiuj link i wyślij. Odbiorca otwiera model w przeglądarce — bez rejestracji, bez instalowania czegokolwiek, na każdym urządzeniu.',
-    color: 'text-green-600',
-    bg: 'bg-green-50',
-    border: 'border-green-200',
-  },
-];
 
 const useCases = [
   { emoji: '🖥️', label: 'Architektura systemów' },
@@ -106,6 +34,81 @@ const LandingPage = () => {
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [stats, setStats] = useState(null);
+  const { t } = useTranslation();
+
+  const features = [
+    {
+      icon: (
+        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8}
+            d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18" />
+        </svg>
+      ),
+      gradient: 'from-blue-500 to-indigo-600',
+      title: t('landing.feature1Title'),
+      desc: t('landing.feature1Desc'),
+    },
+    {
+      icon: (
+        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8}
+            d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+        </svg>
+      ),
+      gradient: 'from-green-500 to-emerald-600',
+      title: t('landing.feature2Title'),
+      desc: t('landing.feature2Desc'),
+    },
+    {
+      icon: (
+        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8}
+            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+        </svg>
+      ),
+      gradient: 'from-purple-500 to-violet-600',
+      title: t('landing.feature3Title'),
+      desc: t('landing.feature3Desc'),
+    },
+    {
+      icon: (
+        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8}
+            d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+        </svg>
+      ),
+      gradient: 'from-pink-500 to-rose-600',
+      title: t('landing.feature4Title'),
+      desc: t('landing.feature4Desc'),
+    },
+  ];
+
+  const steps = [
+    {
+      num: t('landing.step1Num'),
+      title: t('landing.step1Title'),
+      desc: t('landing.step1Desc'),
+      color: 'text-blue-600',
+      bg: 'bg-blue-50',
+      border: 'border-blue-200',
+    },
+    {
+      num: t('landing.step2Num'),
+      title: t('landing.step2Title'),
+      desc: t('landing.step2Desc'),
+      color: 'text-purple-600',
+      bg: 'bg-purple-50',
+      border: 'border-purple-200',
+    },
+    {
+      num: t('landing.step3Num'),
+      title: t('landing.step3Title'),
+      desc: t('landing.step3Desc'),
+      color: 'text-green-600',
+      bg: 'bg-green-50',
+      border: 'border-green-200',
+    },
+  ];
 
   useEffect(() => {
     let ignore = false;
@@ -138,19 +141,20 @@ const LandingPage = () => {
 
             {/* CTA buttons */}
             <div className="flex items-center gap-3">
+              <LanguageSwitcher />
               {isLoggedIn ? (
                 <>
                   <button
                     onClick={() => navigate('/dashboard')}
                     className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
                   >
-                    Moje konto
+                    {t('landing.myAccount')}
                   </button>
                   <button
                     onClick={handleLogout}
                     className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 rounded-lg shadow-md hover:shadow-lg transition-all"
                   >
-                    Wyloguj się
+                    {t('landing.logout')}
                   </button>
                 </>
               ) : (
@@ -159,13 +163,13 @@ const LandingPage = () => {
                     onClick={() => navigate('/login')}
                     className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
                   >
-                    Zaloguj się
+                    {t('landing.login')}
                   </button>
                   <button
                     onClick={() => navigate('/guest')}
                     className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 rounded-lg shadow-md hover:shadow-lg transition-all"
                   >
-                    Wypróbuj za darmo
+                    {t('landing.tryFree')}
                   </button>
                 </>
               )}
@@ -182,19 +186,16 @@ const LandingPage = () => {
 
         <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <span className="inline-block mb-4 px-4 py-1.5 bg-blue-100 text-blue-700 text-sm font-semibold rounded-full">
-            ⚡ Narzędzie dla developerów i architektów IT
+            {t('landing.badge')}
           </span>
           <h1 className="text-5xl sm:text-6xl font-extrabold text-gray-900 leading-tight mb-6">
-            Pokaż swój system.{' '}
+            {t('landing.heading')}{' '}
             <span className="bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
-              Przestań go tylko opisywać.
+              {t('landing.headingHighlight')}
             </span>
           </h1>
           <p className="text-xl text-gray-600 mb-10 max-w-2xl mx-auto leading-relaxed">
-            ThreeDocsy to narzędzie dla ludzi, którzy chcą szybko i efektownie
-            zaprezentować swoje rozwiązania, wizje i architekturę.
-            Interaktywne bloki zamiast suchych PDF-ów —
-            jedna&nbsp;rzecz na raz, zero przeciążenia informacyjnego.
+            {t('landing.desc')}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             {isLoggedIn ? (
@@ -203,13 +204,13 @@ const LandingPage = () => {
                   onClick={() => navigate('/dashboard')}
                   className="px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 rounded-2xl shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-0.5"
                 >
-                  Przejdź do dashboardu
+                  {t('landing.goToDashboard')}
                 </button>
                 <button
                   onClick={handleLogout}
                   className="px-8 py-4 text-lg font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:border-blue-400 hover:text-blue-600 rounded-2xl shadow-lg hover:shadow-xl transition-all"
                 >
-                  Wyloguj się
+                  {t('landing.logout')}
                 </button>
               </>
             ) : (
@@ -218,13 +219,13 @@ const LandingPage = () => {
                   onClick={() => navigate('/guest')}
                   className="px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 rounded-2xl shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-0.5"
                 >
-                  Utwórz model za darmo — bez rejestracji
+                  {t('landing.tryFree')}
                 </button>
                 <button
                   onClick={() => navigate('/login')}
                   className="px-8 py-4 text-lg font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:border-blue-400 hover:text-blue-600 rounded-2xl shadow-lg hover:shadow-xl transition-all"
                 >
-                  Mam już konto
+                  {t('landing.hasAccount')}
                 </button>
               </>
             )}
@@ -510,13 +511,13 @@ const LandingPage = () => {
                   onClick={() => navigate('/dashboard')}
                   className="px-10 py-4 text-lg font-bold text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 rounded-2xl shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-0.5"
                 >
-                  Przejdź do dashboardu
+                  {t('landing.goToDashboard')}
                 </button>
                 <button
                   onClick={handleLogout}
                   className="px-10 py-4 text-lg font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:border-purple-400 hover:text-purple-600 rounded-2xl shadow-lg transition-all"
                 >
-                  Wyloguj się
+                  {t('landing.logout')}
                 </button>
               </>
             ) : (
@@ -525,13 +526,13 @@ const LandingPage = () => {
                   onClick={() => navigate('/guest')}
                   className="px-10 py-4 text-lg font-bold text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 rounded-2xl shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-0.5"
                 >
-                  Zacznij teraz — za darmo
+                  {t('landing.tryFree')}
                 </button>
                 <button
                   onClick={() => navigate('/login')}
                   className="px-10 py-4 text-lg font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:border-purple-400 hover:text-purple-600 rounded-2xl shadow-lg transition-all"
                 >
-                  Zaloguj się
+                  {t('landing.login')}
                 </button>
               </>
             )}

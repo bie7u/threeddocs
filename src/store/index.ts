@@ -45,6 +45,9 @@ interface AppStore {
   // Node positions for React Flow
   nodePositions: Record<string, { x: number; y: number }>;
 
+  // Language preference
+  language: 'pl' | 'en';
+
   // Guest mode (unauthenticated user)
   isGuestMode: boolean;
   guestShareToken: string | null;
@@ -72,6 +75,7 @@ interface AppStore {
   getAllProjects: () => SavedProject[];
   deleteProject: (projectId: string) => Promise<void>;
   createNewProject: (projectName: string, projectType?: 'builder' | 'upload', projectModelUrl?: string) => Promise<ProjectData>;
+  setLanguage: (lang: 'pl' | 'en') => void;
   /** Creates a guest project (no auth required) and stores the share token. */
   createNewGuestProject: (projectName: string, projectType?: 'builder' | 'upload', projectModelUrl?: string) => Promise<ProjectData>;
   /** Clears guest mode state (e.g., on logout or navigation to login). */
@@ -89,6 +93,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
   editorMode: 'model',
   cameraMode: 'free',
   nodePositions: {},
+  language: (localStorage.getItem('language') as 'pl' | 'en') ?? 'pl',
   isGuestMode: false,
   guestShareToken: null,
 
@@ -353,5 +358,10 @@ export const useAppStore = create<AppStore>((set, get) => ({
       selectedStepId: null,
       isPreviewMode: false,
     });
+  },
+
+  setLanguage: (lang: 'pl' | 'en') => {
+    localStorage.setItem('language', lang);
+    set({ language: lang });
   },
 }));
