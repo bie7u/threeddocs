@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { Edge } from 'reactflow';
 import type { InstructionStep, ProjectData, ConnectionData, GuideStep } from '../types';
+import type { Language } from '../i18n';
 import {
   fetchProjectsPage,
   createProject,
@@ -48,7 +49,10 @@ interface AppStore {
   // Guest mode (unauthenticated user)
   isGuestMode: boolean;
   guestShareToken: string | null;
-  
+
+  // Language
+  language: Language;
+
   // Actions
   setProject: (project: ProjectData, nodePositions?: Record<string, { x: number; y: number }>, persist?: boolean) => void;
   addStep: (step: InstructionStep, position?: { x: number; y: number }) => void;
@@ -76,6 +80,7 @@ interface AppStore {
   createNewGuestProject: (projectName: string, projectType?: 'builder' | 'upload', projectModelUrl?: string) => Promise<ProjectData>;
   /** Clears guest mode state (e.g., on logout or navigation to login). */
   clearGuestMode: () => void;
+  setLanguage: (lang: Language) => void;
 }
 
 export const useAppStore = create<AppStore>((set, get) => ({
@@ -91,6 +96,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
   nodePositions: {},
   isGuestMode: false,
   guestShareToken: null,
+  language: (localStorage.getItem('language') as Language) || 'pl',
 
   setProject: (project, nodePositions, persist = true) => {
     set({ 
@@ -353,5 +359,10 @@ export const useAppStore = create<AppStore>((set, get) => ({
       selectedStepId: null,
       isPreviewMode: false,
     });
+  },
+
+  setLanguage: (lang) => {
+    localStorage.setItem('language', lang);
+    set({ language: lang });
   },
 }));
