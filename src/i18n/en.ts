@@ -103,6 +103,7 @@ export const en = {
     guestModeBanner: '— saving projects, sharing models and all options are available after signing in.',
   },
   mainLayout: {
+    backToProjectsTitle: 'Back to projects',
     uploadTitle: '3D Model Documentation',
     builderTitle: '3D Instruction Builder',
     editorMode: 'Editor mode',

@@ -103,6 +103,7 @@ export const pl = {
     guestModeBanner: '— zapis projektów, udostępnianie modeli i wszystkie opcje są dostępne po zalogowaniu.',
   },
   mainLayout: {
+    backToProjectsTitle: 'Powrót do projektów',
     uploadTitle: 'Dokumentacja modelu 3D',
     builderTitle: 'Kreator instrukcji 3D',
     editorMode: 'Tryb edytora',
