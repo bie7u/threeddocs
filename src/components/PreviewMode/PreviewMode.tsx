@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import DOMPurify from 'dompurify';
 import { useAppStore } from '../../store';
+import { useTranslation } from '../../hooks/useTranslation';
 import { Viewer3D } from '../Viewer3D/Viewer3D';
 import { isHtmlContent } from '../../utils/html';
 import { generateShareToken } from '../../services/projects';
@@ -17,6 +18,7 @@ export const PreviewMode = ({ onGoToEditorPanel, isPublic, shareToken }: { onGoT
     viewMode,
     isGuestMode,
   } = useAppStore();
+  const { t } = useTranslation();
   const [showCopyNotification, setShowCopyNotification] = useState(false);
   const [isGeneratingLink, setIsGeneratingLink] = useState(false);
 
@@ -24,9 +26,9 @@ export const PreviewMode = ({ onGoToEditorPanel, isPublic, shareToken }: { onGoT
     return (
       <div className="w-full h-full flex items-center justify-center bg-gray-100">
         <div className="text-center">
-          <p className="text-gray-500 mb-4">Brak kroków do podglądu</p>
+          <p className="text-gray-500 mb-4">{t.previewMode.noSteps}</p>
           <button onClick={() => setPreviewMode(false)} className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
-            Wyjdź z podglądu
+            {t.previewMode.exitPreviewBtn}
           </button>
         </div>
       </div>
@@ -55,10 +57,10 @@ export const PreviewMode = ({ onGoToEditorPanel, isPublic, shareToken }: { onGoT
         setShowCopyNotification(true);
         setTimeout(() => setShowCopyNotification(false), 3000);
       } catch {
-        alert(`Udostępnij ten link: ${shareUrl}`);
+        alert(`${t.previewMode.copyFallback}${shareUrl}`);
       }
     } catch {
-      alert('Nie udało się wygenerować linku. Spróbuj ponownie.');
+      alert(t.previewMode.shareError);
     } finally {
       setIsGeneratingLink(false);
     }
@@ -84,7 +86,7 @@ export const PreviewMode = ({ onGoToEditorPanel, isPublic, shareToken }: { onGoT
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>
-          <span className="font-medium">Link skopiowany do schowka!</span>
+          <span className="font-medium">{t.previewMode.shareSuccess}</span>
         </div>
       )}
 
@@ -97,24 +99,24 @@ export const PreviewMode = ({ onGoToEditorPanel, isPublic, shareToken }: { onGoT
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
-                <span className="text-sm font-semibold text-white">Kamera:</span>
+                <span className="text-sm font-semibold text-white">{t.layout.cameraAuto.split(':')[0]}:</span>
               </div>
               <div className="flex gap-2">
                 <button
                   onClick={() => setCameraMode('auto')}
                   className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 ${cameraMode === 'auto' ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/30' : 'bg-white/10 text-slate-300 hover:bg-white/20'}`}
-                >Auto</button>
+                >{t.previewMode.cameraAuto}</button>
                 <button
                   onClick={() => setCameraMode('free')}
                   className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 ${cameraMode === 'free' ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/30' : 'bg-white/10 text-slate-300 hover:bg-white/20'}`}
-                >Swobodna</button>
+                >{t.previewMode.cameraFree}</button>
               </div>
             </div>
           </div>
 
           <div className="flex items-center gap-3 bg-gradient-to-r from-blue-500/20 to-indigo-600/20 backdrop-blur-sm px-6 py-2 rounded-xl border border-blue-400/30 shadow-xl">
             <div className="w-2 h-2 bg-blue-400 rounded-full shadow-lg shadow-blue-400/50 motion-safe:animate-pulse" aria-hidden="true"></div>
-            <span className="text-sm font-bold text-white">Tryb podglądu</span>
+            <span className="text-sm font-bold text-white">{t.layout.preview}</span>
           </div>
 
           <div className="flex items-center gap-3">
@@ -123,17 +125,13 @@ export const PreviewMode = ({ onGoToEditorPanel, isPublic, shareToken }: { onGoT
                 <div className="relative group">
                   <button
                     disabled
-                    aria-label="Udostępnij link – Zarejestrowani użytkownicy mogą udostępniać model innym generując link"
                     className="flex items-center gap-2 px-5 py-2 bg-gray-600/50 text-gray-400 rounded-xl cursor-not-allowed font-medium opacity-70"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
                     </svg>
-                    Udostępnij link
+                    {t.previewMode.shareBtn}
                   </button>
-                  <div className="absolute right-0 top-full mt-2 w-72 bg-slate-800 text-white text-xs rounded-lg px-3 py-2 shadow-xl z-50 hidden group-hover:block border border-white/10 pointer-events-none">
-                    Zarejestrowani użytkownicy mogą udostępniać model innym generując link
-                  </div>
                 </div>
               ) : (
                 <button
@@ -150,7 +148,7 @@ export const PreviewMode = ({ onGoToEditorPanel, isPublic, shareToken }: { onGoT
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
                     </svg>
                   )}
-                  {isGeneratingLink ? 'Generowanie...' : 'Udostępnij link'}
+                  {isGeneratingLink ? t.common.loading : t.previewMode.shareBtn}
                 </button>
               )
             )}
@@ -162,7 +160,7 @@ export const PreviewMode = ({ onGoToEditorPanel, isPublic, shareToken }: { onGoT
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                 </svg>
-                Przejdź do panelu edytora
+                {t.layout.editMode}
               </button>
             )}
             {!isPublic && (
@@ -173,7 +171,7 @@ export const PreviewMode = ({ onGoToEditorPanel, isPublic, shareToken }: { onGoT
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
-                Wyjdź z podglądu
+                {t.previewMode.exitPreviewBtn}
               </button>
             )}
           </div>
@@ -214,12 +212,12 @@ export const PreviewMode = ({ onGoToEditorPanel, isPublic, shareToken }: { onGoT
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
-              Poprzedni
+              {t.previewMode.prevStep}
             </button>
 
             <div className="text-center min-w-[140px] px-4">
-              <div className="text-xs text-slate-400 uppercase tracking-wider mb-1">Krok</div>
-              <div className="text-2xl font-bold text-blue-300" aria-label={`Step ${currentPreviewStepIndex + 1} of ${guideSteps.length}`}>
+              <div className="text-xs text-slate-400 uppercase tracking-wider mb-1">{t.previewMode.step}</div>
+              <div className="text-2xl font-bold text-blue-300" aria-label={`${t.previewMode.step} ${currentPreviewStepIndex + 1} ${t.previewMode.of} ${guideSteps.length}`}>
                 {currentPreviewStepIndex + 1} / {guideSteps.length}
               </div>
             </div>
@@ -229,7 +227,7 @@ export const PreviewMode = ({ onGoToEditorPanel, isPublic, shareToken }: { onGoT
               disabled={!canGoNext}
               className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium transition-all duration-200 ${canGoNext ? 'bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 shadow-lg shadow-blue-500/30' : 'bg-white/10 cursor-not-allowed opacity-50'}`}
             >
-              Następny
+              {t.previewMode.nextStep}
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
@@ -245,9 +243,3 @@ export const PreviewMode = ({ onGoToEditorPanel, isPublic, shareToken }: { onGoT
                 title={step.title}
               />
             ))}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
