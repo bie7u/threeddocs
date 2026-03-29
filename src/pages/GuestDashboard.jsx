@@ -22,7 +22,8 @@ const GuestDashboard = () => {
       .finally(() => {
         setIsInitializing(false);
       });
-  }, [clearGuestMode, createNewGuestProject, t]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clearGuestMode, createNewGuestProject]);
 
   const handleBackFromEditor = () => {
     clearGuestMode();
