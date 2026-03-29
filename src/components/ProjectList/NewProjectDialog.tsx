@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { useTranslation } from '../../hooks/useTranslation';
 
 interface NewProjectDialogProps {
   onClose: () => void;
@@ -10,6 +11,7 @@ interface NewProjectDialogProps {
 type ProjectType = 'builder' | 'upload';
 
 export const NewProjectDialog = ({ onClose, onCreateProject, isCreating = false, createError = '' }: NewProjectDialogProps) => {
+  const { t } = useTranslation();
   const [step, setStep] = useState<'choose-type' | 'configure'>('choose-type');
   const [selectedType, setSelectedType] = useState<ProjectType | null>(null);
   const [projectName, setProjectName] = useState('');
@@ -30,13 +32,13 @@ export const NewProjectDialog = ({ onClose, onCreateProject, isCreating = false,
 
     const maxSize = 10 * 1024 * 1024;
     if (file.size > maxSize) {
-      alert('Rozmiar pliku przekracza limit 10 MB. Wybierz mniejszy plik.');
+      alert(t.newProject.fileSizeError);
       e.target.value = '';
       return;
     }
 
     if (!file.name.match(/\.(gltf|glb)$/i)) {
-      alert('Nieprawidłowy typ pliku. Wybierz plik GLTF (.gltf) lub GLB (.glb).');
+      alert(t.newProject.fileTypeError);
       e.target.value = '';
       return;
     }
@@ -52,7 +54,7 @@ export const NewProjectDialog = ({ onClose, onCreateProject, isCreating = false,
       setIsUploading(false);
     };
     reader.onerror = () => {
-      alert('Nie udało się odczytać pliku. Spróbuj ponownie.');
+      alert(t.newProject.fileTypeError);
       setIsUploading(false);
     };
     reader.readAsDataURL(file);
@@ -79,8 +81,8 @@ export const NewProjectDialog = ({ onClose, onCreateProject, isCreating = false,
                 </svg>
               </div>
               <div>
-                <h2 className="text-lg font-bold text-white">Dodaj nowy model</h2>
-                <p className="text-xs text-slate-400">Wybierz sposób tworzenia dokumentacji</p>
+                <h2 className="text-lg font-bold text-white">{t.newProject.title}</h2>
+                <p className="text-xs text-slate-400">{t.newProject.chooseType}</p>
               </div>
             </div>
             <button onClick={onClose} className="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-white transition-colors rounded-lg hover:bg-slate-700">
@@ -94,12 +96,12 @@ export const NewProjectDialog = ({ onClose, onCreateProject, isCreating = false,
           <div className="flex items-center gap-2 mt-4">
             <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-all ${step === 'choose-type' ? 'bg-blue-500 text-white' : 'bg-slate-700 text-slate-300'}`}>
               <span className="w-4 h-4 rounded-full bg-white/20 flex items-center justify-center text-xs">1</span>
-              Typ projektu
+              {t.newProject.step1}
             </div>
             <div className="flex-1 h-px bg-slate-600"></div>
             <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-all ${step === 'configure' ? 'bg-blue-500 text-white' : 'bg-slate-700 text-slate-300'}`}>
               <span className="w-4 h-4 rounded-full bg-white/20 flex items-center justify-center text-xs">2</span>
-              Konfiguracja
+              {t.newProject.step2}
             </div>
           </div>
         </div>
@@ -108,7 +110,7 @@ export const NewProjectDialog = ({ onClose, onCreateProject, isCreating = false,
         <div className="p-6">
           {step === 'choose-type' && (
             <div className="space-y-4">
-              <p className="text-sm text-slate-600 mb-4">Jak chcesz stworzyć dokumentację 3D?</p>
+              <p className="text-sm text-slate-600 mb-4">{t.newProject.chooseType}</p>
               
               {/* Builder option */}
               <button
@@ -122,8 +124,8 @@ export const NewProjectDialog = ({ onClose, onCreateProject, isCreating = false,
                     </svg>
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-bold text-slate-800 text-base mb-1">🧱 Zbuduj model 3D</h3>
-                    <p className="text-sm text-slate-500">Twórz instrukcje krok po kroku używając kształtów 3D (sześciany, sfery, cylindry). Idealne do diagramów przepływu i instrukcji montażu.</p>
+                    <h3 className="font-bold text-slate-800 text-base mb-1">🧱 {t.newProject.builderTitle}</h3>
+                    <p className="text-sm text-slate-500">{t.newProject.builderDesc}</p>
                     <div className="flex gap-2 mt-2">
                       <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full font-medium">Diagramy przepływu</span>
                       <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full font-medium">Krok po kroku</span>
@@ -147,8 +149,8 @@ export const NewProjectDialog = ({ onClose, onCreateProject, isCreating = false,
                     </svg>
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-bold text-slate-800 text-base mb-1">📤 Wgraj własny model</h3>
-                    <p className="text-sm text-slate-500">Wgraj swój własny model GLTF/GLB i twórz dokumentację klikając na elementy modelu. Idealne do rzeczywistych produktów.</p>
+                    <h3 className="font-bold text-slate-800 text-base mb-1">📤 {t.newProject.uploadTitle}</h3>
+                    <p className="text-sm text-slate-500">{t.newProject.uploadDesc}</p>
                     <div className="flex gap-2 mt-2">
                       <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full font-medium">GLTF/GLB</span>
                       <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full font-medium">Prawdziwe modele</span>
@@ -171,7 +173,7 @@ export const NewProjectDialog = ({ onClose, onCreateProject, isCreating = false,
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
-                Wróć do wyboru typu
+                {t.newProject.back}
               </button>
 
               <div className={`flex items-center gap-3 p-3 rounded-xl ${selectedType === 'builder' ? 'bg-blue-50 border border-blue-200' : 'bg-green-50 border border-green-200'}`}>
@@ -180,29 +182,29 @@ export const NewProjectDialog = ({ onClose, onCreateProject, isCreating = false,
                 </div>
                 <div>
                   <p className={`text-sm font-semibold ${selectedType === 'builder' ? 'text-blue-700' : 'text-green-700'}`}>
-                    {selectedType === 'builder' ? 'Zbuduj model 3D' : 'Wgraj własny model'}
+                    {selectedType === 'builder' ? t.newProject.builderTitle : t.newProject.uploadTitle}
                   </p>
                   <p className="text-xs text-slate-500">
-                    {selectedType === 'builder' ? 'Tworzenie z kształtów 3D' : 'Import modelu GLTF/GLB'}
+                    {selectedType === 'builder' ? t.newProject.builderDesc : t.newProject.uploadDesc}
                   </p>
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">Nazwa projektu</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">{t.newProject.projectName}</label>
                 <input
                   type="text"
                   value={projectName}
                   onChange={(e) => setProjectName(e.target.value)}
                   className="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                  placeholder="Podaj nazwę projektu…"
+                  placeholder={t.newProject.projectNamePlaceholder}
                   autoFocus
                 />
               </div>
 
               {selectedType === 'upload' && (
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">Plik modelu 3D</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-1.5">{t.newProject.uploadFile}</label>
                   <div
                     onClick={() => fileInputRef.current?.click()}
                     className={`w-full p-6 border-2 border-dashed rounded-xl cursor-pointer transition-all ${uploadedModelUrl ? 'border-green-400 bg-green-50' : 'border-slate-300 hover:border-blue-400 hover:bg-blue-50'}`}
@@ -217,7 +219,7 @@ export const NewProjectDialog = ({ onClose, onCreateProject, isCreating = false,
                     {isUploading ? (
                       <div className="text-center">
                         <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-                        <p className="text-sm text-slate-500">Wczytywanie pliku…</p>
+                        <p className="text-sm text-slate-500">{t.newProject.dropFile}</p>
                       </div>
                     ) : uploadedModelUrl ? (
                       <div className="flex items-center gap-3">
@@ -228,7 +230,7 @@ export const NewProjectDialog = ({ onClose, onCreateProject, isCreating = false,
                         </div>
                         <div>
                           <p className="text-sm font-semibold text-green-700">{uploadedFileName}</p>
-                          <p className="text-xs text-slate-500">Kliknij aby zmienić plik</p>
+                          <p className="text-xs text-slate-500">{t.newProject.fileSelected}</p>
                         </div>
                       </div>
                     ) : (
@@ -236,8 +238,8 @@ export const NewProjectDialog = ({ onClose, onCreateProject, isCreating = false,
                         <svg className="w-10 h-10 text-slate-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                         </svg>
-                        <p className="text-sm font-medium text-slate-600">Kliknij aby wybrać plik</p>
-                        <p className="text-xs text-slate-400 mt-0.5">GLTF lub GLB, max 10MB</p>
+                        <p className="text-sm font-medium text-slate-600">{t.newProject.dropFile}</p>
+                        <p className="text-xs text-slate-400 mt-0.5">{t.newProject.uploadHint}</p>
                       </div>
                     )}
                   </div>
@@ -252,14 +254,14 @@ export const NewProjectDialog = ({ onClose, onCreateProject, isCreating = false,
 
               <div className="flex gap-3 pt-2">
                 <button onClick={onClose} disabled={isCreating} className="flex-1 px-4 py-2.5 border border-slate-300 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-                  Anuluj
+                  {t.newProject.cancel}
                 </button>
                 <button
                   onClick={handleCreate}
                   disabled={!canCreate || isCreating}
                   className={`flex-1 px-4 py-2.5 rounded-xl text-sm font-bold text-white transition-all ${canCreate && !isCreating ? 'bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 shadow-lg shadow-blue-500/30' : 'bg-slate-300 cursor-not-allowed'}`}
                 >
-                  {isCreating ? 'Tworzenie…' : 'Utwórz projekt'}
+                  {isCreating ? t.newProject.creating : t.newProject.create}
                 </button>
               </div>
             </div>

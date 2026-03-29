@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, useMemo, useEffect, Suspense, Component, type ReactNode } from 'react';
+import { useTranslation } from '../../hooks/useTranslation';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import { useGLTF } from '@react-three/drei';
@@ -95,6 +96,7 @@ interface Props {
 }
 
 export const UploadModelDialog = ({ existing, onClose, onSaved }: Props) => {
+  const { t } = useTranslation();
   const [name, setName] = useState(existing?.name ?? '');
   const [modelDataUrl, setModelDataUrl] = useState<string | null>(existing?.modelDataUrl ?? null);
   const [modelFileName, setModelFileName] = useState(existing?.modelFileName ?? '');
@@ -111,12 +113,12 @@ export const UploadModelDialog = ({ existing, onClose, onSaved }: Props) => {
 
     const maxSize = 10 * 1024 * 1024; // 10 MB
     if (file.size > maxSize) {
-      alert('Plik jest za duży (maks. 10 MB).');
+      alert(t.uploadModel.fileSizeError);
       e.target.value = '';
       return;
     }
     if (!file.name.match(/\.(gltf|glb)$/i)) {
-      alert('Proszę wybrać plik GLTF (.gltf) lub GLB (.glb).');
+      alert(t.uploadModel.fileTypeError);
       e.target.value = '';
       return;
     }
@@ -131,7 +133,7 @@ export const UploadModelDialog = ({ existing, onClose, onSaved }: Props) => {
       setIsLoading(false);
     };
     reader.onerror = () => {
-      alert('Nie udało się wczytać pliku.');
+      alert(t.uploadModel.loadError);
       setIsLoading(false);
     };
     reader.readAsDataURL(file);
@@ -140,11 +142,11 @@ export const UploadModelDialog = ({ existing, onClose, onSaved }: Props) => {
   const handleSave = async () => {
     const trimmedName = name.trim();
     if (!trimmedName) {
-      alert('Proszę podać nazwę modelu.');
+      alert(t.uploadModel.nameRequired);
       return;
     }
     if (!existing && !modelDataUrl) {
-      alert('Proszę wybrać plik modelu 3D.');
+      alert(t.uploadModel.fileRequired);
       return;
     }
     setIsSaving(true);
@@ -157,7 +159,7 @@ export const UploadModelDialog = ({ existing, onClose, onSaved }: Props) => {
       }
       onSaved(saved);
     } catch (err) {
-      alert((err as Error).message ?? 'Nie udało się zapisać modelu.');
+      alert((err as Error).message ?? t.uploadModel.loadError);
     } finally {
       setIsSaving(false);
     }
@@ -169,7 +171,7 @@ export const UploadModelDialog = ({ existing, onClose, onSaved }: Props) => {
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-indigo-600 to-blue-500">
           <h2 className="text-xl font-bold text-white">
-            {existing ? 'Edytuj model 3D' : 'Wgraj element 3D'}
+            {existing ? t.uploadModel.titleEdit : t.uploadModel.titleCreate}
           </h2>
           <button
             onClick={onClose}
@@ -188,13 +190,13 @@ export const UploadModelDialog = ({ existing, onClose, onSaved }: Props) => {
             {/* Name */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1">
-                Nazwa modelu
+                {t.uploadModel.name}
               </label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="np. Silnik turbinowy"
+                placeholder={t.uploadModel.namePlaceholder}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
             </div>
@@ -202,7 +204,7 @@ export const UploadModelDialog = ({ existing, onClose, onSaved }: Props) => {
             {/* File picker */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1">
-                Plik modelu 3D <span className="text-gray-400 font-normal">(.gltf / .glb, maks. 10 MB)</span>
+                {t.uploadModel.file} <span className="text-gray-400 font-normal">({t.uploadModel.fileFormats})</span>
               </label>
               <div
                 onClick={() => fileInputRef.current?.click()}
@@ -226,7 +228,7 @@ export const UploadModelDialog = ({ existing, onClose, onSaved }: Props) => {
                     </svg>
                     <div>
                       <p className="text-sm font-medium text-green-700">{modelFileName}</p>
-                      <p className="text-xs text-gray-500">{isLoading ? 'Wczytywanie…' : 'Kliknij, aby zmienić plik'}</p>
+                      <p className="text-xs text-gray-500">{isLoading ? t.uploadModel.saving : t.uploadModel.changeFile}</p>
                     </div>
                   </div>
                 ) : (
@@ -234,7 +236,7 @@ export const UploadModelDialog = ({ existing, onClose, onSaved }: Props) => {
                     <svg className="w-8 h-8 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                     </svg>
-                    <p className="text-sm text-gray-500">Kliknij, aby wybrać plik .gltf lub .glb</p>
+                    <p className="text-sm text-gray-500">{t.uploadModel.fileFormats}</p>
                   </div>
                 )}
               </div>
@@ -243,7 +245,7 @@ export const UploadModelDialog = ({ existing, onClose, onSaved }: Props) => {
             {/* Scale */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1">
-                Skala <span className="text-gray-400 font-normal">(0.1 – 5.0)</span>
+                {t.uploadModel.scale} <span className="text-gray-400 font-normal">(0.1 – 5.0)</span>
               </label>
               <div className="flex items-center gap-3">
                 <input
@@ -271,13 +273,13 @@ export const UploadModelDialog = ({ existing, onClose, onSaved }: Props) => {
             {/* Description */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1">
-                Opis <span className="text-gray-400 font-normal">(opcjonalny)</span>
+                {t.uploadModel.description}
               </label>
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={3}
-                placeholder="Krótki opis modelu…"
+                placeholder={t.uploadModel.descriptionPlaceholder}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none text-sm"
               />
             </div>
@@ -316,14 +318,14 @@ export const UploadModelDialog = ({ existing, onClose, onSaved }: Props) => {
             disabled={isSaving}
             className="px-5 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 transition disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            Anuluj
+            {t.uploadModel.cancel}
           </button>
           <button
             onClick={handleSave}
             disabled={isSaving}
             className="px-5 py-2 text-sm font-medium text-white bg-gradient-to-r from-indigo-500 to-blue-600 rounded-lg hover:from-indigo-600 hover:to-blue-700 transition disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            {isSaving ? 'Zapisywanie…' : 'Zapisz model'}
+            {isSaving ? t.uploadModel.saving : t.uploadModel.save}
           </button>
         </div>
       </div>

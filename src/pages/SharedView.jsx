@@ -4,8 +4,10 @@ import { useAppStore } from '../store';
 import { PreviewMode } from '../components/PreviewMode/PreviewMode';
 import { UploadPreviewMode } from '../components/UploadModelEditor';
 import { fetchPublicProject } from '../services/projects';
+import { useTranslation } from '../hooks/useTranslation';
 
 const SharedView = () => {
+  const { t } = useTranslation();
   const { shareToken } = useParams();
   const navigate = useNavigate();
   const { project, setProject, setPreviewMode, isPreviewMode } = useAppStore();
@@ -46,9 +48,9 @@ const SharedView = () => {
               />
             </svg>
           </div>
-          <h1 className="text-2xl font-bold mb-2">Model nie znaleziony</h1>
+          <h1 className="text-2xl font-bold mb-2">{t.sharedView.notFound}</h1>
           <p className="text-slate-400 mb-6 max-w-sm">
-            Ten link może być nieważny lub model został usunięty.
+            {t.sharedView.notFoundDesc}
           </p>
           <button
             onClick={() => navigate('/')}
@@ -67,7 +69,7 @@ const SharedView = () => {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 to-slate-800">
         <div className="text-white text-center">
           <div className="w-12 h-12 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p>Ładowanie modelu...</p>
+          <p>{t.sharedView.loading}</p>
         </div>
       </div>
     );
