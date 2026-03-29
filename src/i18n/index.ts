@@ -167,6 +167,7 @@ export const translations = {
       projectsLimit: 'modeli / limit 30',
       limitWarning: 'Osiągnąłeś limit 30 modeli. Usuń stary model, aby dodać nowy.',
       logoutConfirm: 'Czy na pewno chcesz się wylogować?',
+      createFailed: 'Nie udało się utworzyć projektu',
     },
     guestDashboard: {
       initializing: 'Inicjalizacja…',
@@ -456,6 +457,7 @@ export const translations = {
     sharedView: {
       loading: 'Ładowanie modelu…',
       notFound: 'Model nie znaleziony.',
+      notFoundDesc: 'Ten link może być nieważny lub model został usunięty.',
     },
     landingDemo: {
       tab1: 'Diagram Architektury',
@@ -629,6 +631,7 @@ export const translations = {
       projectsLimit: 'models / limit 30',
       limitWarning: 'You have reached the 30 model limit. Delete an old model to add a new one.',
       logoutConfirm: 'Are you sure you want to log out?',
+      createFailed: 'Failed to create project',
     },
     guestDashboard: {
       initializing: 'Initializing…',
@@ -918,6 +921,7 @@ export const translations = {
     sharedView: {
       loading: 'Loading model…',
       notFound: 'Model not found.',
+      notFoundDesc: 'This link may be invalid or the model has been deleted.',
     },
     landingDemo: {
       tab1: 'Architecture Diagram',

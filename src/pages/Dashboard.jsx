@@ -50,7 +50,7 @@ const Dashboard = () => {
       setShowNewProjectDialog(false);
       setShowEditor(true);
     } catch (err) {
-      setCreateError(err instanceof Error ? err.message : t.dashboard.addNew);
+      setCreateError(err instanceof Error ? err.message : t.dashboard.createFailed);
     } finally {
       setIsCreating(false);
     }

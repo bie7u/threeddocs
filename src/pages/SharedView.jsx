@@ -50,7 +50,7 @@ const SharedView = () => {
           </div>
           <h1 className="text-2xl font-bold mb-2">{t.sharedView.notFound}</h1>
           <p className="text-slate-400 mb-6 max-w-sm">
-            Ten link może być nieważny lub model został usunięty.
+            {t.sharedView.notFoundDesc}
           </p>
           <button
             onClick={() => navigate('/')}
