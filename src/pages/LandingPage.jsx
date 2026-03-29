@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { probeSession, logout } from '../services/auth';
 import { API_BASE } from '../services/api';
+import { useTranslation } from '../hooks/useTranslation';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 const LOGO_SRC = '/logo.svg';
 
 const features = [

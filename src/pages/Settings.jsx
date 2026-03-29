@@ -6,6 +6,8 @@ import { loadCustom3DElements, deleteCustom3DElement } from '../utils/custom3DEl
 import { loadUploadedModels, deleteUploadedModel } from '../utils/uploadedModels';
 import { getMe, changePassword } from '../services/auth';
 import { Footer } from '../components/Footer/Footer';
+import { useTranslation } from '../hooks/useTranslation';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 
 // ─── Account Modal ────────────────────────────────────────────────────────────
 

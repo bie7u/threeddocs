@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
 import { useAppStore } from '../../store';
+import { useTranslation } from '../../hooks/useTranslation';
 import { UploadedModelCanvas } from './UploadedModelCanvas';
 import { RichTextEditor } from '../RichTextEditor';
 import { stripHtmlTags } from '../../utils/html';
@@ -19,6 +20,7 @@ interface EditingState {
 const DEFAULT_CAM: CameraPosition = { x: 5, y: 5, z: 5, targetX: 0, targetY: 0, targetZ: 0 };
 
 export const UploadModelEditor = () => {
+  const { t } = useTranslation();
   const { project, setPreviewMode, addStep, updateStep, deleteStep } = useAppStore();
   const [selectedStepId, setSelectedStepId] = useState<string | null>(null);
   const [editingStep, setEditingStep] = useState<EditingState | null>(null);
