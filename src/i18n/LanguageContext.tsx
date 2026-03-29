@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, ReactNode } from 'react';
-import { Locale, getStoredLocale, setStoredLocale, translate } from './index';
+import type { Locale } from './index';
+import { getStoredLocale, setStoredLocale, translate } from './index';
 
 interface LanguageContextType {
   locale: Locale;

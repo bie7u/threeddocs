@@ -1,5 +1,5 @@
 import { useLanguage } from './LanguageContext';
-import { Locale } from './index';
+import type { Locale } from './index';
 
 export const LanguageDropdown = () => {
   const { locale, setLocale, t } = useLanguage();
