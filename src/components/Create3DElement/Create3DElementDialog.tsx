@@ -42,7 +42,7 @@ export const Create3DElementDialog = ({ existing, onClose, onSaved }: Props) => 
     if (!file) return;
     const validTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
     if (!validTypes.includes(file.type)) {
-      alert(t.create3DElement.textureSizeError);
+      alert(t.create3DElement.textureTypeError);
       e.target.value = '';
       return;
     }
@@ -72,7 +72,7 @@ export const Create3DElementDialog = ({ existing, onClose, onSaved }: Props) => 
   const handleSave = async () => {
     const trimmed = text.trim();
     if (!trimmed) {
-      alert(t.create3DElement.text);
+      alert(t.create3DElement.textRequired);
       return;
     }
     setIsSaving(true);
@@ -92,7 +92,7 @@ export const Create3DElementDialog = ({ existing, onClose, onSaved }: Props) => 
       const saved = await saveCustom3DElement(payload, !existing);
       onSaved(saved);
     } catch (err) {
-      alert((err as Error).message ?? t.create3DElement.saving);
+      alert((err as Error).message ?? t.create3DElement.saveFailed);
     } finally {
       setIsSaving(false);
     }

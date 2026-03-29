@@ -395,6 +395,9 @@ export const translations = {
       cancel: 'Anuluj',
       limitReached: 'Osiągnięto limit 20 elementów.',
       textureSizeError: 'Plik tekstury jest za duży (maks. 5 MB).',
+      textureTypeError: 'Proszę wybrać obraz PNG, JPG lub WebP.',
+      textRequired: 'Proszę wpisać tekst elementu.',
+      saveFailed: 'Nie udało się zapisać elementu.',
     },
     uploadModel: {
       titleCreate: 'Wgraj model 3D',
@@ -414,6 +417,8 @@ export const translations = {
       fileSizeError: 'Plik jest za duży (maks. 10 MB).',
       fileTypeError: 'Obsługiwane tylko pliki .gltf i .glb.',
       loadError: 'Błąd ładowania modelu. Sprawdź plik.',
+      nameRequired: 'Proszę podać nazwę modelu.',
+      fileRequired: 'Proszę wybrać plik modelu 3D.',
     },
     modelPreview: {
       title: 'Podgląd modelu',
@@ -876,6 +881,9 @@ export const translations = {
       cancel: 'Cancel',
       limitReached: 'Element limit of 20 reached.',
       textureSizeError: 'Texture file is too large (max 5 MB).',
+      textureTypeError: 'Please select a PNG, JPG or WebP image.',
+      textRequired: 'Please enter element text.',
+      saveFailed: 'Failed to save element.',
     },
     uploadModel: {
       titleCreate: 'Upload 3D model',
@@ -895,6 +903,8 @@ export const translations = {
       fileSizeError: 'File is too large (max 10 MB).',
       fileTypeError: 'Only .gltf and .glb files are supported.',
       loadError: 'Error loading model. Check the file.',
+      nameRequired: 'Please provide a model name.',
+      fileRequired: 'Please select a 3D model file.',
     },
     modelPreview: {
       title: 'Model preview',
