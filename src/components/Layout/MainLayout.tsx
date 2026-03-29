@@ -7,6 +7,8 @@ import { PreviewMode } from '../PreviewMode/PreviewMode';
 import { GuideBuilder } from '../GuideBuilder/GuideBuilder';
 import { UploadModelEditor, UploadPreviewMode } from '../UploadModelEditor';
 import { sampleProject, sampleNodePositions } from '../../utils/sampleData';
+import { LanguageSwitcher } from '../LanguageSwitcher/LanguageSwitcher';
+import { useTranslation } from '../../i18n';
 
 interface MainLayoutProps {
   onBackToProjectList?: () => void;
@@ -16,6 +18,7 @@ interface MainLayoutProps {
 }
 
 export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, onGoToLogin, useSampleProjectFallback = true }: MainLayoutProps) => {
+  const { t } = useTranslation();
   const { 
     project, 
     selectedStepId, 
@@ -75,7 +78,7 @@ export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, onGoToLogin
   const handleTogglePreview = () => { setPreviewMode(!isPreviewMode); };
   const handleToggleCameraMode = () => { setCameraMode(cameraMode === 'auto' ? 'free' : 'auto'); };
   const handleLoadSample = () => {
-    if (window.confirm('Załadować przykładowy projekt? To zastąpi bieżący projekt.')) {
+    if (window.confirm(t('dialogs.confirmLoadSample'))) {
       setProject(sampleProject, sampleNodePositions);
     }
   };
@@ -93,11 +96,11 @@ export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, onGoToLogin
         <div className="h-16 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white flex items-center justify-between px-6 shadow-xl border-b border-slate-700">
           <div className="flex items-center gap-4">
             {onBackToProjectList && (
-              <button onClick={onBackToProjectList} className="px-4 py-2 bg-slate-700/50 backdrop-blur-sm rounded-lg hover:bg-slate-600/50 transition-all duration-200 flex items-center gap-2 border border-slate-600/30 shadow-lg" title="Powrót do listy projektów">
+              <button onClick={onBackToProjectList} className="px-4 py-2 bg-slate-700/50 backdrop-blur-sm rounded-lg hover:bg-slate-600/50 transition-all duration-200 flex items-center gap-2 border border-slate-600/30 shadow-lg" title={t('nav.projects')}>
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
-                <span className="text-sm font-medium">{isGuestMode ? 'Wróć' : 'Projekty'}</span>
+                <span className="text-sm font-medium">{isGuestMode ? t('nav.back') : t('nav.projects')}</span>
               </button>
             )}
             <div className="flex items-center gap-3">
@@ -105,7 +108,7 @@ export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, onGoToLogin
                 <span className="text-xl" role="img" aria-label="Upload">📤</span>
               </div>
               <div>
-                <h1 className="text-lg font-bold">Dokumentacja modelu 3D{isGuestMode && <span className="ml-2 text-xs font-normal text-yellow-300 bg-yellow-500/20 px-2 py-0.5 rounded-full">Tryb gościa</span>}</h1>
+                <h1 className="text-lg font-bold">Dokumentacja modelu 3D{isGuestMode && <span className="ml-2 text-xs font-normal text-yellow-300 bg-yellow-500/20 px-2 py-0.5 rounded-full">{t('status.guestMode')}</span>}</h1>
                 {project && <span className="text-xs text-slate-300 font-medium">{project.name}</span>}
               </div>
             </div>
@@ -113,7 +116,7 @@ export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, onGoToLogin
           <div className="flex items-center gap-3">
             <div className="px-4 py-2 bg-green-500/20 backdrop-blur-sm rounded-lg border border-green-500/30 shadow-lg flex items-center gap-2">
               <div className="w-2 h-2 bg-green-400 rounded-full shadow-lg shadow-green-400/50 motion-safe:animate-pulse" aria-hidden="true"></div>
-              <span className="text-sm font-medium text-green-300">Tryb edytora</span>
+              <span className="text-sm font-medium text-green-300">{t('editor.editorMode')}</span>
             </div>
           </div>
         </div>
@@ -129,11 +132,11 @@ export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, onGoToLogin
       <div className="h-16 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white flex items-center justify-between px-6 shadow-xl border-b border-slate-700">
         <div className="flex items-center gap-4">
           {onBackToProjectList && (
-            <button onClick={onBackToProjectList} className="px-4 py-2 bg-slate-700/50 backdrop-blur-sm rounded-lg hover:bg-slate-600/50 transition-all duration-200 flex items-center gap-2 border border-slate-600/30 shadow-lg hover:shadow-slate-500/20" title="Powrót do listy projektów">
+            <button onClick={onBackToProjectList} className="px-4 py-2 bg-slate-700/50 backdrop-blur-sm rounded-lg hover:bg-slate-600/50 transition-all duration-200 flex items-center gap-2 border border-slate-600/30 shadow-lg hover:shadow-slate-500/20" title={t('nav.projects')}>
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
-              <span className="text-sm font-medium">{isGuestMode ? 'Wróć' : 'Projekty'}</span>
+              <span className="text-sm font-medium">{isGuestMode ? t('nav.back') : t('nav.projects')}</span>
             </button>
           )}
           <div className="flex items-center gap-3">
@@ -141,7 +144,7 @@ export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, onGoToLogin
               <span className="text-xl" role="img" aria-label="Document">📝</span>
             </div>
             <div>
-              <h1 className="text-lg font-bold">Kreator instrukcji 3D{isGuestMode && <span className="ml-2 text-xs font-normal text-yellow-300 bg-yellow-500/20 px-2 py-0.5 rounded-full">Tryb gościa</span>}</h1>
+              <h1 className="text-lg font-bold">Kreator instrukcji 3D{isGuestMode && <span className="ml-2 text-xs font-normal text-yellow-300 bg-yellow-500/20 px-2 py-0.5 rounded-full">{t('status.guestMode')}</span>}</h1>
               {project && <span className="text-xs text-slate-300 font-medium">{project.name}</span>}
             </div>
           </div>
@@ -150,28 +153,29 @@ export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, onGoToLogin
         <div className="flex items-center gap-3">
           <div className="px-4 py-2 bg-green-500/20 backdrop-blur-sm rounded-lg border border-green-500/30 shadow-lg flex items-center gap-2">
             <div className="w-2 h-2 bg-green-400 rounded-full shadow-lg shadow-green-400/50 motion-safe:animate-pulse" aria-hidden="true"></div>
-            <span className="text-sm font-medium text-green-300">Tryb edytora</span>
+            <span className="text-sm font-medium text-green-300">{t('editor.editorMode')}</span>
           </div>
 
           <div className="flex items-center bg-slate-700/50 rounded-lg p-1 border border-slate-600/30">
             <button
               onClick={() => setEditorMode('model')}
               className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${editorMode === 'model' ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg' : 'text-slate-300 hover:text-white'}`}
-            >🧱 Kreator modelu</button>
+            >{t('editor.modelMode')}</button>
             <button
               onClick={() => setEditorMode('guide')}
               className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${editorMode === 'guide' ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-lg' : 'text-slate-300 hover:text-white'}`}
-            >📋 Kreator przewodnika</button>
+            >{t('editor.guideMode')}</button>
           </div>
 
           <button
             onClick={handleToggleCameraMode}
             className={`px-4 py-2 rounded-lg transition-all duration-200 text-sm font-medium shadow-lg ${cameraMode === 'free' ? 'bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 shadow-emerald-500/30' : 'bg-slate-700/50 backdrop-blur-sm hover:bg-slate-600/50 border border-slate-600/30'}`}
           >
-            {cameraMode === 'free' ? '📷 Wolna kamera' : '📷 Auto kamera'}
+            {cameraMode === 'free' ? t('editor.freeCamera') : t('editor.autoCamera')}
           </button>
+          <LanguageSwitcher />
           <button onClick={handleLoadSample} className="px-4 py-2 bg-slate-700/50 backdrop-blur-sm rounded-lg hover:bg-slate-600/50 transition-all duration-200 text-sm font-medium border border-slate-600/30 shadow-lg">
-            Załaduj przykład
+            {t('buttons.loadSample')}
           </button>
           <button
             onClick={handleTogglePreview}
@@ -181,7 +185,7 @@ export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, onGoToLogin
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            Podgląd
+            {t('buttons.preview')}
           </button>
         </div>
       </div>
@@ -191,15 +195,15 @@ export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, onGoToLogin
         <div className="bg-amber-50 border-b border-amber-200 px-6 py-2 flex items-center justify-between gap-4 flex-shrink-0">
           <div className="flex items-center gap-2 text-amber-800 text-sm">
             <span className="text-base">👤</span>
-            <span className="font-medium">Tryb gościa</span>
-            <span className="text-amber-700">— zapis projektów, udostępnianie modeli i wszystkie opcje są dostępne po zalogowaniu.</span>
+            <span className="font-medium">{t('status.guestMode')}</span>
+            <span className="text-amber-700">{t('status.guestBanner')}</span>
           </div>
           {onGoToLogin && (
             <button
               onClick={onGoToLogin}
               className="flex-shrink-0 px-4 py-1.5 bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-xs font-semibold rounded-lg hover:from-blue-600 hover:to-indigo-700 transition-all shadow"
             >
-              Zaloguj się
+              {t('status.loginToAccess')}
             </button>
           )}
         </div>
@@ -220,8 +224,8 @@ export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, onGoToLogin
                     </svg>
                   </div>
                   <div>
-                    <h2 className="font-bold text-slate-800 text-sm">Właściwości kroku</h2>
-                    <p className="text-xs text-slate-500">Dodaj i skonfiguruj kroki</p>
+                    <h2 className="font-bold text-slate-800 text-sm">{t('layout.stepProperties')}</h2>
+                    <p className="text-xs text-slate-500">{t('layout.configureSteps')}</p>
                   </div>
                 </div>
               </div>
@@ -248,22 +252,22 @@ export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, onGoToLogin
                       </svg>
                     </div>
                     <div>
-                      <h2 className="font-bold text-slate-800 text-sm">Kreator modelu</h2>
+                      <h2 className="font-bold text-slate-800 text-sm">{t('layout.modelBuilder')}</h2>
                       <p className="text-xs text-slate-500">
-                        Projektuj przepływ modelu 3D
+                        {t('layout.modelFlow')}
                         {project && project.steps.length > 0 && (
                           <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-700">
                             {project.steps.length} {
-                              project.steps.length === 1 ? 'krok' :
-                              [2,3,4].includes(project.steps.length % 10) && ![12,13,14].includes(project.steps.length % 100) ? 'kroki' :
-                              'kroków'
+                              project.steps.length === 1 ? t('steps.count.one') :
+                              [2,3,4].includes(project.steps.length % 10) && ![12,13,14].includes(project.steps.length % 100) ? t('steps.count.few') :
+                              t('steps.count.many')
                             }
                           </span>
                         )}
                       </p>
                     </div>
                   </div>
-                  <div className="text-xs text-slate-400 hidden lg:block">Przeciągnij węzły · Połącz strzałkami</div>
+                  <div className="text-xs text-slate-400 hidden lg:block">{t('layout.dragNodes')}</div>
                 </div>
               </div>
               <div className="flex-1 min-h-0"><StepBuilder /></div>
@@ -279,8 +283,8 @@ export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, onGoToLogin
                     </svg>
                   </div>
                   <div>
-                    <h2 className="font-bold text-white text-sm">Podgląd 3D</h2>
-                    <p className="text-xs text-slate-400">Widok modelu na żywo</p>
+                    <h2 className="font-bold text-white text-sm">{t('layout.steps3D')}</h2>
+                    <p className="text-xs text-slate-400">{t('status.live3dPreview')}</p>
                   </div>
                 </div>
               </div>
@@ -292,7 +296,7 @@ export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, onGoToLogin
                       <svg className="w-8 h-8 mx-auto mb-2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5" />
                       </svg>
-                      <p className="text-sm font-medium">Wybierz krok, aby zobaczyć podgląd 3D</p>
+                      <p className="text-sm font-medium">{t('layout.selectStepPreview')}</p>
                     </div>
                   </div>
                 )}
@@ -302,8 +306,8 @@ export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, onGoToLogin
                       <svg className="w-12 h-12 mx-auto mb-3 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                       </svg>
-                      <p className="text-sm text-slate-500 font-medium">Brak kroków</p>
-                      <p className="text-xs text-slate-600 mt-1">Dodaj krok, aby zobaczyć podgląd</p>
+                      <p className="text-sm text-slate-500 font-medium">{t('layout.noSteps')}</p>
+                      <p className="text-xs text-slate-600 mt-1">{t('layout.addStepPreview')}</p>
                     </div>
                   </div>
                 ) : null}
