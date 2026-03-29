@@ -21,6 +21,7 @@ import 'reactflow/dist/style.css';
 import { useAppStore } from '../../store';
 import type { InstructionStep, ConnectionData, ConnectionStyle, ShapeType, ArrowDirection, ConnectionType, EngravedBlockParams } from '../../types';
 import { ShapeTypePicker } from '../ShapeTypePicker/ShapeTypePicker';
+import { useTranslation } from '../../hooks/useTranslation';
 
 // Custom node component
 const StepNode = ({ data, selected }: NodeProps<InstructionStep>) => {
@@ -66,28 +67,20 @@ const StepNode = ({ data, selected }: NodeProps<InstructionStep>) => {
 };
 
 // ─── Connection styles ────────────────────────────────────────────────────────
-const CONNECTION_STYLES: { value: ConnectionStyle; label: string; color: string; textColor: string }[] = [
-  { value: 'standard', label: 'Standard', color: '#64748b', textColor: '#fff' },
-  { value: 'glass',    label: 'Szklane',  color: '#60a5fa', textColor: '#fff' },
-  { value: 'glow',     label: 'Złote',    color: '#fbbf24', textColor: '#1e1e1e' },
-  { value: 'neon',     label: 'Neonowe',  color: '#ec4899', textColor: '#fff' },
+const CONNECTION_STYLES: { value: ConnectionStyle; color: string; textColor: string }[] = [
+  { value: 'standard', color: '#64748b', textColor: '#fff' },
+  { value: 'glass',    color: '#60a5fa', textColor: '#fff' },
+  { value: 'glow',     color: '#fbbf24', textColor: '#1e1e1e' },
+  { value: 'neon',     color: '#ec4899', textColor: '#fff' },
 ];
 
-const ARROW_DIRS: { value: ArrowDirection; label: string }[] = [
-  { value: 'none',          label: '— Brak' },
-  { value: 'forward',       label: '→ Naprzód' },
-  { value: 'backward',      label: '← Wstecz' },
-  { value: 'bidirectional', label: '↔ Dwukierunkowe' },
-];
-
-const CONN_TYPES: { value: ConnectionType; label: string }[] = [
-  { value: 'tube',  label: '🔩 Rura' },
-  { value: 'arrow', label: '➡ Strzałka' },
-];
+const ARROW_DIR_VALUES: ArrowDirection[] = ['none', 'forward', 'backward', 'bidirectional'];
+const CONN_TYPE_VALUES: ConnectionType[] = ['tube', 'arrow'];
 
 
 // ─── Inline connection editor rendered on the edge label ──────────────────────
 const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<ConnectionData>) => {
+  const { t } = useTranslation();
   const { updateConnections, project, isGuestMode } = useAppStore();
   const [open, setOpen] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
@@ -131,6 +124,22 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
   }, [data]);
 
   const styleInfo = CONNECTION_STYLES.find(s => s.value === currentStyle) || CONNECTION_STYLES[0];
+  const styleLabels: Record<ConnectionStyle, string> = {
+    standard: t.stepBuilder.standard,
+    glass: t.stepBuilder.glass,
+    glow: t.stepBuilder.glow,
+    neon: t.stepBuilder.neon,
+  };
+  const arrowDirLabels: Record<ArrowDirection, string> = {
+    none: `— ${t.stepBuilder.none}`,
+    forward: `→ ${t.stepBuilder.forward}`,
+    backward: `← ${t.stepBuilder.backward}`,
+    bidirectional: `↔ ${t.stepBuilder.both}`,
+  };
+  const connTypeLabels: Record<ConnectionType, string> = {
+    tube: `🔩 ${t.stepBuilder.tube}`,
+    arrow: `➡ ${t.stepBuilder.arrow}`,
+  };
 
   // Helper that immediately commits the provided overrides merged with current draft state
   const commitDraft = useCallback((override: Partial<ConnectionData>) => {
@@ -164,7 +173,7 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
   }, [project, id, draftTitle, draftDesc, draftStyle, draftShape, draftCustom3dElementId, draftUploadedModelId, draftShapeScale, draftShapePosY, draftShapeRotY, draftArrow, draftConnType, draftEngravedParams, updateConnections]);
 
   const getShapeButtonLabel = (): string => {
-    if (!draftShape) return 'Brak';
+    if (!draftShape) return t.stepProperties.noShapeSelected;
     const labels: Partial<Record<ShapeType, string>> = {
       cube: '📦 Sześcian',
       sphere: '🔵 Kula',
@@ -228,11 +237,11 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
           {!open ? (
             <button
               onClick={() => setOpen(true)}
-              title="Edytuj połączenie"
+              title={t.stepBuilder.connection}
               className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold shadow-md hover:scale-105 active:scale-95 transition-transform"
               style={{ backgroundColor: styleInfo.color, color: styleInfo.textColor }}
             >
-              <span>{styleInfo.label}</span>
+              <span>{styleLabels[styleInfo.value]}</span>
               {currentDescription && (
                 <span className="opacity-80" title={currentDescription}>📝</span>
               )}
@@ -245,7 +254,7 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
             <div className="bg-white rounded-xl shadow-2xl border border-slate-200 w-72 overflow-hidden">
               {/* Header */}
               <div className="flex items-center justify-between px-3 py-2 bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
-                <span className="text-xs font-bold text-slate-700 uppercase tracking-wide">Edytuj połączenie</span>
+                <span className="text-xs font-bold text-slate-700 uppercase tracking-wide">{t.stepBuilder.connection}</span>
                 <button
                   onClick={() => setOpen(false)}
                   className="w-5 h-5 flex items-center justify-center rounded hover:bg-slate-200 text-slate-500 transition"
@@ -259,17 +268,17 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
               <div className="p-3 space-y-3">
                 {/* Style swatches */}
                 <div>
-                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Styl wizualny</p>
+                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">{t.stepBuilder.connectionStyle}</p>
                   <div className="flex gap-1.5">
                     {CONNECTION_STYLES.map(s => (
                       <button
                         key={s.value}
                         onClick={() => { setDraftStyle(s.value); commitDraft({ style: s.value }); }}
-                        title={s.label}
+                        title={styleLabels[s.value]}
                         className={`flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all ${draftStyle === s.value ? 'ring-2 ring-offset-1 ring-blue-500 scale-105' : 'opacity-70 hover:opacity-100'}`}
                         style={{ backgroundColor: s.color, color: s.textColor }}
                       >
-                        {s.label}
+                        {styleLabels[s.value]}
                       </button>
                     ))}
                   </div>
@@ -278,24 +287,24 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
                 {/* Connection type + Arrow direction side by side */}
                 <div className={draftConnType === 'arrow' ? 'grid grid-cols-2 gap-2' : 'grid grid-cols-1 gap-2'}>
                   <div>
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Typ</p>
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">{t.stepBuilder.connectionType}</p>
                     <select
                       value={draftConnType}
                       onChange={e => { setDraftConnType(e.target.value as ConnectionType); commitDraft({ connectionType: e.target.value as ConnectionType }); }}
                       className="w-full px-2 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
-                      {CONN_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                      {CONN_TYPE_VALUES.map(v => <option key={v} value={v}>{connTypeLabels[v]}</option>)}
                     </select>
                   </div>
                   {draftConnType === 'arrow' && (
                     <div>
-                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Kierunek</p>
+                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">{t.stepBuilder.arrowDirection}</p>
                       <select
                         value={draftArrow}
                         onChange={e => { setDraftArrow(e.target.value as ArrowDirection); commitDraft({ arrowDirection: e.target.value as ArrowDirection }); }}
                         className="w-full px-2 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                       >
-                        {ARROW_DIRS.map(a => <option key={a.value} value={a.value}>{a.label}</option>)}
+                        {ARROW_DIR_VALUES.map(v => <option key={v} value={v}>{arrowDirLabels[v]}</option>)}
                       </select>
                     </div>
                   )}
@@ -303,7 +312,7 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
 
                 {/* Shape type picker */}
                 <div>
-                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Typ kształtu</p>
+                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">{t.stepBuilder.shapeSelector}</p>
                   <div className="flex gap-1.5">
                     <button
                       type="button"
@@ -423,9 +432,9 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
                 {/* Engraved block settings */}
                 {draftShape === 'engravedBlock' && (
                   <div className="space-y-2 border border-slate-200 rounded-lg p-2 bg-slate-50">
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Ustawienia klocka z tekstem</p>
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">{t.stepBuilder.engravingText}</p>
                     <div>
-                      <p className="text-xs font-semibold text-slate-500 mb-1">Tekst <span className="font-normal text-slate-400">(maks. 24 znaki)</span></p>
+                      <p className="text-xs font-semibold text-slate-500 mb-1">{t.stepBuilder.engravingText} <span className="font-normal text-slate-400">(maks. 24 znaki)</span></p>
                       <input
                         type="text"
                         value={draftEngravedParams.text}
@@ -435,7 +444,7 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
                       />
                     </div>
                     <div>
-                      <p className="text-xs font-semibold text-slate-500 mb-1">Czcionka</p>
+                      <p className="text-xs font-semibold text-slate-500 mb-1">{t.stepBuilder.engravingFont}</p>
                       <select
                         value={draftEngravedParams.font}
                         onChange={e => handleEngravedParamChange('font', e.target.value as EngravedBlockParams['font'])}
@@ -447,7 +456,7 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
                       </select>
                     </div>
                     <div>
-                      <p className="text-xs font-semibold text-slate-500 mb-1">Grubość <span className="font-normal text-slate-400">(0.05–0.3)</span></p>
+                      <p className="text-xs font-semibold text-slate-500 mb-1">{t.stepBuilder.engravingDepth} <span className="font-normal text-slate-400">(0.05–0.3)</span></p>
                       <div className="flex items-center gap-2">
                         <input type="range" min="0.05" max="0.3" step="0.01" value={draftEngravedParams.depth} onChange={e => handleEngravedParamChange('depth', parseFloat(e.target.value))} className="flex-1" />
                         <input type="number" min="0.05" max="0.3" step="0.01" value={draftEngravedParams.depth} onChange={e => handleEngravedParamChange('depth', parseFloat(e.target.value))} className="w-14 px-1.5 py-1 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
@@ -459,14 +468,14 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
                 {/* Title */}
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Tytuł (opcjonalnie)</p>
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">{t.stepBuilder.connectionTitle}</p>
                     <span className="text-xs text-slate-400">{draftTitle.length}/50</span>
                   </div>
                   <input
                     type="text"
                     value={draftTitle}
                     onChange={e => { setDraftTitle(e.target.value); commitDraft({ title: e.target.value }); }}
-                    placeholder="Tytuł połączenia…"
+                    placeholder={t.stepBuilder.connectionTitle}
                     maxLength={50}
                     className="w-full px-2 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
@@ -475,14 +484,14 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
                 {/* Description */}
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Opis (opcjonalnie)</p>
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">{t.stepBuilder.connectionDesc}</p>
                     <span className="text-xs text-slate-400">{draftDesc.length}/500</span>
                   </div>
                   <textarea
                     value={draftDesc}
                     onChange={e => { setDraftDesc(e.target.value); commitDraft({ description: e.target.value }); }}
                     rows={2}
-                    placeholder="Opis połączenia…"
+                    placeholder={t.stepBuilder.connectionDesc}
                     maxLength={500}
                     className="w-full px-2 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                   />
@@ -502,7 +511,7 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
                 </button>
                 <button
                   onClick={handleDelete}
-                  title="Usuń połączenie"
+                  title={t.stepBuilder.deleteEdge}
                   className="px-2.5 py-1.5 bg-red-50 hover:bg-red-100 text-red-500 text-xs font-semibold rounded-lg border border-red-200 transition-all"
                 >
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -522,6 +531,7 @@ const nodeTypes = { stepNode: StepNode };
 const edgeTypes = { default: CustomEdge };
 
 export const StepBuilder = () => {
+  const { t } = useTranslation();
   const { project, updateConnections, setSelectedStepId, nodePositions, updateNodePosition } = useAppStore();
   
   const initialNodes: Node[] = useMemo(() => {
@@ -631,8 +641,8 @@ export const StepBuilder = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z" />
               </svg>
             </div>
-            <p className="text-slate-500 font-medium text-sm">Brak kroków</p>
-            <p className="text-slate-400 text-xs mt-1">Dodaj krok w panelu po lewej</p>
+            <p className="text-slate-500 font-medium text-sm">{t.stepBuilder.addStep}</p>
+            <p className="text-slate-400 text-xs mt-1">{t.stepBuilder.selectStep}</p>
           </div>
         </div>
       )}
