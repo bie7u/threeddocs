@@ -2,10 +2,13 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAppStore } from '../../store';
 import { generateShareToken, fetchProjectsPage } from '../../services/projects';
 import { Footer } from '../Footer/Footer';
+import { useLanguage } from '../../i18n/LanguageContext';
+import { LanguageDropdown } from '../../i18n/LanguageDropdown';
 
 const PAGE_SIZE = 10;
 
 export const MyModels = ({ onOpenEditor, onClose }) => {
+  const { t } = useLanguage();
   const { deleteProject, setProject, setPreviewMode } = useAppStore();
   const [copiedId, setCopiedId] = useState(null);
   const [shareError, setShareError] = useState(null);
@@ -33,11 +36,11 @@ export const MyModels = ({ onOpenEditor, onClose }) => {
       setHasNext(result.hasNext);
       setHasPrevious(result.hasPrevious);
     } catch {
-      setLoadError('Nie udało się załadować modeli. Spróbuj ponownie.');
+      setLoadError(t('myModels.loadError'));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -76,14 +79,14 @@ export const MyModels = ({ onOpenEditor, onClose }) => {
         setShareError(shareUrl);
       }
     } catch {
-      setShareError('Nie udało się wygenerować linku. Spróbuj ponownie.');
+      setShareError(t('myModels.loadError'));
     } finally {
       setSharingId(null);
     }
   };
 
   const handleDelete = async (projectId) => {
-    if (window.confirm('Czy na pewno chcesz usunąć ten model?')) {
+    if (window.confirm(t('myModels.confirmDelete'))) {
       try {
         await deleteProject(projectId);
         // If we just removed the only item on a non-first page, go back
@@ -119,12 +122,12 @@ export const MyModels = ({ onOpenEditor, onClose }) => {
               <button
                 onClick={onClose}
                 className="flex items-center gap-2 px-3 py-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
-                title="Powrót do pulpitu"
+                title={t('myModels.backToDashboard')}
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
-                <span className="text-sm font-medium">Pulpit</span>
+                <span className="text-sm font-medium">{t('myModels.backToDashboard')}</span>
               </button>
               <div className="flex items-center">
                 <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center transform rotate-12">
@@ -142,15 +145,18 @@ export const MyModels = ({ onOpenEditor, onClose }) => {
                     />
                   </svg>
                 </div>
-                <span className="ml-3 text-xl font-bold text-gray-900">Moje modele</span>
+                <span className="ml-3 text-xl font-bold text-gray-900">{t('myModels.title')}</span>
               </div>
             </div>
-            <div className="text-sm text-gray-500">
-              {loading
-                ? 'Ładowanie…'
-                : totalCount === 0
-                  ? 'Brak modeli'
-                  : `${totalCount} ${totalCount === 1 ? 'model' : totalCount < 5 ? 'modele' : 'modeli'}`}
+            <div className="flex items-center gap-3">
+              <LanguageDropdown />
+              <div className="text-sm text-gray-500">
+                {loading
+                  ? t('buttons.loading')
+                  : totalCount === 0
+                    ? t('myModels.noModels')
+                    : `${totalCount} ${totalCount === 1 ? t('myModels.model') : totalCount < 5 ? t('myModels.models2_4') : t('myModels.models5plus')}`}
+              </div>
             </div>
           </div>
         </div>
@@ -167,7 +173,7 @@ export const MyModels = ({ onOpenEditor, onClose }) => {
               type="text"
               value={search}
               onChange={(e) => handleSearch(e.target.value)}
-              placeholder="Szukaj modeli..."
+              placeholder={t('myModels.searchPlaceholder')}
               className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
@@ -180,13 +186,13 @@ export const MyModels = ({ onOpenEditor, onClose }) => {
         {shareError && (
           <div className="mb-6 flex items-center justify-between gap-4 px-5 py-3 bg-yellow-50 border border-yellow-300 rounded-xl text-sm text-yellow-800">
             <span>
-              Nie można skopiować automatycznie. Skopiuj ręcznie:{' '}
+              {t('myModels.copyFailed')}{' '}
               <span className="font-mono break-all">{shareError}</span>
             </span>
             <button
               onClick={() => setShareError(null)}
               className="flex-shrink-0 text-yellow-600 hover:text-yellow-800 transition-colors"
-              aria-label="Zamknij"
+              aria-label={t('buttons.close')}
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -229,19 +235,19 @@ export const MyModels = ({ onOpenEditor, onClose }) => {
               </svg>
             </div>
             <h2 className="text-2xl font-bold text-gray-700 mb-2">
-              {search ? 'Brak wyników' : 'Brak modeli'}
+              {search ? t('myModels.noResults') : t('myModels.noModels')}
             </h2>
             <p className="text-gray-500 mb-6">
               {search
-                ? `Nie znaleziono modeli pasujących do „${search}".`
-                : 'Nie masz jeszcze żadnych zapisanych modeli 3D.'}
+                ? t('myModels.noResultsDesc', { query: search })
+                : t('myModels.noModelsDesc')}
             </p>
             {!search && (
               <button
                 onClick={onClose}
                 className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-medium rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all shadow-lg"
               >
-                Dodaj pierwszy model
+                {t('myModels.addFirst')}
               </button>
             )}
           </div>
@@ -289,7 +295,7 @@ export const MyModels = ({ onOpenEditor, onClose }) => {
                             d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
                           />
                         </svg>
-                        {saved.project.steps.length} {saved.project.steps.length === 1 ? 'krok' : saved.project.steps.length < 5 ? 'kroki' : 'kroków'}
+                        {saved.project.steps.length} {saved.project.steps.length === 1 ? t('myModels.step') : saved.project.steps.length < 5 ? t('myModels.steps2_4') : t('myModels.steps5plus')}
                       </span>
                       <span className="flex items-center gap-1">
                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -325,7 +331,7 @@ export const MyModels = ({ onOpenEditor, onClose }) => {
                               d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                             />
                           </svg>
-                          Podgląd
+                          {t('buttons.preview')}
                         </button>
                         <button
                           onClick={() => handleOpenEditor(saved)}
@@ -339,7 +345,7 @@ export const MyModels = ({ onOpenEditor, onClose }) => {
                               d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
                             />
                           </svg>
-                          Edytuj
+                          {t('buttons.edit')}
                         </button>
                       </div>
 
@@ -353,14 +359,14 @@ export const MyModels = ({ onOpenEditor, onClose }) => {
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                             </svg>
-                            Link skopiowany!
+                            {t('myModels.linkCopied')}
                           </>
                         ) : sharingId === saved.project.id ? (
                           <>
                             <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                             </svg>
-                            Generowanie linku...
+                            {t('myModels.generating')}
                           </>
                         ) : (
                           <>
@@ -372,7 +378,7 @@ export const MyModels = ({ onOpenEditor, onClose }) => {
                                 d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
                               />
                             </svg>
-                            Generuj link do udostępnienia
+                            {t('myModels.generateLink')}
                           </>
                         )}
                       </button>
@@ -389,7 +395,7 @@ export const MyModels = ({ onOpenEditor, onClose }) => {
                             d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
                           />
                         </svg>
-                        Usuń
+                        {t('buttons.delete')}
                       </button>
                     </div>
                   </div>
@@ -408,12 +414,12 @@ export const MyModels = ({ onOpenEditor, onClose }) => {
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                   </svg>
-                  Poprzednia
+                  {t('myModels.previous')}
                 </button>
 
                 <span className="px-4 py-2 text-sm text-gray-500">
-                  Strona <span className="font-semibold text-gray-800">{page}</span>{' '}
-                  z <span className="font-semibold text-gray-800">{Math.ceil(totalCount / PAGE_SIZE)}</span>
+                  {t('myModels.page')} <span className="font-semibold text-gray-800">{page}</span>{' '}
+                  {t('myModels.of')} <span className="font-semibold text-gray-800">{Math.ceil(totalCount / PAGE_SIZE)}</span>
                 </span>
 
                 <button
@@ -421,7 +427,7 @@ export const MyModels = ({ onOpenEditor, onClose }) => {
                   disabled={!hasNext}
                   className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-xl border border-gray-200 text-gray-700 hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50 transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:hover:text-gray-700 disabled:hover:bg-transparent"
                 >
-                  Następna
+                  {t('myModels.next')}
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
