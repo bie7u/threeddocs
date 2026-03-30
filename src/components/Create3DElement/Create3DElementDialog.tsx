@@ -62,7 +62,7 @@ export const Create3DElementDialog = ({ existing, onClose, onSaved }: Props) => 
     };
     reader.readAsDataURL(file);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [t]);
 
   const handleRemoveTexture = () => {
     setTextureDataUrl(undefined);

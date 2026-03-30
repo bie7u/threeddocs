@@ -138,7 +138,7 @@ export const UploadModelDialog = ({ existing, onClose, onSaved }: Props) => {
     };
     reader.readAsDataURL(file);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [name]);
+  }, [name, t]);
 
   const handleSave = async () => {
     const trimmedName = name.trim();
