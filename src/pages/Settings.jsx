@@ -26,7 +26,8 @@ const AccountModal = ({ onClose }) => {
     getMe()
       .then(setUser)
       .catch(() => setUserError(t('settings.account.loadingError')));
-  }, [t]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleChangePassword = async (e) => {
     e.preventDefault();

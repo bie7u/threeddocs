@@ -36,11 +36,11 @@ export const MyModels = ({ onOpenEditor, onClose }) => {
       setHasNext(result.hasNext);
       setHasPrevious(result.hasPrevious);
     } catch {
-      setLoadError(t('myModels.loadError'));
+      setLoadError('myModels.loadError');
     } finally {
       setLoading(false);
     }
-  }, [t]);
+  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -79,7 +79,7 @@ export const MyModels = ({ onOpenEditor, onClose }) => {
         setShareError(shareUrl);
       }
     } catch {
-      setShareError(t('myModels.loadError'));
+      setShareError(t('myModels.generateLinkError'));
     } finally {
       setSharingId(null);
     }
@@ -204,7 +204,7 @@ export const MyModels = ({ onOpenEditor, onClose }) => {
         {/* Load error */}
         {loadError && (
           <div className="mb-6 px-5 py-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
-            {loadError}
+            {t(loadError)}
           </div>
         )}
 

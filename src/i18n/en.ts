@@ -188,6 +188,7 @@ export const en = {
     generating: 'Generating link...',
     generateLink: 'Generate share link',
     confirmDelete: 'Are you sure you want to delete this model?',
+    generateLinkError: 'Failed to generate link. Please try again.',
   },
   settings: {
     title: 'Settings',

@@ -188,6 +188,7 @@ export const pl = {
     generating: 'Generowanie linku...',
     generateLink: 'Generuj link do udostępnienia',
     confirmDelete: 'Czy na pewno chcesz usunąć ten model?',
+    generateLinkError: 'Nie udało się wygenerować linku. Spróbuj ponownie.',
   },
   settings: {
     title: 'Ustawienia',
