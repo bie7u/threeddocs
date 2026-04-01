@@ -128,6 +128,8 @@ export const pl = {
     step: 'krok',
     steps2_4: 'kroki',
     steps5plus: 'kroków',
+    darkMode: 'Tryb ciemny',
+    lightMode: 'Tryb jasny',
   },
   newProject: {
     title: 'Dodaj nowy model',

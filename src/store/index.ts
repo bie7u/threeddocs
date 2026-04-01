@@ -9,6 +9,7 @@ import {
 } from '../services/projects';
 
 const GUEST_PROJECT_KEY = '3ddocs_guest_project';
+const DARK_MODE_KEY = '3ddocs_dark_mode';
 
 export interface SavedProject {
   project: ProjectData;
@@ -48,6 +49,9 @@ interface AppStore {
   // Guest mode (unauthenticated user)
   isGuestMode: boolean;
   guestShareToken: string | null;
+
+  // Dark mode
+  isDarkMode: boolean;
   
   // Actions
   setProject: (project: ProjectData, nodePositions?: Record<string, { x: number; y: number }>, persist?: boolean) => void;
@@ -76,6 +80,8 @@ interface AppStore {
   createNewGuestProject: (projectName: string, projectType?: 'builder' | 'upload', projectModelUrl?: string) => Promise<ProjectData>;
   /** Clears guest mode state (e.g., on logout or navigation to login). */
   clearGuestMode: () => void;
+  /** Toggles or sets dark mode and persists the preference. */
+  setDarkMode: (dark: boolean) => void;
 }
 
 export const useAppStore = create<AppStore>((set, get) => ({
@@ -91,6 +97,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
   nodePositions: {},
   isGuestMode: false,
   guestShareToken: null,
+  isDarkMode: localStorage.getItem(DARK_MODE_KEY) === 'true',
 
   setProject: (project, nodePositions, persist = true) => {
     set({ 
@@ -353,5 +360,10 @@ export const useAppStore = create<AppStore>((set, get) => ({
       selectedStepId: null,
       isPreviewMode: false,
     });
+  },
+
+  setDarkMode: (dark) => {
+    localStorage.setItem(DARK_MODE_KEY, String(dark));
+    set({ isDarkMode: dark });
   },
 }));

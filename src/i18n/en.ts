@@ -128,6 +128,8 @@ export const en = {
     step: 'step',
     steps2_4: 'steps',
     steps5plus: 'steps',
+    darkMode: 'Dark mode',
+    lightMode: 'Light mode',
   },
   newProject: {
     title: 'Add new model',

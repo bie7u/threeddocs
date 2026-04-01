@@ -32,6 +32,8 @@ export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, onGoToLogin
     setEditorMode,
     setSelectedStepId,
     isGuestMode,
+    isDarkMode,
+    setDarkMode,
   } = useAppStore();
 
   useEffect(() => {
@@ -92,7 +94,7 @@ export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, onGoToLogin
 
   if (project?.projectType === 'upload') {
     return (
-      <div className="w-screen h-screen flex flex-col bg-gradient-to-br from-slate-50 to-slate-100">
+      <div className="w-screen h-screen flex flex-col bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-950">
         <div className="h-16 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white flex items-center justify-between px-6 shadow-xl border-b border-slate-700">
           <div className="flex items-center gap-4">
             {onBackToProjectList && (
@@ -118,6 +120,21 @@ export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, onGoToLogin
               <div className="w-2 h-2 bg-green-400 rounded-full shadow-lg shadow-green-400/50 motion-safe:animate-pulse" aria-hidden="true"></div>
               <span className="text-sm font-medium text-green-300">{t('mainLayout.editorMode')}</span>
             </div>
+            <button
+              onClick={() => setDarkMode(!isDarkMode)}
+              className="w-9 h-9 flex items-center justify-center rounded-lg bg-slate-700/50 hover:bg-slate-600/50 border border-slate-600/30 transition-all duration-200 shadow-lg"
+              title={isDarkMode ? t('mainLayout.lightMode') : t('mainLayout.darkMode')}
+            >
+              {isDarkMode ? (
+                <svg className="w-5 h-5 text-yellow-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+              ) : (
+                <svg className="w-5 h-5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+              )}
+            </button>
           </div>
         </div>
         <div className="flex-1 flex overflow-hidden gap-1 p-1">
@@ -128,7 +145,7 @@ export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, onGoToLogin
   }
 
   return (
-    <div className="w-screen h-screen flex flex-col bg-gradient-to-br from-slate-50 to-slate-100">
+    <div className="w-screen h-screen flex flex-col bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-950">
       <div className="h-16 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white flex items-center justify-between px-6 shadow-xl border-b border-slate-700">
         <div className="flex items-center gap-4">
           {onBackToProjectList && (
@@ -177,6 +194,21 @@ export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, onGoToLogin
             {t('mainLayout.loadSample')}
           </button>
           <button
+            onClick={() => setDarkMode(!isDarkMode)}
+            className="w-9 h-9 flex items-center justify-center rounded-lg bg-slate-700/50 hover:bg-slate-600/50 border border-slate-600/30 transition-all duration-200 shadow-lg"
+            title={isDarkMode ? t('mainLayout.lightMode') : t('mainLayout.darkMode')}
+          >
+            {isDarkMode ? (
+              <svg className="w-5 h-5 text-yellow-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+            ) : (
+              <svg className="w-5 h-5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+              </svg>
+            )}
+          </button>
+          <button
             onClick={handleTogglePreview}
             className="px-5 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg hover:from-blue-600 hover:to-indigo-700 transition-all duration-200 font-medium shadow-lg shadow-blue-500/30 flex items-center gap-2"
           >
@@ -191,11 +223,11 @@ export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, onGoToLogin
 
       {/* Guest mode banner */}
       {isGuestMode && (
-        <div className="bg-amber-50 border-b border-amber-200 px-6 py-2 flex items-center justify-between gap-4 flex-shrink-0">
-          <div className="flex items-center gap-2 text-amber-800 text-sm">
+        <div className="bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200 dark:border-amber-800 px-6 py-2 flex items-center justify-between gap-4 flex-shrink-0">
+          <div className="flex items-center gap-2 text-amber-800 dark:text-amber-200 text-sm">
             <span className="text-base">👤</span>
             <span className="font-medium">{t('guest.guestMode')}</span>
-            <span className="text-amber-700">{t('guest.guestModeBanner')}</span>
+            <span className="text-amber-700 dark:text-amber-300">{t('guest.guestModeBanner')}</span>
           </div>
           {onGoToLogin && (
             <button
@@ -214,8 +246,8 @@ export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, onGoToLogin
         ) : (
           <>
             {/* Left panel – Step properties */}
-            <div className="flex-shrink-0 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden flex flex-col" style={{ width: panelWidth }}>
-              <div className="px-5 py-3.5 bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200 flex-shrink-0">
+            <div className="flex-shrink-0 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col" style={{ width: panelWidth }}>
+              <div className="px-5 py-3.5 bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-700 dark:to-slate-800 border-b border-slate-200 dark:border-slate-700 flex-shrink-0">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-amber-600 rounded-lg flex items-center justify-center shadow-md" aria-hidden="true">
                     <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -223,12 +255,12 @@ export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, onGoToLogin
                     </svg>
                   </div>
                   <div>
-                    <h2 className="font-bold text-slate-800 text-sm">{t('mainLayout.stepProperties')}</h2>
-                    <p className="text-xs text-slate-500">{t('mainLayout.stepPropertiesDesc')}</p>
+                    <h2 className="font-bold text-slate-800 dark:text-slate-100 text-sm">{t('mainLayout.stepProperties')}</h2>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">{t('mainLayout.stepPropertiesDesc')}</p>
                   </div>
                 </div>
               </div>
-              <div className="flex-1 overflow-y-auto bg-slate-50"><StepProperties /></div>
+              <div className="flex-1 overflow-y-auto bg-slate-50 dark:bg-slate-900"><StepProperties /></div>
             </div>
 
             {/* Resize handle */}
@@ -241,8 +273,8 @@ export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, onGoToLogin
             </div>
 
             {/* Center panel – Model flow builder */}
-            <div className="flex-1 min-w-0 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden flex flex-col ml-1.5">
-              <div className="px-5 py-3.5 bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200 flex-shrink-0">
+            <div className="flex-1 min-w-0 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col ml-1.5">
+              <div className="px-5 py-3.5 bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-700 dark:to-slate-800 border-b border-slate-200 dark:border-slate-700 flex-shrink-0">
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-lg flex items-center justify-center shadow-md" aria-hidden="true">
@@ -251,11 +283,11 @@ export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, onGoToLogin
                       </svg>
                     </div>
                     <div>
-                      <h2 className="font-bold text-slate-800 text-sm">{t('mainLayout.modelBuilderPanel')}</h2>
-                      <p className="text-xs text-slate-500">
+                      <h2 className="font-bold text-slate-800 dark:text-slate-100 text-sm">{t('mainLayout.modelBuilderPanel')}</h2>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">
                         {t('mainLayout.modelBuilderDesc')}
                         {project && project.steps.length > 0 && (
-                          <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-700">
+                          <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300">
                             {project.steps.length} {
                               project.steps.length === 1 ? t('mainLayout.step') :
                               [2,3,4].includes(project.steps.length % 10) && ![12,13,14].includes(project.steps.length % 100) ? t('mainLayout.steps2_4') :
@@ -266,14 +298,14 @@ export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, onGoToLogin
                       </p>
                     </div>
                   </div>
-                  <div className="text-xs text-slate-400 hidden lg:block">{t('mainLayout.dragNodes')}</div>
+                  <div className="text-xs text-slate-400 dark:text-slate-500 hidden lg:block">{t('mainLayout.dragNodes')}</div>
                 </div>
               </div>
               <div className="flex-1 min-h-0"><StepBuilder /></div>
             </div>
 
             {/* Right panel – 3D Preview */}
-            <div className="w-96 flex-shrink-0 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden flex flex-col ml-1.5">
+            <div className="w-96 flex-shrink-0 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col ml-1.5">
               <div className="px-5 py-3.5 bg-gradient-to-r from-slate-900 to-slate-800 border-b border-slate-700 flex-shrink-0">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center shadow-md" aria-hidden="true">

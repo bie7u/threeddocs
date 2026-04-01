@@ -25,7 +25,7 @@ export const GuideBuilder = () => {
 
   if (!project) {
     return (
-      <div className="w-full h-full flex items-center justify-center text-slate-500">
+      <div className="w-full h-full flex items-center justify-center text-slate-500 dark:text-slate-400">
         {t('guideBuilder.noProject')}
       </div>
     );
@@ -65,9 +65,9 @@ export const GuideBuilder = () => {
     <div className="w-full h-full flex overflow-hidden gap-2 p-1">
 
       {/* ─── Left panel: Available steps ─── */}
-      <div className="w-72 bg-white rounded-xl shadow-xl border border-slate-200 flex flex-col overflow-hidden">
+      <div className="w-72 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="px-4 py-3 bg-gradient-to-r from-orange-50 to-amber-50 border-b border-orange-100 flex-shrink-0">
+        <div className="px-4 py-3 bg-gradient-to-r from-orange-50 to-amber-50 dark:from-slate-700 dark:to-slate-800 border-b border-orange-100 dark:border-slate-700 flex-shrink-0">
           <div className="flex items-center gap-3 mb-2">
             <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-amber-600 rounded-lg flex items-center justify-center shadow-lg flex-shrink-0">
               <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -75,14 +75,14 @@ export const GuideBuilder = () => {
               </svg>
             </div>
             <div>
-              <h2 className="font-bold text-slate-800 text-sm">{t('guideBuilder.modelSteps')}</h2>
-              <p className="text-xs text-slate-500">{t('guideBuilder.addToGuide')}</p>
+              <h2 className="font-bold text-slate-800 dark:text-slate-100 text-sm">{t('guideBuilder.modelSteps')}</h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400">{t('guideBuilder.addToGuide')}</p>
             </div>
           </div>
           {project.steps.length > 0 && (
             <button
               onClick={handleAddAll}
-              className="w-full py-1.5 text-xs font-semibold text-orange-700 bg-orange-100 hover:bg-orange-200 rounded-lg transition-all border border-orange-200"
+              className="w-full py-1.5 text-xs font-semibold text-orange-700 dark:text-orange-300 bg-orange-100 dark:bg-orange-900/30 hover:bg-orange-200 dark:hover:bg-orange-900/50 rounded-lg transition-all border border-orange-200 dark:border-orange-800"
             >
               {t('guideBuilder.addAll')}
             </button>
@@ -93,13 +93,13 @@ export const GuideBuilder = () => {
         <div className="flex-1 overflow-y-auto p-2 space-y-1.5">
           {project.steps.length === 0 && (
             <div className="flex flex-col items-center justify-center py-10 text-center px-4">
-              <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center mb-3">
+              <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center mb-3">
                 <svg className="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                 </svg>
               </div>
-              <p className="text-sm font-medium text-slate-500">{t('guideBuilder.noModelSteps')}</p>
-              <p className="text-xs text-slate-400 mt-1">{t('guideBuilder.noModelStepsDesc')}</p>
+              <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{t('guideBuilder.noModelSteps')}</p>
+              <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">{t('guideBuilder.noModelStepsDesc')}</p>
             </div>
           )}
           {project.steps.map((step) => {
@@ -111,17 +111,17 @@ export const GuideBuilder = () => {
                 onClick={() => setSelectedStepId(step.id === selectedStepId ? null : step.id)}
                 className={`flex items-center gap-2.5 px-3 py-2 rounded-xl border cursor-pointer transition-all ${
                   isSelected
-                    ? 'border-blue-400 bg-blue-50 shadow-sm'
+                    ? 'border-blue-400 bg-blue-50 dark:bg-blue-900/30 shadow-sm'
                     : inGuide
-                    ? 'border-green-200 bg-green-50 hover:bg-green-100'
-                    : 'border-slate-200 bg-white hover:bg-slate-50'
+                    ? 'border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/30'
+                    : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700'
                 }`}
               >
                 <div
-                  className="w-3 h-3 rounded-full flex-shrink-0 ring-2 ring-white shadow"
+                  className="w-3 h-3 rounded-full flex-shrink-0 ring-2 ring-white dark:ring-slate-800 shadow"
                   style={{ backgroundColor: step.highlightColor ?? '#4299e1' }}
                 />
-                <span className={`flex-1 text-sm font-medium truncate ${inGuide ? 'text-green-800' : 'text-slate-700'}`}>
+                <span className={`flex-1 text-sm font-medium truncate ${inGuide ? 'text-green-800 dark:text-green-300' : 'text-slate-700 dark:text-slate-200'}`}>
                   {step.title}
                 </span>
                 <button
@@ -130,7 +130,7 @@ export const GuideBuilder = () => {
                   title={inGuide ? t('guideBuilder.alreadyInGuide') : t('guideBuilder.addToGuideBtn')}
                   className={`w-7 h-7 flex items-center justify-center rounded-lg text-sm font-bold transition-all flex-shrink-0 ${
                     inGuide
-                      ? 'bg-green-100 text-green-600 cursor-default ring-1 ring-green-300'
+                      ? 'bg-green-100 dark:bg-green-900/40 text-green-600 dark:text-green-400 cursor-default ring-1 ring-green-300 dark:ring-green-700'
                       : 'bg-gradient-to-br from-blue-500 to-indigo-600 text-white hover:from-blue-600 hover:to-indigo-700 shadow'
                   }`}
                 >
@@ -145,8 +145,8 @@ export const GuideBuilder = () => {
       {/* ─── Center panel: 3D Preview + Step Editor ─── */}
       <div className="flex-1 flex flex-col gap-2 min-h-0 overflow-hidden">
         {/* 3D Viewer */}
-        <div className="flex-1 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden flex flex-col min-h-0">
-          <div className="px-4 py-2.5 bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200 flex-shrink-0 flex items-center justify-between">
+        <div className="flex-1 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col min-h-0">
+          <div className="px-4 py-2.5 bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-700 dark:to-slate-800 border-b border-slate-200 dark:border-slate-700 flex-shrink-0 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-7 h-7 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-lg flex items-center justify-center shadow flex-shrink-0">
                 <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -154,12 +154,12 @@ export const GuideBuilder = () => {
                 </svg>
               </div>
               <div>
-                <h2 className="font-bold text-slate-800 text-sm">{t('guideBuilder.preview3D')}</h2>
-                <p className="text-xs text-slate-400">{t('guideBuilder.focusCamera')}</p>
+                <h2 className="font-bold text-slate-800 dark:text-slate-100 text-sm">{t('guideBuilder.preview3D')}</h2>
+                <p className="text-xs text-slate-400 dark:text-slate-500">{t('guideBuilder.focusCamera')}</p>
               </div>
             </div>
             {selectedStep && (
-              <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full border border-blue-200 truncate max-w-[180px]">
+              <span className="text-xs font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2.5 py-1 rounded-full border border-blue-200 dark:border-blue-700 truncate max-w-[180px]">
                 {selectedStep.title}
               </span>
             )}
@@ -185,34 +185,34 @@ export const GuideBuilder = () => {
 
         {/* Step editor (only when step selected) */}
         {selectedStep && (
-          <div className="bg-white rounded-xl shadow-xl border border-slate-200 flex flex-col overflow-hidden flex-shrink-0">
-            <div className="px-4 py-2.5 bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200 flex items-center gap-3">
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 flex flex-col overflow-hidden flex-shrink-0">
+            <div className="px-4 py-2.5 bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-700 dark:to-slate-800 border-b border-slate-200 dark:border-slate-700 flex items-center gap-3">
               <div className="w-7 h-7 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center shadow flex-shrink-0">
                 <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                 </svg>
               </div>
               <div>
-                <h2 className="font-bold text-slate-800 text-sm">{t('guideBuilder.editStep')}</h2>
-                <p className="text-xs text-slate-400">{t('guideBuilder.autoSave')}</p>
+                <h2 className="font-bold text-slate-800 dark:text-slate-100 text-sm">{t('guideBuilder.editStep')}</h2>
+                <p className="text-xs text-slate-400 dark:text-slate-500">{t('guideBuilder.autoSave')}</p>
               </div>
             </div>
             <div className="p-3 space-y-3 overflow-y-auto max-h-64">
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide">{t('guideBuilder.title')}</label>
-                  <span className="text-xs text-slate-400">{selectedStep.title.length}/200</span>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wide">{t('guideBuilder.title')}</label>
+                  <span className="text-xs text-slate-400 dark:text-slate-500">{selectedStep.title.length}/200</span>
                 </div>
                 <input
                   type="text"
                   value={selectedStep.title}
                   onChange={(e) => updateStep(selectedStep.id, { title: e.target.value })}
-                  className="w-full px-3 py-1.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-1.5 text-sm border border-slate-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
                   maxLength={200}
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1">{t('guideBuilder.description')}</label>
+                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wide mb-1">{t('guideBuilder.description')}</label>
                 <RichTextEditor
                   value={selectedStep.description}
                   onChange={(value) => updateStep(selectedStep.id, { description: value })}
@@ -225,9 +225,9 @@ export const GuideBuilder = () => {
       </div>
 
       {/* ─── Right panel: Ordered guide steps ─── */}
-      <div className="w-72 bg-white rounded-xl shadow-xl border border-slate-200 flex flex-col overflow-hidden">
+      <div className="w-72 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="px-4 py-3 bg-gradient-to-r from-purple-50 to-indigo-50 border-b border-purple-100 flex-shrink-0">
+        <div className="px-4 py-3 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-slate-700 dark:to-slate-800 border-b border-purple-100 dark:border-slate-700 flex-shrink-0">
           <div className="flex items-center gap-3 mb-2">
             <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-lg flex items-center justify-center shadow-lg flex-shrink-0">
               <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -235,8 +235,8 @@ export const GuideBuilder = () => {
               </svg>
             </div>
             <div className="flex-1 min-w-0">
-              <h2 className="font-bold text-slate-800 text-sm">{t('guideBuilder.guideSteps')}</h2>
-              <p className="text-xs text-slate-500">{t('guideBuilder.dragToReorder')}</p>
+              <h2 className="font-bold text-slate-800 dark:text-slate-100 text-sm">{t('guideBuilder.guideSteps')}</h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400">{t('guideBuilder.dragToReorder')}</p>
             </div>
             {guide.length > 0 && (
               <span className="flex-shrink-0 w-6 h-6 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 text-white text-xs font-bold flex items-center justify-center shadow">
@@ -247,7 +247,7 @@ export const GuideBuilder = () => {
           {guide.length > 0 && (
             <button
               onClick={handleClearGuide}
-              className="w-full py-1.5 text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-all border border-red-200"
+              className="w-full py-1.5 text-xs font-semibold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg transition-all border border-red-200 dark:border-red-800"
             >
               {t('guideBuilder.removeAll')}
             </button>
@@ -258,13 +258,13 @@ export const GuideBuilder = () => {
         <div className="flex-1 overflow-y-auto p-2 space-y-1.5">
           {guide.length === 0 && (
             <div className="flex flex-col items-center justify-center py-10 text-center px-4">
-              <div className="w-12 h-12 rounded-2xl bg-purple-50 flex items-center justify-center mb-3">
-                <svg className="w-6 h-6 text-purple-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-12 h-12 rounded-2xl bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center mb-3">
+                <svg className="w-6 h-6 text-purple-300 dark:text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
                 </svg>
               </div>
-              <p className="text-sm font-medium text-slate-500">{t('guideBuilder.emptyGuide')}</p>
-              <p className="text-xs text-slate-400 mt-1">{t('guideBuilder.emptyGuideDesc')}</p>
+              <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{t('guideBuilder.emptyGuide')}</p>
+              <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">{t('guideBuilder.emptyGuideDesc')}</p>
             </div>
           )}
           {guide.map((gs, index) => {
@@ -284,16 +284,16 @@ export const GuideBuilder = () => {
                 onClick={() => setSelectedStepId(step.id === selectedStepId ? null : step.id)}
                 className={`flex items-center gap-2.5 px-2.5 py-2 rounded-xl border cursor-grab active:cursor-grabbing transition-all select-none ${
                   isDragging
-                    ? 'opacity-30 border-slate-300 bg-slate-100 scale-95'
+                    ? 'opacity-30 border-slate-300 dark:border-slate-600 bg-slate-100 dark:bg-slate-700 scale-95'
                     : isDragOver
-                    ? 'border-purple-400 bg-purple-50 shadow-md scale-100'
+                    ? 'border-purple-400 bg-purple-50 dark:bg-purple-900/30 shadow-md scale-100'
                     : isSelected
-                    ? 'border-blue-400 bg-blue-50 shadow-sm'
-                    : 'border-slate-200 bg-white hover:bg-slate-50 hover:shadow-sm'
+                    ? 'border-blue-400 bg-blue-50 dark:bg-blue-900/30 shadow-sm'
+                    : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 hover:shadow-sm'
                 }`}
               >
                 {/* Drag handle */}
-                <div className="flex-shrink-0 text-slate-300 hover:text-slate-500 transition-colors">
+                <div className="flex-shrink-0 text-slate-300 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-400 transition-colors">
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M8 6a2 2 0 110-4 2 2 0 010 4zm8 0a2 2 0 110-4 2 2 0 010 4zM8 14a2 2 0 110-4 2 2 0 010 4zm8 0a2 2 0 110-4 2 2 0 010 4zM8 22a2 2 0 110-4 2 2 0 010 4zm8 0a2 2 0 110-4 2 2 0 010 4z" />
                   </svg>
@@ -305,11 +305,11 @@ export const GuideBuilder = () => {
                 >
                   {index + 1}
                 </div>
-                <span className="flex-1 text-sm font-medium text-slate-700 truncate">{step.title}</span>
+                <span className="flex-1 text-sm font-medium text-slate-700 dark:text-slate-200 truncate">{step.title}</span>
                 <button
                   onClick={(e) => { e.stopPropagation(); removeGuideStep(gs.id); }}
                   title={t('guideBuilder.removeFromGuide')}
-                  className="w-6 h-6 flex items-center justify-center rounded-lg text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all flex-shrink-0"
+                  className="w-6 h-6 flex items-center justify-center rounded-lg text-slate-300 dark:text-slate-600 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 transition-all flex-shrink-0"
                 >
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
@@ -321,9 +321,9 @@ export const GuideBuilder = () => {
         </div>
 
         {guide.length > 0 && (
-          <div className="px-3 py-2 border-t border-slate-100 bg-slate-50 flex-shrink-0 flex items-center justify-center gap-2">
+          <div className="px-3 py-2 border-t border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 flex-shrink-0 flex items-center justify-center gap-2">
             <div className="w-2 h-2 rounded-full bg-purple-400" />
-            <p className="text-xs text-slate-500 font-medium">
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
               {t('guideBuilder.stepsInGuide', { count: guide.length })}
             </p>
           </div>

@@ -161,7 +161,7 @@ export const StepProperties = () => {
   };
 
   return (
-    <div className="w-full h-full bg-slate-50 overflow-y-auto">
+    <div className="w-full h-full bg-slate-50 dark:bg-slate-900 overflow-y-auto">
       {/* Add step button always visible at top */}
       <div className="px-4 pt-4 pb-2">
         <button
@@ -178,61 +178,61 @@ export const StepProperties = () => {
       <div className="px-4 pb-4">
         {!selectedStep ? (
           <div className="text-center py-10">
-            <div className="w-12 h-12 mx-auto mb-3 bg-orange-100 rounded-xl flex items-center justify-center">
+            <div className="w-12 h-12 mx-auto mb-3 bg-orange-100 dark:bg-orange-900/30 rounded-xl flex items-center justify-center">
               <svg className="w-6 h-6 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5" />
               </svg>
             </div>
-            <p className="text-slate-500 text-sm font-medium">{t('stepProperties.noStepSelected')}</p>
-            <p className="text-slate-400 text-xs mt-1">{t('stepProperties.clickNode')}</p>
+            <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">{t('stepProperties.noStepSelected')}</p>
+            <p className="text-slate-400 dark:text-slate-500 text-xs mt-1">{t('stepProperties.clickNode')}</p>
           </div>
         ) : (
           <div className="space-y-3 mt-2">
-            <div className="bg-white rounded-lg border border-slate-200 p-3 shadow-sm">
+            <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-3 shadow-sm">
               <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide">{t('stepProperties.stepTitle')}</label>
-                <span className="text-xs text-slate-400">{(formData.title || '').length}/200</span>
+                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wide">{t('stepProperties.stepTitle')}</label>
+                <span className="text-xs text-slate-400 dark:text-slate-500">{(formData.title || '').length}/200</span>
               </div>
               <input
                 type="text"
                 value={formData.title || ''}
                 onChange={(e) => handleInputChange('title', e.target.value)}
-                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
                 placeholder={t('stepProperties.stepTitlePlaceholder')}
                 maxLength={200}
               />
             </div>
-            <div className="bg-white rounded-lg border border-slate-200 p-3 shadow-sm">
-              <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">{t('stepProperties.description')}</label>
+            <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-3 shadow-sm">
+              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wide mb-1.5">{t('stepProperties.description')}</label>
               <RichTextEditor
                 value={formData.description || ''}
                 onChange={(value) => handleInputChange('description', value)}
                 maxLength={2000}
               />
             </div>
-            <div className="bg-white rounded-lg border border-slate-200 p-3 shadow-sm">
-              <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">{t('stepProperties.highlightColor')}</label>
+            <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-3 shadow-sm">
+              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wide mb-1.5">{t('stepProperties.highlightColor')}</label>
               <div className="flex items-center gap-2">
                 <input
                   type="color"
                   value={formData.highlightColor || '#4299e1'}
                   onChange={(e) => handleInputChange('highlightColor', e.target.value)}
-                  className="w-10 h-9 border border-slate-200 rounded-lg cursor-pointer"
+                  className="w-10 h-9 border border-slate-200 dark:border-slate-600 rounded-lg cursor-pointer"
                 />
                 <input
                   type="text"
                   value={formData.highlightColor || '#4299e1'}
                   onChange={(e) => handleInputChange('highlightColor', e.target.value)}
-                  className="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="flex-1 px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
                 />
               </div>
             </div>
-            <div className="bg-white rounded-lg border border-slate-200 p-3 shadow-sm">
-              <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">{t('stepProperties.shapeType')}</label>
+            <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-3 shadow-sm">
+              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wide mb-1.5">{t('stepProperties.shapeType')}</label>
               <button
                 type="button"
                 onClick={() => setPickerOpen(true)}
-                className="w-full flex items-center justify-between px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-700 hover:border-blue-400 hover:bg-slate-50 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full flex items-center justify-between px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg text-sm text-slate-700 dark:text-slate-200 hover:border-blue-400 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700"
               >
                 <span>{getShapeButtonLabel()}</span>
                 <svg className="w-4 h-4 text-slate-400 flex-shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -253,26 +253,26 @@ export const StepProperties = () => {
             )}
 
             {formData.shapeType === 'engravedBlock' && (
-              <div className="bg-white rounded-lg border border-slate-200 p-3 shadow-sm space-y-3">
-                <p className="text-xs font-semibold text-slate-600 uppercase tracking-wide">{t('stepProperties.engravedSettings')}</p>
+              <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-3 shadow-sm space-y-3">
+                <p className="text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wide">{t('stepProperties.engravedSettings')}</p>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Tekst <span className="text-gray-400 font-normal">(maks. 3 słów, 24 znaki)</span>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
+                    Tekst <span className="text-gray-400 dark:text-slate-500 font-normal">(maks. 3 słów, 24 znaki)</span>
                   </label>
                   <input
                     type="text"
                     value={formData.engravedBlockParams?.text ?? 'DB'}
                     onChange={(e) => handleEngravedParamChange('text', e.target.value)}
                     maxLength={24}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('stepProperties.font')}</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">{t('stepProperties.font')}</label>
                   <select
                     value={formData.engravedBlockParams?.font ?? 'helvetiker'}
                     onChange={(e) => handleEngravedParamChange('font', e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
                   >
                     <option value="helvetiker">Sans (Helvetiker)</option>
                     <option value="optimer">Serif (Optimer)</option>
@@ -280,8 +280,8 @@ export const StepProperties = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {t('stepProperties.textDepth')} <span className="text-gray-400 font-normal">(0.05 – 0.3)</span>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
+                    {t('stepProperties.textDepth')} <span className="text-gray-400 dark:text-slate-500 font-normal">(0.05 – 0.3)</span>
                   </label>
                   <div className="flex items-center gap-3">
                     <input
@@ -300,13 +300,13 @@ export const StepProperties = () => {
                       step="0.01"
                       value={formData.engravedBlockParams?.depth ?? 0.12}
                       onChange={(e) => handleEngravedParamChange('depth', parseFloat(e.target.value))}
-                      className="w-16 px-2 py-1 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-16 px-2 py-1 border border-slate-200 dark:border-slate-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
                     />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Padding <span className="text-gray-400 font-normal">(0.05 – 0.2)</span>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
+                    Padding <span className="text-gray-400 dark:text-slate-500 font-normal">(0.05 – 0.2)</span>
                   </label>
                   <div className="flex items-center gap-3">
                     <input
@@ -325,16 +325,16 @@ export const StepProperties = () => {
                       step="0.01"
                       value={formData.engravedBlockParams?.padding ?? 0.1}
                       onChange={(e) => handleEngravedParamChange('padding', parseFloat(e.target.value))}
-                      className="w-16 px-2 py-1 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-16 px-2 py-1 border border-slate-200 dark:border-slate-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
                     />
                   </div>
                 </div>
               </div>
             )}
 
-            <div className="bg-white rounded-lg border border-slate-200 p-3 shadow-sm">
-              <label htmlFor="model-scale" className="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">
-                {t('stepProperties.scale')} <span className="text-slate-400 font-normal normal-case">(0.1 – 5.0)</span>
+            <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-3 shadow-sm">
+              <label htmlFor="model-scale" className="block text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wide mb-1.5">
+                {t('stepProperties.scale')} <span className="text-slate-400 dark:text-slate-500 font-normal normal-case">(0.1 – 5.0)</span>
               </label>
               <div className="flex items-center gap-3">
                 <input
@@ -354,14 +354,14 @@ export const StepProperties = () => {
                   step="0.1"
                   value={formData.modelScale ?? 1}
                   onChange={(e) => handleInputChange('modelScale', parseFloat(e.target.value))}
-                  className="w-16 px-2 py-1 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-16 px-2 py-1 border border-slate-200 dark:border-slate-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
                 />
               </div>
             </div>
 
-            <div className="bg-white rounded-lg border border-slate-200 p-3 shadow-sm">
-              <label htmlFor="model-position-y" className="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">
-                {t('stepProperties.positionY')} <span className="text-slate-400 font-normal normal-case">(-10 – 10)</span>
+            <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-3 shadow-sm">
+              <label htmlFor="model-position-y" className="block text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wide mb-1.5">
+                {t('stepProperties.positionY')} <span className="text-slate-400 dark:text-slate-500 font-normal normal-case">(-10 – 10)</span>
               </label>
               <div className="flex items-center gap-3">
                 <input
@@ -381,14 +381,14 @@ export const StepProperties = () => {
                   step="0.1"
                   value={formData.modelPositionY ?? 0}
                   onChange={(e) => handleInputChange('modelPositionY', parseFloat(e.target.value))}
-                  className="w-16 px-2 py-1 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-16 px-2 py-1 border border-slate-200 dark:border-slate-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
                 />
               </div>
             </div>
 
-            <div className="bg-white rounded-lg border border-slate-200 p-3 shadow-sm">
-              <label htmlFor="model-rotation-y" className="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">
-                {t('stepProperties.rotationY')} <span className="text-slate-400 font-normal normal-case">(0 – 360°)</span>
+            <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-3 shadow-sm">
+              <label htmlFor="model-rotation-y" className="block text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wide mb-1.5">
+                {t('stepProperties.rotationY')} <span className="text-slate-400 dark:text-slate-500 font-normal normal-case">(0 – 360°)</span>
               </label>
               <div className="flex items-center gap-3">
                 <input
@@ -408,7 +408,7 @@ export const StepProperties = () => {
                   step="1"
                   value={formData.modelRotationY ?? 0}
                   onChange={(e) => handleInputChange('modelRotationY', parseFloat(e.target.value))}
-                  className="w-16 px-2 py-1 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-16 px-2 py-1 border border-slate-200 dark:border-slate-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
                 />
               </div>
             </div>
@@ -420,7 +420,7 @@ export const StepProperties = () => {
                 </svg>
                 {t('stepProperties.saveChanges')}
               </button>
-              <button onClick={handleDelete} className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-red-50 text-red-600 border border-red-200 rounded-lg hover:bg-red-100 transition-all font-medium text-sm">
+              <button onClick={handleDelete} className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-all font-medium text-sm">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
@@ -428,8 +428,8 @@ export const StepProperties = () => {
               </button>
             </div>
 
-            <div className="pt-2 border-t border-slate-200">
-              <p className="text-xs text-slate-400 font-mono truncate">ID: {selectedStep.id}</p>
+            <div className="pt-2 border-t border-slate-200 dark:border-slate-700">
+              <p className="text-xs text-slate-400 dark:text-slate-500 font-mono truncate">ID: {selectedStep.id}</p>
             </div>
           </div>
         )}

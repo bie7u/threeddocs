@@ -34,10 +34,10 @@ const StepNode = ({ data, selected }: NodeProps<InstructionStep>) => {
 
   return (
     <div
-      className={`rounded-xl bg-white shadow-lg min-w-[190px] max-w-[240px] transition-all duration-150 ${
+      className={`rounded-xl bg-white dark:bg-slate-800 shadow-lg min-w-[190px] max-w-[240px] transition-all duration-150 ${
         selected
-          ? 'ring-2 ring-offset-1 ring-blue-500 shadow-blue-200'
-          : 'border border-slate-200 hover:shadow-md'
+          ? 'ring-2 ring-offset-1 ring-blue-500 shadow-blue-200 dark:ring-offset-slate-900'
+          : 'border border-slate-200 dark:border-slate-700 hover:shadow-md'
       }`}
     >
       <Handle type="target" position={Position.Top} className="!w-2.5 !h-2.5 !bg-slate-400 !border-white !border-2" />
@@ -50,10 +50,10 @@ const StepNode = ({ data, selected }: NodeProps<InstructionStep>) => {
       <div className="px-3 py-2.5">
         <div className="flex items-center gap-2 mb-1">
           <span className="text-base leading-none">{icon}</span>
-          <div className="font-semibold text-slate-800 text-sm leading-tight truncate">{data.title}</div>
+          <div className="font-semibold text-slate-800 dark:text-slate-100 text-sm leading-tight truncate">{data.title}</div>
         </div>
         {data.description && (
-          <div className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
+          <div className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
             {data.description.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()}
           </div>
         )}
@@ -244,13 +244,13 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
             </button>
           ) : (
             /* Expanded editor panel */
-            <div className="bg-white rounded-xl shadow-2xl border border-slate-200 w-72 overflow-hidden">
+            <div className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 w-72 overflow-hidden">
               {/* Header */}
-              <div className="flex items-center justify-between px-3 py-2 bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
-                <span className="text-xs font-bold text-slate-700 uppercase tracking-wide">{t('stepBuilder.editConnection')}</span>
+              <div className="flex items-center justify-between px-3 py-2 bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-700 dark:to-slate-800 border-b border-slate-200 dark:border-slate-700">
+                <span className="text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wide">{t('stepBuilder.editConnection')}</span>
                 <button
                   onClick={() => setOpen(false)}
-                  className="w-5 h-5 flex items-center justify-center rounded hover:bg-slate-200 text-slate-500 transition"
+                  className="w-5 h-5 flex items-center justify-center rounded hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-500 dark:text-slate-400 transition"
                 >
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
@@ -261,14 +261,14 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
               <div className="p-3 space-y-3">
                 {/* Style swatches */}
                 <div>
-                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">{t('stepBuilder.visualStyle')}</p>
+                  <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">{t('stepBuilder.visualStyle')}</p>
                   <div className="flex gap-1.5">
                     {CONNECTION_STYLES.map(s => (
                       <button
                         key={s.value}
                         onClick={() => { setDraftStyle(s.value); commitDraft({ style: s.value }); }}
                         title={s.labelKey === 'Standard' ? 'Standard' : t(s.labelKey)}
-                        className={`flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all ${draftStyle === s.value ? 'ring-2 ring-offset-1 ring-blue-500 scale-105' : 'opacity-70 hover:opacity-100'}`}
+                        className={`flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all ${draftStyle === s.value ? 'ring-2 ring-offset-1 ring-blue-500 scale-105 dark:ring-offset-slate-800' : 'opacity-70 hover:opacity-100'}`}
                         style={{ backgroundColor: s.color, color: s.textColor }}
                       >
                         {s.labelKey === 'Standard' ? 'Standard' : t(s.labelKey)}
@@ -280,22 +280,22 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
                 {/* Connection type + Arrow direction side by side */}
                 <div className={draftConnType === 'arrow' ? 'grid grid-cols-2 gap-2' : 'grid grid-cols-1 gap-2'}>
                   <div>
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">{t('stepBuilder.connectionType')}</p>
+                    <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1">{t('stepBuilder.connectionType')}</p>
                     <select
                       value={draftConnType}
                       onChange={e => { setDraftConnType(e.target.value as ConnectionType); commitDraft({ connectionType: e.target.value as ConnectionType }); }}
-                      className="w-full px-2 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-2 py-1.5 text-xs border border-slate-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
                     >
                       {CONN_TYPES.map(ct => <option key={ct.value} value={ct.value}>{t(ct.labelKey)}</option>)}
                     </select>
                   </div>
                   {draftConnType === 'arrow' && (
                     <div>
-                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">{t('stepBuilder.arrowDirection')}</p>
+                      <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1">{t('stepBuilder.arrowDirection')}</p>
                       <select
                         value={draftArrow}
                         onChange={e => { setDraftArrow(e.target.value as ArrowDirection); commitDraft({ arrowDirection: e.target.value as ArrowDirection }); }}
-                        className="w-full px-2 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-2 py-1.5 text-xs border border-slate-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
                       >
                         {ARROW_DIRS.map(a => <option key={a.value} value={a.value}>{t(a.labelKey)}</option>)}
                       </select>
@@ -305,12 +305,12 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
 
                 {/* Shape type picker */}
                 <div>
-                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">{t('stepBuilder.shapeType')}</p>
+                  <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1">{t('stepBuilder.shapeType')}</p>
                   <div className="flex gap-1.5">
                     <button
                       type="button"
                       onClick={() => setPickerOpen(true)}
-                      className="flex-1 flex items-center justify-between px-2 py-1.5 text-xs border border-slate-200 rounded-lg text-slate-700 hover:border-blue-400 hover:bg-slate-50 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="flex-1 flex items-center justify-between px-2 py-1.5 text-xs border border-slate-200 dark:border-slate-600 rounded-lg text-slate-700 dark:text-slate-200 hover:border-blue-400 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700"
                     >
                       <span>{getShapeButtonLabel()}</span>
                       <svg className="w-3.5 h-3.5 text-slate-400 flex-shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -322,7 +322,7 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
                         type="button"
                         onClick={handleClearShape}
                         title={t('stepBuilder.removeShape')}
-                        className="px-2 py-1.5 text-xs border border-slate-200 rounded-lg text-slate-400 hover:text-red-500 hover:border-red-200 hover:bg-red-50 transition-colors focus:outline-none"
+                        className="px-2 py-1.5 text-xs border border-slate-200 dark:border-slate-600 rounded-lg text-slate-400 dark:text-slate-500 hover:text-red-500 hover:border-red-200 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors focus:outline-none bg-white dark:bg-slate-700"
                       >
                         ✕
                       </button>
@@ -345,8 +345,8 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
                 {draftShape && (
                   <div className="space-y-2">
                     <div>
-                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">
-                        {t('stepBuilder.shapeScale')} <span className="font-normal normal-case text-slate-400">(0.1 – 5.0)</span>
+                      <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1">
+                        {t('stepBuilder.shapeScale')} <span className="font-normal normal-case text-slate-400 dark:text-slate-500">(0.1 – 5.0)</span>
                       </p>
                       <div className="flex items-center gap-2">
                         <input
@@ -365,13 +365,13 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
                           step="0.1"
                           value={draftShapeScale}
                           onChange={e => { const v = parseFloat(e.target.value); setDraftShapeScale(v); commitDraft({ shapeModelScale: v }); }}
-                          className="w-14 px-1.5 py-1 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-14 px-1.5 py-1 text-xs border border-slate-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
                         />
                       </div>
                     </div>
                     <div>
-                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">
-                        {t('stepBuilder.positionY')} <span className="font-normal normal-case text-slate-400">(-10 – 10)</span>
+                      <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1">
+                        {t('stepBuilder.positionY')} <span className="font-normal normal-case text-slate-400 dark:text-slate-500">(-10 – 10)</span>
                       </p>
                       <div className="flex items-center gap-2">
                         <input
@@ -390,13 +390,13 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
                           step="0.1"
                           value={draftShapePosY}
                           onChange={e => { const v = parseFloat(e.target.value); setDraftShapePosY(v); commitDraft({ shapeModelPositionY: v }); }}
-                          className="w-14 px-1.5 py-1 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-14 px-1.5 py-1 text-xs border border-slate-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
                         />
                       </div>
                     </div>
                     <div>
-                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">
-                        {t('stepBuilder.rotationY')} <span className="font-normal normal-case text-slate-400">(0 – 360°)</span>
+                      <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1">
+                        {t('stepBuilder.rotationY')} <span className="font-normal normal-case text-slate-400 dark:text-slate-500">(0 – 360°)</span>
                       </p>
                       <div className="flex items-center gap-2">
                         <input
@@ -415,7 +415,7 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
                           step="1"
                           value={draftShapeRotY}
                           onChange={e => { const v = parseFloat(e.target.value); setDraftShapeRotY(v); commitDraft({ shapeModelRotationY: v }); }}
-                          className="w-14 px-1.5 py-1 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-14 px-1.5 py-1 text-xs border border-slate-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
                         />
                       </div>
                     </div>
@@ -424,24 +424,24 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
 
                 {/* Engraved block settings */}
                 {draftShape === 'engravedBlock' && (
-                  <div className="space-y-2 border border-slate-200 rounded-lg p-2 bg-slate-50">
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">{t('stepBuilder.engravedSettings')}</p>
+                  <div className="space-y-2 border border-slate-200 dark:border-slate-700 rounded-lg p-2 bg-slate-50 dark:bg-slate-900">
+                    <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">{t('stepBuilder.engravedSettings')}</p>
                     <div>
-                      <p className="text-xs font-semibold text-slate-500 mb-1">{t('stepBuilder.textLabel')} <span className="font-normal text-slate-400">{t('stepBuilder.textHint')}</span></p>
+                      <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">{t('stepBuilder.textLabel')} <span className="font-normal text-slate-400 dark:text-slate-500">{t('stepBuilder.textHint')}</span></p>
                       <input
                         type="text"
                         value={draftEngravedParams.text}
                         onChange={e => handleEngravedParamChange('text', e.target.value)}
                         maxLength={24}
-                        className="w-full px-2 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-2 py-1.5 text-xs border border-slate-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
                       />
                     </div>
                     <div>
-                      <p className="text-xs font-semibold text-slate-500 mb-1">{t('stepBuilder.font')}</p>
+                      <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">{t('stepBuilder.font')}</p>
                       <select
                         value={draftEngravedParams.font}
                         onChange={e => handleEngravedParamChange('font', e.target.value as EngravedBlockParams['font'])}
-                        className="w-full px-2 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-2 py-1.5 text-xs border border-slate-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
                       >
                         <option value="helvetiker">Sans (Helvetiker)</option>
                         <option value="optimer">Serif (Optimer)</option>
@@ -449,10 +449,10 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
                       </select>
                     </div>
                     <div>
-                      <p className="text-xs font-semibold text-slate-500 mb-1">{t('stepBuilder.textDepth')} <span className="font-normal text-slate-400">(0.05–0.3)</span></p>
+                      <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">{t('stepBuilder.textDepth')} <span className="font-normal text-slate-400 dark:text-slate-500">(0.05–0.3)</span></p>
                       <div className="flex items-center gap-2">
                         <input type="range" min="0.05" max="0.3" step="0.01" value={draftEngravedParams.depth} onChange={e => handleEngravedParamChange('depth', parseFloat(e.target.value))} className="flex-1" />
-                        <input type="number" min="0.05" max="0.3" step="0.01" value={draftEngravedParams.depth} onChange={e => handleEngravedParamChange('depth', parseFloat(e.target.value))} className="w-14 px-1.5 py-1 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        <input type="number" min="0.05" max="0.3" step="0.01" value={draftEngravedParams.depth} onChange={e => handleEngravedParamChange('depth', parseFloat(e.target.value))} className="w-14 px-1.5 py-1 text-xs border border-slate-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100" />
                       </div>
                     </div>
                   </div>
@@ -461,8 +461,8 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
                 {/* Title */}
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">{t('stepBuilder.titleOptional')}</p>
-                    <span className="text-xs text-slate-400">{draftTitle.length}/50</span>
+                    <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">{t('stepBuilder.titleOptional')}</p>
+                    <span className="text-xs text-slate-400 dark:text-slate-500">{draftTitle.length}/50</span>
                   </div>
                   <input
                     type="text"
@@ -470,15 +470,15 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
                     onChange={e => { setDraftTitle(e.target.value); commitDraft({ title: e.target.value }); }}
                     placeholder={t('stepBuilder.titlePlaceholder')}
                     maxLength={50}
-                    className="w-full px-2 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-2 py-1.5 text-xs border border-slate-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
                   />
                 </div>
 
                 {/* Description */}
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">{t('stepBuilder.descriptionOptional')}</p>
-                    <span className="text-xs text-slate-400">{draftDesc.length}/500</span>
+                    <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">{t('stepBuilder.descriptionOptional')}</p>
+                    <span className="text-xs text-slate-400 dark:text-slate-500">{draftDesc.length}/500</span>
                   </div>
                   <textarea
                     value={draftDesc}
@@ -486,7 +486,7 @@ const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<
                     rows={2}
                     placeholder={t('stepBuilder.descriptionPlaceholder')}
                     maxLength={500}
-                    className="w-full px-2 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                    className="w-full px-2 py-1.5 text-xs border border-slate-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
                   />
                 </div>
               </div>
@@ -607,7 +607,7 @@ export const StepBuilder = () => {
   );
 
   return (
-    <div className="w-full h-full bg-slate-50 relative">
+    <div className="w-full h-full bg-slate-50 dark:bg-slate-900 relative">
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -620,22 +620,22 @@ export const StepBuilder = () => {
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         fitView
-        className="bg-slate-50"
+        className="bg-slate-50 dark:bg-slate-900"
         proOptions={{ hideAttribution: true }}
       >
         <Background color="#cbd5e1" gap={20} size={1} />
-        <Controls className="shadow-lg border border-slate-200 rounded-lg overflow-hidden" />
+        <Controls className="shadow-lg border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden" />
       </ReactFlow>
       {nodes.length === 0 && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <div className="text-center">
-            <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-purple-100 to-indigo-100 rounded-2xl flex items-center justify-center">
+            <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-purple-100 to-indigo-100 dark:from-purple-900/30 dark:to-indigo-900/30 rounded-2xl flex items-center justify-center">
               <svg className="w-8 h-8 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z" />
               </svg>
             </div>
-            <p className="text-slate-500 font-medium text-sm">{t('stepBuilder.noSteps')}</p>
-            <p className="text-slate-400 text-xs mt-1">{t('stepBuilder.addStepHint')}</p>
+            <p className="text-slate-500 dark:text-slate-400 font-medium text-sm">{t('stepBuilder.noSteps')}</p>
+            <p className="text-slate-400 dark:text-slate-500 text-xs mt-1">{t('stepBuilder.addStepHint')}</p>
           </div>
         </div>
       )}
