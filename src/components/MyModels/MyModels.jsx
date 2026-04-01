@@ -4,6 +4,7 @@ import { generateShareToken, fetchProjectsPage } from '../../services/projects';
 import { Footer } from '../Footer/Footer';
 import { useLanguage } from '../../i18n/LanguageContext';
 import { LanguageDropdown } from '../../i18n/LanguageDropdown';
+import { DarkModeToggle } from '../DarkModeToggle/DarkModeToggle';
 
 const PAGE_SIZE = 10;
 
@@ -113,15 +114,15 @@ export const MyModels = ({ onOpenEditor, onClose }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-950 flex flex-col">
       {/* Navigation Bar */}
-      <nav className="bg-white shadow-lg">
+      <nav className="bg-white dark:bg-slate-800 shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-4">
               <button
                 onClick={onClose}
-                className="flex items-center gap-2 px-3 py-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
+                className="flex items-center gap-2 px-3 py-2 rounded-lg text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
                 title={t('myModels.backToDashboard')}
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -145,12 +146,13 @@ export const MyModels = ({ onOpenEditor, onClose }) => {
                     />
                   </svg>
                 </div>
-                <span className="ml-3 text-xl font-bold text-gray-900">{t('myModels.title')}</span>
+                <span className="ml-3 text-xl font-bold text-gray-900 dark:text-slate-100">{t('myModels.title')}</span>
               </div>
             </div>
             <div className="flex items-center gap-3">
               <LanguageDropdown />
-              <div className="text-sm text-gray-500">
+              <DarkModeToggle className="hover:bg-gray-100 dark:hover:bg-slate-700" />
+              <div className="text-sm text-gray-500 dark:text-slate-400">
                 {loading
                   ? t('buttons.loading')
                   : totalCount === 0

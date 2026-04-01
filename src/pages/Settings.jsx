@@ -8,6 +8,7 @@ import { getMe, changePassword } from '../services/auth';
 import { Footer } from '../components/Footer/Footer';
 import { useLanguage } from '../i18n/LanguageContext';
 import { LanguageDropdown } from '../i18n/LanguageDropdown';
+import { DarkModeToggle } from '../components/DarkModeToggle/DarkModeToggle';
 
 // ─── Account Modal ────────────────────────────────────────────────────────────
 
@@ -226,15 +227,15 @@ const Settings = ({ onClose }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-950 flex flex-col">
       {/* Navigation Bar */}
-      <nav className="bg-white shadow-lg">
+      <nav className="bg-white dark:bg-slate-800 shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-4">
               <button
                 onClick={onClose}
-                className="flex items-center gap-2 px-3 py-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
+                className="flex items-center gap-2 px-3 py-2 rounded-lg text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
                 title={t('settings.backToDashboard')}
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -242,7 +243,7 @@ const Settings = ({ onClose }) => {
                 </svg>
                 <span className="text-sm font-medium">{t('settings.backToDashboard')}</span>
               </button>
-              <span className="text-gray-300">|</span>
+              <span className="text-gray-300 dark:text-slate-600">|</span>
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
                   <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -250,11 +251,12 @@ const Settings = ({ onClose }) => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
                 </div>
-                <h1 className="text-xl font-bold text-gray-900">{t('settings.title')}</h1>
+                <h1 className="text-xl font-bold text-gray-900 dark:text-slate-100">{t('settings.title')}</h1>
               </div>
             </div>
-            <div className="flex items-center">
+            <div className="flex items-center gap-2">
               <LanguageDropdown />
+              <DarkModeToggle className="hover:bg-gray-100 dark:hover:bg-slate-700" />
             </div>
           </div>
         </div>

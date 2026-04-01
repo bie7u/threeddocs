@@ -10,6 +10,7 @@ import { useAppStore } from '../store';
 import { getMe } from '../services/auth';
 import { logout } from '../services/auth';
 import { Footer } from '../components/Footer/Footer';
+import { DarkModeToggle } from '../components/DarkModeToggle/DarkModeToggle';
 
 const Dashboard = () => {
   const { t } = useLanguage();
@@ -99,17 +100,18 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-950 flex flex-col">
       {/* Navigation Bar */}
-      <nav className="bg-white shadow-lg">
+      <nav className="bg-white dark:bg-slate-800 shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-2">
               <img src="/logo.svg" alt="ThreeDocsy logo" className="h-9 w-auto" />
-              <span className="text-xl font-bold text-gray-900">ThreeDocsy</span>
+              <span className="text-xl font-bold text-gray-900 dark:text-slate-100">ThreeDocsy</span>
             </div>
             <div className="flex items-center gap-3">
               <LanguageDropdown />
+              <DarkModeToggle className="hover:bg-gray-100 dark:hover:bg-slate-700" />
               <button
                 onClick={handleLogout}
                 className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 rounded-lg transition duration-150"
@@ -124,10 +126,10 @@ const Dashboard = () => {
       {/* Main Content */}
       <div className="w-full flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-slate-100 mb-4">
             {t('dashboard.title')}
           </h1>
-          <p className="text-xl text-gray-600 mb-8">
+          <p className="text-xl text-gray-600 dark:text-slate-400 mb-8">
             {t('dashboard.subtitle')}
           </p>
           
@@ -136,7 +138,7 @@ const Dashboard = () => {
             {/* Moje modele (My models) */}
             <div
               onClick={() => setShowMyModels(true)}
-              className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow cursor-pointer border border-gray-200 hover:border-blue-400 group"
+              className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow cursor-pointer border border-gray-200 dark:border-slate-700 hover:border-blue-400 dark:hover:border-blue-500 group"
             >
               <div className="text-blue-500 mb-4 group-hover:scale-110 transition-transform">
                 <svg
@@ -153,14 +155,14 @@ const Dashboard = () => {
                   />
                 </svg>
               </div>
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">{t('dashboard.myModels')}</h3>
-              <p className="text-sm text-gray-600">{t('dashboard.myModelsDesc')}</p>
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-slate-100 mb-2">{t('dashboard.myModels')}</h3>
+              <p className="text-sm text-gray-600 dark:text-slate-400">{t('dashboard.myModelsDesc')}</p>
             </div>
 
             {/* Dodaj nowy model (Add new model) */}
             <div
               onClick={projectsCount < MAX_PROJECTS ? () => setShowNewProjectDialog(true) : undefined}
-              className={`bg-white p-6 rounded-xl shadow-lg transition-all border border-gray-200 group ${projectsCount < MAX_PROJECTS ? 'hover:shadow-xl cursor-pointer hover:border-purple-400' : 'opacity-60 cursor-not-allowed'}`}
+              className={`bg-white dark:bg-slate-800 p-6 rounded-xl shadow-lg transition-all border border-gray-200 dark:border-slate-700 group ${projectsCount < MAX_PROJECTS ? 'hover:shadow-xl cursor-pointer hover:border-purple-400 dark:hover:border-purple-500' : 'opacity-60 cursor-not-allowed'}`}
             >
               <div className="text-purple-500 mb-4 group-hover:scale-110 transition-transform">
                 <svg
@@ -177,9 +179,9 @@ const Dashboard = () => {
                   />
                 </svg>
               </div>
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">{t('dashboard.addNewModel')}</h3>
-              <p className="text-sm text-gray-600">{t('dashboard.addNewModelDesc')}</p>
-              <p className="text-xs text-gray-400 mt-1">
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-slate-100 mb-2">{t('dashboard.addNewModel')}</h3>
+              <p className="text-sm text-gray-600 dark:text-slate-400">{t('dashboard.addNewModelDesc')}</p>
+              <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">
                 {t('dashboard.projects') + ': '}{projectsCount}/{MAX_PROJECTS}
                 {projectsCount >= MAX_PROJECTS && <span className="text-red-500 ml-1">{t('dashboard.limitReached')}</span>}
               </p>
@@ -188,7 +190,7 @@ const Dashboard = () => {
             {/* Ustawienia (Settings) */}
             <div
               onClick={() => setShowSettings(true)}
-              className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow cursor-pointer border border-gray-200 hover:border-green-400 group"
+              className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow cursor-pointer border border-gray-200 dark:border-slate-700 hover:border-green-400 dark:hover:border-green-500 group"
             >
               <div className="text-green-500 mb-4">
                 <svg
@@ -211,8 +213,8 @@ const Dashboard = () => {
                   />
                 </svg>
               </div>
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">{t('dashboard.settings')}</h3>
-              <p className="text-sm text-gray-600">{t('dashboard.settingsDesc')}</p>
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-slate-100 mb-2">{t('dashboard.settings')}</h3>
+              <p className="text-sm text-gray-600 dark:text-slate-400">{t('dashboard.settingsDesc')}</p>
             </div>
           </div>
         </div>

@@ -9,6 +9,7 @@ import { UploadModelEditor, UploadPreviewMode } from '../UploadModelEditor';
 import { sampleProject, sampleNodePositions } from '../../utils/sampleData';
 import { useLanguage } from '../../i18n/LanguageContext';
 import { LanguageDropdown } from '../../i18n/LanguageDropdown';
+import { DarkModeToggle } from '../DarkModeToggle/DarkModeToggle';
 
 interface MainLayoutProps {
   onBackToProjectList?: () => void;
@@ -32,8 +33,6 @@ export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, onGoToLogin
     setEditorMode,
     setSelectedStepId,
     isGuestMode,
-    isDarkMode,
-    setDarkMode,
   } = useAppStore();
 
   useEffect(() => {
@@ -120,21 +119,7 @@ export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, onGoToLogin
               <div className="w-2 h-2 bg-green-400 rounded-full shadow-lg shadow-green-400/50 motion-safe:animate-pulse" aria-hidden="true"></div>
               <span className="text-sm font-medium text-green-300">{t('mainLayout.editorMode')}</span>
             </div>
-            <button
-              onClick={() => setDarkMode(!isDarkMode)}
-              className="w-9 h-9 flex items-center justify-center rounded-lg bg-slate-700/50 hover:bg-slate-600/50 border border-slate-600/30 transition-all duration-200 shadow-lg"
-              title={isDarkMode ? t('mainLayout.lightMode') : t('mainLayout.darkMode')}
-            >
-              {isDarkMode ? (
-                <svg className="w-5 h-5 text-yellow-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
-              ) : (
-                <svg className="w-5 h-5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                </svg>
-              )}
-            </button>
+            <DarkModeToggle className="bg-slate-700/50 hover:bg-slate-600/50 border border-slate-600/30 shadow-lg" />
           </div>
         </div>
         <div className="flex-1 flex overflow-hidden gap-1 p-1">
@@ -193,21 +178,7 @@ export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, onGoToLogin
           <button onClick={handleLoadSample} className="px-4 py-2 bg-slate-700/50 backdrop-blur-sm rounded-lg hover:bg-slate-600/50 transition-all duration-200 text-sm font-medium border border-slate-600/30 shadow-lg">
             {t('mainLayout.loadSample')}
           </button>
-          <button
-            onClick={() => setDarkMode(!isDarkMode)}
-            className="w-9 h-9 flex items-center justify-center rounded-lg bg-slate-700/50 hover:bg-slate-600/50 border border-slate-600/30 transition-all duration-200 shadow-lg"
-            title={isDarkMode ? t('mainLayout.lightMode') : t('mainLayout.darkMode')}
-          >
-            {isDarkMode ? (
-              <svg className="w-5 h-5 text-yellow-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-              </svg>
-            ) : (
-              <svg className="w-5 h-5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-              </svg>
-            )}
-          </button>
+          <DarkModeToggle className="bg-slate-700/50 hover:bg-slate-600/50 border border-slate-600/30 shadow-lg" />
           <button
             onClick={handleTogglePreview}
             className="px-5 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg hover:from-blue-600 hover:to-indigo-700 transition-all duration-200 font-medium shadow-lg shadow-blue-500/30 flex items-center gap-2"
