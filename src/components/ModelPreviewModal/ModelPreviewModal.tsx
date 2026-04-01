@@ -4,6 +4,7 @@ import { OrbitControls, PerspectiveCamera, useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
 import { Custom3DShape } from '../Viewer3D/Custom3DShape';
 import type { Custom3DElement, UploadedModel3D } from '../../types';
+import { useLanguage } from '../../i18n/LanguageContext';
 
 // ── Uploaded-model renderer (mirrors CustomModel/CustomModelRenderer in Viewer3D) ──
 
@@ -81,6 +82,7 @@ interface ModelPreviewModalProps {
 }
 
 export const ModelPreviewModal = ({ element, model, onClose }: ModelPreviewModalProps) => {
+  const { t } = useLanguage();
   // Close on backdrop click
   const handleBackdrop = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) onClose();
@@ -93,7 +95,7 @@ export const ModelPreviewModal = ({ element, model, onClose }: ModelPreviewModal
     return () => window.removeEventListener('keydown', onKey);
   }, [onClose]);
 
-  const title = element?.name ?? model?.name ?? 'Podgląd';
+  const title = element?.name ?? model?.name ?? t('buttons.preview');
   const description = element?.description ?? model?.description;
 
   return (
@@ -108,7 +110,7 @@ export const ModelPreviewModal = ({ element, model, onClose }: ModelPreviewModal
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-white transition-colors ml-4 flex-shrink-0"
-            aria-label="Zamknij podgląd"
+            aria-label={t('modelPreview.closePreview')}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -137,7 +139,7 @@ export const ModelPreviewModal = ({ element, model, onClose }: ModelPreviewModal
 
         {/* Footer hint */}
         <p className="text-center text-xs text-gray-500 py-2">
-          Przeciągnij aby obrócić · Scroll aby przybliżyć
+          {t('modelPreview.dragHint')}
         </p>
 
         {/* Description */}

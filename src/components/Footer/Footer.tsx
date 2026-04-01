@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { SuggestionDialog } from './SuggestionDialog';
+import { useLanguage } from '../../i18n/LanguageContext';
 
 export const Footer = () => {
   const [showSuggestionDialog, setShowSuggestionDialog] = useState(false);
+  const { t } = useLanguage();
 
   return (
     <>
@@ -15,7 +17,7 @@ export const Footer = () => {
             onClick={() => setShowSuggestionDialog(true)}
             className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 rounded-lg transition duration-150"
           >
-            Zgłoś sugestię
+            {t('footer.suggestion')}
           </button>
         </div>
       </footer>
