@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom';
+import { useLanguage } from '../i18n/LanguageContext';
 
 const TermsOfService = () => {
+  const { t } = useLanguage();
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 py-12 px-4">
       <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-2xl p-10">
@@ -8,83 +10,83 @@ const TermsOfService = () => {
           <img src="/logo.svg" alt="ThreeDocsy logo" className="h-12 w-auto" />
         </div>
         <h1 className="text-3xl font-bold text-gray-900 mb-2 text-center">
-          Regulamin korzystania z aplikacji Threedocsy
+          {t('terms.title')}
         </h1>
         <p className="text-center text-sm text-gray-400 mb-8">📄</p>
 
         <div className="space-y-6 text-gray-700 text-sm leading-relaxed">
           <section>
-            <h2 className="text-lg font-semibold text-gray-900 mb-2">§1 Postanowienia ogólne</h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-2">{t('terms.s1Title')}</h2>
             <ol className="list-decimal list-inside space-y-1">
-              <li>Regulamin określa zasady korzystania z aplikacji internetowej „Threedocsy" dostępnej pod adresem [URL].</li>
-              <li>Operatorem aplikacji jest osoba fizyczna prowadząca projekt „Threedocsy" (dalej: „Operator").</li>
-              <li>Kontakt z Operatorem możliwy jest pod adresem e-mail: [TWÓJ EMAIL].</li>
-              <li>Korzystanie z aplikacji oznacza akceptację niniejszego regulaminu.</li>
+              <li>{t('terms.s1p1')}</li>
+              <li>{t('terms.s1p2')}</li>
+              <li>{t('terms.s1p3')}</li>
+              <li>{t('terms.s1p4')}</li>
             </ol>
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-gray-900 mb-2">§2 Konto użytkownika</h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-2">{t('terms.s2Title')}</h2>
             <ol className="list-decimal list-inside space-y-1">
-              <li>Korzystanie z wybranych funkcji aplikacji może wymagać rejestracji.</li>
-              <li>Użytkownik zobowiązuje się do podania prawdziwych danych.</li>
-              <li>Użytkownik odpowiada za bezpieczeństwo swojego konta.</li>
-              <li>Zabronione jest udostępnianie konta osobom trzecim.</li>
+              <li>{t('terms.s2p1')}</li>
+              <li>{t('terms.s2p2')}</li>
+              <li>{t('terms.s2p3')}</li>
+              <li>{t('terms.s2p4')}</li>
             </ol>
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-gray-900 mb-2">§3 Zasady korzystania</h2>
-            <p>Użytkownik zobowiązuje się korzystać z aplikacji zgodnie z prawem. Zabronione jest:</p>
+            <h2 className="text-lg font-semibold text-gray-900 mb-2">{t('terms.s3Title')}</h2>
+            <p>{t('terms.s3intro')}</p>
             <ul className="list-disc list-inside space-y-1 mt-1 ml-4">
-              <li>dostarczanie treści nielegalnych,</li>
-              <li>podejmowanie prób włamania lub zakłócenia działania,</li>
-              <li>wykorzystywanie aplikacji w sposób sprzeczny z jej przeznaczeniem.</li>
+              <li>{t('terms.s3item1')}</li>
+              <li>{t('terms.s3item2')}</li>
+              <li>{t('terms.s3item3')}</li>
             </ul>
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-gray-900 mb-2">§4 Dostępność usługi</h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-2">{t('terms.s4Title')}</h2>
             <ol className="list-decimal list-inside space-y-1">
-              <li>Aplikacja udostępniana jest „tak jak jest" (as is).</li>
-              <li>Operator nie gwarantuje ciągłej dostępności aplikacji.</li>
-              <li>Operator może wprowadzać zmiany w funkcjonalności w dowolnym czasie.</li>
+              <li>{t('terms.s4p1')}</li>
+              <li>{t('terms.s4p2')}</li>
+              <li>{t('terms.s4p3')}</li>
             </ol>
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-gray-900 mb-2">§5 Odpowiedzialność</h2>
-            <p>Operator nie ponosi odpowiedzialności za:</p>
+            <h2 className="text-lg font-semibold text-gray-900 mb-2">{t('terms.s5Title')}</h2>
+            <p>{t('terms.s5intro')}</p>
             <ul className="list-disc list-inside space-y-1 mt-1 ml-4">
-              <li>skutki korzystania z aplikacji przez użytkownika,</li>
-              <li>utratę danych,</li>
-              <li>przerwy w działaniu usługi.</li>
+              <li>{t('terms.s5item1')}</li>
+              <li>{t('terms.s5item2')}</li>
+              <li>{t('terms.s5item3')}</li>
             </ul>
-            <p className="mt-1">Użytkownik korzysta z aplikacji na własne ryzyko.</p>
+            <p className="mt-1">{t('terms.s5outro')}</p>
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-gray-900 mb-2">§6 Usunięcie konta</h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-2">{t('terms.s6Title')}</h2>
             <ol className="list-decimal list-inside space-y-1">
-              <li>Użytkownik może w każdej chwili zaprzestać korzystania z aplikacji.</li>
-              <li>Operator może usunąć konto w przypadku naruszenia regulaminu.</li>
+              <li>{t('terms.s6p1')}</li>
+              <li>{t('terms.s6p2')}</li>
             </ol>
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-gray-900 mb-2">§7 Dane osobowe</h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-2">{t('terms.s7Title')}</h2>
             <ol className="list-decimal list-inside space-y-1">
-              <li>Dane użytkowników mogą być przetwarzane w zakresie niezbędnym do działania aplikacji.</li>
-              <li>Dane są przetwarzane zgodnie z RODO.</li>
-              <li>Szczegóły znajdują się w Polityce prywatności.</li>
+              <li>{t('terms.s7p1')}</li>
+              <li>{t('terms.s7p2')}</li>
+              <li>{t('terms.s7p3')}</li>
             </ol>
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-gray-900 mb-2">§8 Postanowienia końcowe</h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-2">{t('terms.s8Title')}</h2>
             <ol className="list-decimal list-inside space-y-1">
-              <li>Regulamin może być zmieniany w dowolnym czasie.</li>
-              <li>Dalsze korzystanie z aplikacji oznacza akceptację zmian.</li>
+              <li>{t('terms.s8p1')}</li>
+              <li>{t('terms.s8p2')}</li>
             </ol>
           </section>
         </div>
@@ -94,7 +96,7 @@ const TermsOfService = () => {
             to="/register"
             className="inline-block font-medium text-blue-600 hover:text-blue-500 text-sm"
           >
-            ← Wróć do rejestracji
+            {t('terms.backToRegister')}
           </Link>
         </div>
       </div>

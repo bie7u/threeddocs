@@ -6,9 +6,11 @@ import { loadCustom3DElements } from '../../utils/custom3DElements';
 import { loadUploadedModels } from '../../utils/uploadedModels';
 import type { Custom3DElement } from '../../types';
 import { ShapeTypePicker } from '../ShapeTypePicker/ShapeTypePicker';
+import { useLanguage } from '../../i18n/LanguageContext';
 
 export const StepProperties = () => {
   const { project, selectedStepId, updateStep, deleteStep, addStep, isGuestMode } = useAppStore();
+  const { t } = useLanguage();
   
   const selectedStep = project?.steps.find((step) => step.id === selectedStepId);
   
@@ -108,7 +110,7 @@ export const StepProperties = () => {
   };
 
   const handleDelete = () => {
-    if (selectedStepId && window.confirm('Czy na pewno chcesz usunąć ten krok?')) {
+    if (selectedStepId && window.confirm(t('stepProperties.confirmDelete'))) {
       deleteStep(selectedStepId);
     }
   };
@@ -116,8 +118,8 @@ export const StepProperties = () => {
   const handleAddNewStep = () => {
     const newStep: InstructionStep = {
       id: `step-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
-      title: 'Nowy krok',
-      description: 'Dodaj opis tutaj',
+      title: t('stepProperties.newStep'),
+      description: t('stepProperties.newStepDesc'),
       modelPath: 'box',
       cameraPosition: { x: 5, y: 5, z: 5, targetX: 0, targetY: 0, targetZ: 0 },
       highlightColor: '#4299e1',
@@ -141,21 +143,21 @@ export const StepProperties = () => {
 
   const getShapeButtonLabel = (): string => {
     const labels: Partial<Record<ShapeType, string>> = {
-      cube: '📦 Sześcian',
-      sphere: '🔵 Kula',
-      cylinder: '🥫 Walec',
-      cone: '🔺 Stożek',
-      engravedBlock: '🔲 Klocek z tekstem',
+      cube: `📦 ${t('shapeLabels.cube')}`,
+      sphere: `🔵 ${t('shapeLabels.sphere')}`,
+      cylinder: `🥫 ${t('shapeLabels.cylinder')}`,
+      cone: `🔺 ${t('shapeLabels.cone')}`,
+      engravedBlock: `🔲 ${t('shapeLabels.engravedBlock')}`,
     };
     if (formData.shapeType === 'custom3dElement') {
       const el = custom3DElements.find((e) => e.id === formData.custom3dElementId);
-      return `🧩 ${el?.name ?? 'Element 3D'}`;
+      return `🧩 ${el?.name ?? t('stepProperties.custom3dElementFallback')}`;
     }
     if (formData.shapeType === 'uploadedModel') {
       const m = uploadedModels.find((u) => u.id === formData.uploadedModelId);
-      return `📤 ${m?.name ?? 'Wgrany model'}`;
+      return `📤 ${m?.name ?? t('stepProperties.uploadedModelFallback')}`;
     }
-    return labels[formData.shapeType ?? 'cube'] ?? '📦 Sześcian';
+    return labels[formData.shapeType ?? 'cube'] ?? `📦 ${t('shapeLabels.cube')}`;
   };
 
   return (
@@ -169,7 +171,7 @@ export const StepProperties = () => {
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
           </svg>
-          Dodaj nowy krok
+          {t('stepProperties.addStep')}
         </button>
       </div>
 
@@ -181,14 +183,14 @@ export const StepProperties = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5" />
               </svg>
             </div>
-            <p className="text-slate-500 text-sm font-medium">Żaden krok nie jest zaznaczony</p>
-            <p className="text-slate-400 text-xs mt-1">Kliknij węzeł na kanwie lub dodaj nowy krok</p>
+            <p className="text-slate-500 text-sm font-medium">{t('stepProperties.noStepSelected')}</p>
+            <p className="text-slate-400 text-xs mt-1">{t('stepProperties.clickNode')}</p>
           </div>
         ) : (
           <div className="space-y-3 mt-2">
             <div className="bg-white rounded-lg border border-slate-200 p-3 shadow-sm">
               <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide">Tytuł kroku</label>
+                <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide">{t('stepProperties.stepTitle')}</label>
                 <span className="text-xs text-slate-400">{(formData.title || '').length}/200</span>
               </div>
               <input
@@ -196,12 +198,12 @@ export const StepProperties = () => {
                 value={formData.title || ''}
                 onChange={(e) => handleInputChange('title', e.target.value)}
                 className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Np. Krok 1 – Montaż podstawy"
+                placeholder={t('stepProperties.stepTitlePlaceholder')}
                 maxLength={200}
               />
             </div>
             <div className="bg-white rounded-lg border border-slate-200 p-3 shadow-sm">
-              <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Opis</label>
+              <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">{t('stepProperties.description')}</label>
               <RichTextEditor
                 value={formData.description || ''}
                 onChange={(value) => handleInputChange('description', value)}
@@ -209,7 +211,7 @@ export const StepProperties = () => {
               />
             </div>
             <div className="bg-white rounded-lg border border-slate-200 p-3 shadow-sm">
-              <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Kolor podświetlenia</label>
+              <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">{t('stepProperties.highlightColor')}</label>
               <div className="flex items-center gap-2">
                 <input
                   type="color"
@@ -226,7 +228,7 @@ export const StepProperties = () => {
               </div>
             </div>
             <div className="bg-white rounded-lg border border-slate-200 p-3 shadow-sm">
-              <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Typ kształtu</label>
+              <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">{t('stepProperties.shapeType')}</label>
               <button
                 type="button"
                 onClick={() => setPickerOpen(true)}
@@ -252,7 +254,7 @@ export const StepProperties = () => {
 
             {formData.shapeType === 'engravedBlock' && (
               <div className="bg-white rounded-lg border border-slate-200 p-3 shadow-sm space-y-3">
-                <p className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Ustawienia klocka z tekstem</p>
+                <p className="text-xs font-semibold text-slate-600 uppercase tracking-wide">{t('stepProperties.engravedSettings')}</p>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Tekst <span className="text-gray-400 font-normal">(maks. 3 słów, 24 znaki)</span>
@@ -266,7 +268,7 @@ export const StepProperties = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Czcionka</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('stepProperties.font')}</label>
                   <select
                     value={formData.engravedBlockParams?.font ?? 'helvetiker'}
                     onChange={(e) => handleEngravedParamChange('font', e.target.value)}
@@ -279,7 +281,7 @@ export const StepProperties = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Grubość tekstu <span className="text-gray-400 font-normal">(0.05 – 0.3)</span>
+                    {t('stepProperties.textDepth')} <span className="text-gray-400 font-normal">(0.05 – 0.3)</span>
                   </label>
                   <div className="flex items-center gap-3">
                     <input
@@ -332,7 +334,7 @@ export const StepProperties = () => {
 
             <div className="bg-white rounded-lg border border-slate-200 p-3 shadow-sm">
               <label htmlFor="model-scale" className="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">
-                Skala <span className="text-slate-400 font-normal normal-case">(0.1 – 5.0)</span>
+                {t('stepProperties.scale')} <span className="text-slate-400 font-normal normal-case">(0.1 – 5.0)</span>
               </label>
               <div className="flex items-center gap-3">
                 <input
@@ -359,7 +361,7 @@ export const StepProperties = () => {
 
             <div className="bg-white rounded-lg border border-slate-200 p-3 shadow-sm">
               <label htmlFor="model-position-y" className="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">
-                Pozycja Y <span className="text-slate-400 font-normal normal-case">(-10 – 10, góra/dół)</span>
+                {t('stepProperties.positionY')} <span className="text-slate-400 font-normal normal-case">(-10 – 10)</span>
               </label>
               <div className="flex items-center gap-3">
                 <input
@@ -386,7 +388,7 @@ export const StepProperties = () => {
 
             <div className="bg-white rounded-lg border border-slate-200 p-3 shadow-sm">
               <label htmlFor="model-rotation-y" className="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">
-                Obrót wokół własnej osi <span className="text-slate-400 font-normal normal-case">(0 – 360°)</span>
+                {t('stepProperties.rotationY')} <span className="text-slate-400 font-normal normal-case">(0 – 360°)</span>
               </label>
               <div className="flex items-center gap-3">
                 <input
@@ -416,13 +418,13 @@ export const StepProperties = () => {
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
-                Zapisz zmiany
+                {t('stepProperties.saveChanges')}
               </button>
               <button onClick={handleDelete} className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-red-50 text-red-600 border border-red-200 rounded-lg hover:bg-red-100 transition-all font-medium text-sm">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
-                Usuń krok
+                {t('stepProperties.deleteStep')}
               </button>
             </div>
 

@@ -3,22 +3,21 @@ import { fetchElements } from '../../services/elements';
 import { fetchModels, fetchPublicModels } from '../../services/models';
 import type { Custom3DElement, ShapeType, UploadedModel3D } from '../../types';
 import { ModelPreviewModal } from '../ModelPreviewModal/ModelPreviewModal';
+import { useLanguage } from '../../i18n/LanguageContext';
 
 type Tab = 'standard' | 'elements' | 'models';
 
 interface StandardShape {
   type: ShapeType;
-  label: string;
   emoji: string;
-  description: string;
 }
 
 const STANDARD_SHAPES: StandardShape[] = [
-  { type: 'cube', label: 'Sześcian', emoji: '📦', description: 'Prosty sześcian 3D' },
-  { type: 'sphere', label: 'Kula', emoji: '🔵', description: 'Gładka sfera' },
-  { type: 'cylinder', label: 'Walec', emoji: '🥫', description: 'Cylinder/walec' },
-  { type: 'cone', label: 'Stożek', emoji: '🔺', description: 'Stożek 3D' },
-  { type: 'engravedBlock', label: 'Klocek z tekstem', emoji: '🔲', description: 'Podpisany klocek' },
+  { type: 'cube', emoji: '📦' },
+  { type: 'sphere', emoji: '🔵' },
+  { type: 'cylinder', emoji: '🥫' },
+  { type: 'cone', emoji: '🔺' },
+  { type: 'engravedBlock', emoji: '🔲' },
 ];
 
 interface Props {
@@ -38,6 +37,7 @@ export const ShapeTypePicker = ({
   onSelect,
   onClose,
 }: Props) => {
+  const { t } = useLanguage();
   const initialTab: Tab =
     currentShapeType === 'custom3dElement' ? 'elements' :
     currentShapeType === 'uploadedModel' ? 'models' : 'standard';
@@ -127,9 +127,9 @@ export const ShapeTypePicker = ({
   };
 
   const tabLabels: Record<Tab, string> = {
-    standard: 'Standardowe modele',
-    elements: 'Elementy 3D',
-    models: 'Wgrane modele 3D',
+    standard: t('shapeTypePicker.tabStandard'),
+    elements: t('shapeTypePicker.tabElements'),
+    models: t('shapeTypePicker.tabModels'),
   };
 
   return (
@@ -141,11 +141,11 @@ export const ShapeTypePicker = ({
         <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 overflow-hidden flex flex-col max-h-[80vh]">
           {/* Header */}
           <div className="flex items-center justify-between px-5 py-4 bg-gradient-to-r from-blue-500 to-indigo-600 flex-shrink-0">
-            <h2 className="text-white font-semibold text-lg">Wybierz typ kształtu</h2>
+            <h2 className="text-white font-semibold text-lg">{t('shapeTypePicker.title')}</h2>
             <button
               onClick={onClose}
               className="text-white/80 hover:text-white transition-colors"
-              aria-label="Zamknij"
+              aria-label={t('buttons.close')}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -175,7 +175,9 @@ export const ShapeTypePicker = ({
             {/* ── Standard shapes ─────────────────────────────────── */}
             {activeTab === 'standard' && (
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {STANDARD_SHAPES.map((shape) => (
+                {STANDARD_SHAPES.map((shape) => {
+                  const descKey = `${shape.type}Desc`;
+                  return (
                   <button
                     key={shape.type}
                     onClick={() => handleSelect(shape.type)}
@@ -186,10 +188,11 @@ export const ShapeTypePicker = ({
                     }`}
                   >
                     <span className="text-3xl">{shape.emoji}</span>
-                    <span className="text-sm font-medium text-slate-700">{shape.label}</span>
-                    <span className="text-xs text-slate-400 text-center">{shape.description}</span>
+                    <span className="text-sm font-medium text-slate-700">{t(`shapeLabels.${shape.type}`)}</span>
+                    <span className="text-xs text-slate-400 text-center">{t(`shapeLabels.${descKey}`)}</span>
                   </button>
-                ))}
+                  );
+                })}
               </div>
             )}
 
@@ -204,20 +207,20 @@ export const ShapeTypePicker = ({
                     type="text"
                     value={elementSearch}
                     onChange={(e) => handleElementSearch(e.target.value)}
-                    placeholder="Szukaj elementów 3D..."
+                    placeholder={t('shapeTypePicker.searchElements')}
                     className="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
 
                 {isGuestMode ? (
                   <div className="text-center py-8 text-slate-400 text-sm">
-                    Elementy 3D niedostępne w trybie gościa
+                    {t('shapeTypePicker.guestNoElements')}
                   </div>
                 ) : elementsLoading ? (
-                  <div className="text-center py-8 text-slate-400 text-sm">Ładowanie...</div>
+                  <div className="text-center py-8 text-slate-400 text-sm">{t('shapeTypePicker.loading')}</div>
                 ) : elements.length === 0 ? (
                   <div className="text-center py-8 text-slate-400 text-sm">
-                    {elementSearch ? 'Brak wyników wyszukiwania' : 'Brak elementów 3D. Utwórz je w Ustawienia › Stwórz element 3D.'}
+                    {elementSearch ? t('shapeTypePicker.noResults') : t('shapeTypePicker.noElements')}
                   </div>
                 ) : (
                   <div className="space-y-2">
@@ -248,15 +251,15 @@ export const ShapeTypePicker = ({
                           <button
                             onClick={() => setPreviewElement(el)}
                             className="px-2.5 py-1.5 text-xs text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
-                            title="Podgląd"
+                            title={t('shapeTypePicker.previewBtn')}
                           >
-                            👁 Podgląd
+                            {t('shapeTypePicker.previewBtn')}
                           </button>
                           <button
                             onClick={() => handleSelect('custom3dElement', el.id)}
                             className="px-2.5 py-1.5 text-xs text-white bg-blue-500 rounded-lg hover:bg-blue-600 transition-colors"
                           >
-                            Wybierz
+                            {t('buttons.select')}
                           </button>
                         </div>
                       </div>
@@ -278,17 +281,17 @@ export const ShapeTypePicker = ({
                       type="text"
                       value={modelSearch}
                       onChange={(e) => handleModelSearch(e.target.value)}
-                      placeholder="Szukaj wgranych modeli..."
+                    placeholder={t('shapeTypePicker.searchModels')}
                       className="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   </div>
                 )}
 
                 {modelsLoading ? (
-                  <div className="text-center py-8 text-slate-400 text-sm">Ładowanie...</div>
+                  <div className="text-center py-8 text-slate-400 text-sm">{t('shapeTypePicker.loading')}</div>
                 ) : models.length === 0 ? (
                   <div className="text-center py-8 text-slate-400 text-sm">
-                    {isGuestMode ? 'Brak dostępnych modeli systemowych.' : (modelSearch ? 'Brak wyników wyszukiwania' : 'Brak wgranych modeli 3D. Dodaj je w Ustawienia › Wgraj element 3D.')}
+                    {isGuestMode ? t('shapeTypePicker.noModelsGuest') : (modelSearch ? t('shapeTypePicker.noResults') : t('shapeTypePicker.noModels'))}
                   </div>
                 ) : (
                   <div className="space-y-2">
@@ -309,11 +312,11 @@ export const ShapeTypePicker = ({
                             <div className="flex items-center gap-1.5">
                               <p className="text-sm font-medium text-slate-700 truncate">{m.name}</p>
                               {m.systemModel && (
-                                <span className="flex-shrink-0 inline-flex items-center gap-0.5 px-1.5 py-0.5 text-xs font-medium bg-blue-100 text-blue-700 rounded" aria-label="Model systemowy">
+                                <span className="flex-shrink-0 inline-flex items-center gap-0.5 px-1.5 py-0.5 text-xs font-medium bg-blue-100 text-blue-700 rounded" aria-label={t('shapeTypePicker.systemModel')}>
                                   <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                                     <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
                                   </svg>
-                                  Systemowy
+                                  {t('shapeTypePicker.systemModel')}
                                 </span>
                               )}
                             </div>
@@ -324,15 +327,15 @@ export const ShapeTypePicker = ({
                           <button
                             onClick={() => setPreviewModel(m)}
                             className="px-2.5 py-1.5 text-xs text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
-                            title="Podgląd"
+                            title={t('shapeTypePicker.previewBtn')}
                           >
-                            👁 Podgląd
+                            {t('shapeTypePicker.previewBtn')}
                           </button>
                           <button
                             onClick={() => handleSelect('uploadedModel', undefined, m.id)}
                             className="px-2.5 py-1.5 text-xs text-white bg-blue-500 rounded-lg hover:bg-blue-600 transition-colors"
                           >
-                            Wybierz
+                            {t('buttons.select')}
                           </button>
                         </div>
                       </div>

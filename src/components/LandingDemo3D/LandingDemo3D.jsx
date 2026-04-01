@@ -16,6 +16,7 @@ import { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import * as THREE from 'three';
+import { useLanguage } from '../../i18n/LanguageContext';
 
 // ─── Shared helpers ───────────────────────────────────────────────────────────
 
@@ -862,10 +863,40 @@ function AutoCamera({ stepIdx, tabId, cameraMode, orbitRef, snapOnChange }) {
 // MAIN COMPONENT
 // ═══════════════════════════════════════════════════════════════════════════════
 
-const TABS = [
+const TABS_PL = [
   { id: 'builder', label: 'Diagram Architektury', icon: '🏗️', steps: BUILDER_STEPS },
   { id: 'upload',  label: 'Szafa Serwerowa',      icon: '🖥️', steps: UPLOAD_STEPS  },
   { id: 'cloud',   label: 'Chmura Mikroserwisów', icon: '☁️', steps: CLOUD_STEPS   },
+];
+
+const BUILDER_STEPS_EN = [
+  { id: 0, nodeId: 'user', title: 'Step 1 – Client (Browser)', desc: 'Day 1 onboarding: this is where every request starts. A new developer sees exactly where the traffic comes from — one node, one piece of information.', color: '#3b82f6', emissive: '#1e40af', badge: '🌐 Client' },
+  { id: 1, nodeId: 'lb',   title: 'Step 2 – Load Balancer', desc: 'HTTP traffic is balanced across server instances. Instead of explaining in words — a new dev sees the data flow with their own eyes.', color: '#10b981', emissive: '#064e3b', badge: '⚖️ Load Balancer' },
+  { id: 2, nodeId: 'api',  title: 'Step 3 – API Server (Node.js)', desc: 'The central architecture hub. An interactive map instead of a 30-page wiki — developers remember the structure 2× faster.', color: '#a855f7', emissive: '#581c87', badge: '⚡ API Server' },
+  { id: 3, nodeId: 'auth', title: 'Step 4 – Auth Service (JWT)', desc: 'JWT token verification service. The ↔ arrow shows bidirectional communication. Small knowledge chunks = zero overload for a new employee.', color: '#ef4444', emissive: '#991b1b', badge: '🔐 Auth Service' },
+  { id: 4, nodeId: 'cache', title: 'Step 5 – Cache (Redis)', desc: 'The cache layer speeds up data reads. Each step contains only what matters — a new developer learns the system in logical order.', color: '#f59e0b', emissive: '#78350f', badge: '⚡ Cache (Redis)' },
+  { id: 5, nodeId: 'db',   title: 'Step 6 – Database (PostgreSQL)', desc: 'The last architecture node. After 6 steps a new developer understands the entire technology stack — without asking seniors about the basics.', color: '#06b6d4', emissive: '#0e7490', badge: '🗄️ PostgreSQL' },
+];
+
+const UPLOAD_STEPS_EN = [
+  { id: 0, part: 'rack',      title: 'Step 1 – 19" Server Rack', desc: 'A 19"/42U rack enclosure — the foundation of every data centre. In onboarding: start with the big picture of the infrastructure before drilling into details.', color: '#3b82f6', emissive: '#1d4ed8', badge: '🗄️ Rack 19"' },
+  { id: 1, part: 'switch',    title: 'Step 2 – Network Switch (ToR)', desc: 'Top-of-Rack switch, 48× 10GbE. A new sysadmin immediately sees how devices are connected — instead of studying a Visio diagram.', color: '#10b981', emissive: '#065f46', badge: '🌐 Network Switch' },
+  { id: 2, part: 'appserver', title: 'Step 3 – Application Servers', desc: 'Three compute nodes in a Kubernetes cluster. An interactive map instead of dry documentation — a developer immediately knows what runs where.', color: '#a855f7', emissive: '#6b21a8', badge: '⚙️ App Cluster' },
+  { id: 3, part: 'storage',   title: 'Step 4 – Disk Array (NAS)', desc: '12× NVMe 4 TB in RAID 10 — shared storage for the entire cluster. One step = one thing to remember. That is how effective onboarding works.', color: '#f59e0b', emissive: '#92400e', badge: '💾 Storage Array' },
+];
+
+const CLOUD_STEPS_EN = [
+  { id: 0, group: 'frontend', title: 'Step 1 – Frontend Layer',   desc: 'React SPA, Angular and a mobile client send requests to the API Gateway. Three interfaces, one entry point to the system.', color: '#06b6d4', emissive: '#0e7490' },
+  { id: 1, group: 'gateway',  title: 'Step 2 – API Gateway',       desc: 'Central router: authentication, rate limiting and load balancing. One interface for all services — zero direct connections.', color: '#6366f1', emissive: '#3730a3' },
+  { id: 2, group: 'backend',  title: 'Step 3 – Microservices',     desc: 'Four independent services (User, Order, Payment, Inventory) — scaled and deployed separately, each with its own database.', color: '#a855f7', emissive: '#6b21a8' },
+  { id: 3, group: 'queue',    title: 'Step 4 – Message Queue (Kafka)', desc: 'An async queue decouples services. Domain events flow without direct dependencies between components.', color: '#f97316', emissive: '#9a3412' },
+  { id: 4, group: 'database', title: 'Step 5 – Data Layer',        desc: 'PostgreSQL (relational), MongoDB (documents), Redis (cache) — each service picks the engine that fits its needs.', color: '#10b981', emissive: '#065f46' },
+];
+
+const TABS_EN = [
+  { id: 'builder', label: 'Architecture Diagram', icon: '🏗️', steps: BUILDER_STEPS_EN },
+  { id: 'upload',  label: 'Server Rack',          icon: '🖥️', steps: UPLOAD_STEPS_EN  },
+  { id: 'cloud',   label: 'Microservices Cloud',  icon: '☁️', steps: CLOUD_STEPS_EN   },
 ];
 
 const STEP_INTERVAL_MS = 4000;
@@ -877,6 +908,9 @@ export default function LandingDemo3D() {
   const timerRef     = useRef(null);
   const orbitRef     = useRef(null);
   const snapOnChange = useRef(false); // true → snap camera on next tab switch
+  const { locale, t } = useLanguage();
+
+  const TABS = locale === 'pl' ? TABS_PL : TABS_EN;
 
   const tab  = TABS[tabIdx];
   const step = tab.steps[stepIdx];
@@ -975,7 +1009,7 @@ export default function LandingDemo3D() {
                   d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
-              <span className="text-xs font-semibold text-white hidden sm:inline">Kamera:</span>
+              <span className="text-xs font-semibold text-white hidden sm:inline">{t('previewMode.camera')}</span>
               <button
                 onClick={() => setCameraMode('auto')}
                 className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all duration-200 ${
@@ -983,7 +1017,7 @@ export default function LandingDemo3D() {
                     ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/30'
                     : 'bg-white/10 text-slate-300 hover:bg-white/20'
                 }`}
-              >Auto</button>
+              >{t('previewMode.auto')}</button>
               <button
                 onClick={() => setCameraMode('free')}
                 className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all duration-200 ${
@@ -991,13 +1025,13 @@ export default function LandingDemo3D() {
                     ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/30'
                     : 'bg-white/10 text-slate-300 hover:bg-white/20'
                 }`}
-              >Swobodna</button>
+              >{t('previewMode.free')}</button>
             </div>
 
             {/* Preview Mode badge */}
             <div className="flex items-center gap-2 bg-gradient-to-r from-blue-500/20 to-indigo-600/20 backdrop-blur-sm px-4 sm:px-6 py-2 rounded-xl border border-blue-400/30 shadow-xl">
               <div className="w-2 h-2 bg-blue-400 rounded-full shadow-lg shadow-blue-400/50 motion-safe:animate-pulse" aria-hidden="true" />
-              <span className="text-xs sm:text-sm font-bold text-white">Tryb podglądu</span>
+              <span className="text-xs sm:text-sm font-bold text-white">{t('previewMode.previewMode')}</span>
             </div>
 
             {/* Balance spacer */}
@@ -1034,11 +1068,11 @@ export default function LandingDemo3D() {
                 <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
-                <span className="hidden sm:inline">Poprzedni</span>
+                <span className="hidden sm:inline">{t('previewMode.previous')}</span>
               </button>
 
               <div className="text-center min-w-[80px] sm:min-w-[120px] px-2">
-                <div className="text-[10px] sm:text-xs text-slate-400 uppercase tracking-wider mb-0.5">Krok</div>
+                <div className="text-[10px] sm:text-xs text-slate-400 uppercase tracking-wider mb-0.5">{t('previewMode.step')}</div>
                 <div className="text-xl sm:text-2xl font-bold text-blue-300" aria-label={`Step ${stepIdx + 1} of ${tab.steps.length}`}>
                   {stepIdx + 1} / {tab.steps.length}
                 </div>
@@ -1053,7 +1087,7 @@ export default function LandingDemo3D() {
                     : 'bg-white/10 cursor-not-allowed opacity-50'
                 }`}
               >
-                <span className="hidden sm:inline">Następny</span>
+                <span className="hidden sm:inline">{t('previewMode.next')}</span>
                 <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>

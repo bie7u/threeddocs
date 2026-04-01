@@ -4,6 +4,7 @@ import { useAppStore } from '../store';
 import { PreviewMode } from '../components/PreviewMode/PreviewMode';
 import { UploadPreviewMode } from '../components/UploadModelEditor';
 import { fetchPublicProject } from '../services/projects';
+import { useLanguage } from '../i18n/LanguageContext';
 
 const SharedView = () => {
   const { shareToken } = useParams();
@@ -11,6 +12,7 @@ const SharedView = () => {
   const { project, setProject, setPreviewMode, isPreviewMode } = useAppStore();
   const previewStarted = useRef(false);
   const [notFound, setNotFound] = useState(false);
+  const { t } = useLanguage();
 
   useEffect(() => {
     if (!shareToken) return;
@@ -46,15 +48,15 @@ const SharedView = () => {
               />
             </svg>
           </div>
-          <h1 className="text-2xl font-bold mb-2">Model nie znaleziony</h1>
+          <h1 className="text-2xl font-bold mb-2">{t('sharedView.notFound')}</h1>
           <p className="text-slate-400 mb-6 max-w-sm">
-            Ten link może być nieważny lub model został usunięty.
+            {t('sharedView.notFoundDesc')}
           </p>
           <button
             onClick={() => navigate('/')}
             className="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 rounded-xl font-medium transition-all shadow-lg shadow-blue-500/30"
           >
-            Wróć do strony głównej
+            {t('sharedView.backToHome')}
           </button>
         </div>
       </div>
@@ -67,7 +69,7 @@ const SharedView = () => {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 to-slate-800">
         <div className="text-white text-center">
           <div className="w-12 h-12 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p>Ładowanie modelu...</p>
+          <p>{t('sharedView.loading')}</p>
         </div>
       </div>
     );
