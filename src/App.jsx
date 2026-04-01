@@ -8,7 +8,7 @@ import Dashboard from './pages/Dashboard';
 import GuestDashboard from './pages/GuestDashboard';
 import SharedView from './pages/SharedView';
 import TermsOfService from './pages/TermsOfService';
-import PrivacyPolicy from './pages/PrivacyPolicy';
+import PrivacyPolicy from './pages/PrivacyPage';
 
 function App() {
   return (
