@@ -61,6 +61,19 @@ export const getMe = async (): Promise<AuthUser> => {
   return res.json() as Promise<AuthUser>;
 };
 
+/** POST /api/auth/google/ — exchange a Google ID token for a session; server sets httpOnly cookies. */
+export const loginWithGoogle = async (credential: string): Promise<AuthUser> => {
+  const res = await apiRequest('/auth/google/', {
+    method: 'POST',
+    body: JSON.stringify({ credential }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ message: 'Google login failed' }));
+    throw new Error((err as { message?: string }).message ?? 'Google login failed');
+  }
+  return res.json() as Promise<AuthUser>;
+};
+
 /** POST /api/auth/reset-password/ — sends a password reset email to the given address. */
 export const requestPasswordReset = async (email: string): Promise<void> => {
   const res = await fetch(`${API_BASE}/auth/reset-password/`, {
@@ -74,7 +87,7 @@ export const requestPasswordReset = async (email: string): Promise<void> => {
   }
 };
 
-/** POST /api/auth/reset-password/ — sets a new password using the token from the reset e-mail link. */
+/** POST /api/auth/reset-password-conf/ — sets a new password using the token from the reset e-mail link. */
 export const confirmPasswordReset = async (token: string, password: string): Promise<void> => {
   const res = await fetch(`${API_BASE}/auth/reset-password-conf/`, {
     method: 'POST',

@@ -63,6 +63,7 @@ export const en = {
   },
   errors: {
     invalidCredentials: 'Invalid email or password',
+    googleLoginFailed: 'Google sign-in failed',
     passwordMismatch: 'Passwords do not match',
     acceptBoth: 'You must accept the Terms of Service and Privacy Policy',
     createAccountFailed: 'Failed to create account',

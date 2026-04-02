@@ -63,6 +63,7 @@ export const pl = {
   },
   errors: {
     invalidCredentials: 'Nieprawidłowy e-mail lub hasło',
+    googleLoginFailed: 'Logowanie przez Google nie powiodło się',
     passwordMismatch: 'Hasła nie są zgodne',
     acceptBoth: 'Musisz zaakceptować Regulamin oraz Politykę prywatności',
     createAccountFailed: 'Nie udało się utworzyć konta',
