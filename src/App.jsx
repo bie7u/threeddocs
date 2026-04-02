@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { LanguageProvider } from './i18n/LanguageContext';
 import LandingPage from './pages/LandingPage';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -12,8 +13,9 @@ import PrivacyPolicy from './pages/PrivacyPage';
 
 function App() {
   return (
-    <Router>
-      <Routes>
+    <LanguageProvider>
+      <Router>
+        <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
@@ -24,8 +26,9 @@ function App() {
         <Route path="/view/:shareToken" element={<SharedView />} />
         <Route path="/terms" element={<TermsOfService />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
-      </Routes>
-    </Router>
+        </Routes>
+      </Router>
+    </LanguageProvider>
   );
 }
 

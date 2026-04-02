@@ -1,5 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import { useLanguage } from '../i18n/LanguageContext';
+import { LanguageDropdown } from '../i18n/LanguageDropdown';
 import { MainLayout } from '../components/Layout/MainLayout';
 import { NewProjectDialog } from '../components/ProjectList/NewProjectDialog';
 import { MyModels } from '../components/MyModels/MyModels';
@@ -10,6 +12,7 @@ import { logout } from '../services/auth';
 import { Footer } from '../components/Footer/Footer';
 
 const Dashboard = () => {
+  const { t } = useLanguage();
   const MAX_PROJECTS = 30;
 
   const navigate = useNavigate();
@@ -47,7 +50,7 @@ const Dashboard = () => {
       setShowNewProjectDialog(false);
       setShowEditor(true);
     } catch (err) {
-      setCreateError(err instanceof Error ? err.message : 'Nie udało się utworzyć projektu');
+      setCreateError(err instanceof Error ? err.message : t('errors.createProjectFailed'));
     } finally {
       setIsCreating(false);
     }
@@ -105,12 +108,13 @@ const Dashboard = () => {
               <img src="/logo.svg" alt="ThreeDocsy logo" className="h-9 w-auto" />
               <span className="text-xl font-bold text-gray-900">ThreeDocsy</span>
             </div>
-            <div>
+            <div className="flex items-center gap-3">
+              <LanguageDropdown />
               <button
                 onClick={handleLogout}
                 className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 rounded-lg transition duration-150"
               >
-                Wyloguj się
+                {t('nav.logout')}
               </button>
             </div>
           </div>
@@ -121,10 +125,10 @@ const Dashboard = () => {
       <div className="w-full flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Witaj w panelu ThreeDocsy
+            {t('dashboard.title')}
           </h1>
           <p className="text-xl text-gray-600 mb-8">
-            Twoje środowisko jest gotowe
+            {t('dashboard.subtitle')}
           </p>
           
           {/* Dashboard Tiles */}
@@ -149,8 +153,8 @@ const Dashboard = () => {
                   />
                 </svg>
               </div>
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">Moje modele</h3>
-              <p className="text-sm text-gray-600">Przeglądaj swoje modele 3D</p>
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">{t('dashboard.myModels')}</h3>
+              <p className="text-sm text-gray-600">{t('dashboard.myModelsDesc')}</p>
             </div>
 
             {/* Dodaj nowy model (Add new model) */}
@@ -173,11 +177,11 @@ const Dashboard = () => {
                   />
                 </svg>
               </div>
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">Dodaj nowy model</h3>
-              <p className="text-sm text-gray-600">Wgraj nowy model 3D</p>
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">{t('dashboard.addNewModel')}</h3>
+              <p className="text-sm text-gray-600">{t('dashboard.addNewModelDesc')}</p>
               <p className="text-xs text-gray-400 mt-1">
-                Projekty: {projectsCount}/{MAX_PROJECTS}
-                {projectsCount >= MAX_PROJECTS && <span className="text-red-500 ml-1">— osiągnięto limit</span>}
+                {t('dashboard.projects') + ': '}{projectsCount}/{MAX_PROJECTS}
+                {projectsCount >= MAX_PROJECTS && <span className="text-red-500 ml-1">{t('dashboard.limitReached')}</span>}
               </p>
             </div>
 
@@ -207,8 +211,8 @@ const Dashboard = () => {
                   />
                 </svg>
               </div>
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">Ustawienia</h3>
-              <p className="text-sm text-gray-600">Konfiguruj swoje preferencje</p>
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">{t('dashboard.settings')}</h3>
+              <p className="text-sm text-gray-600">{t('dashboard.settingsDesc')}</p>
             </div>
           </div>
         </div>
