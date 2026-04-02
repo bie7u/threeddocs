@@ -76,7 +76,7 @@ export const requestPasswordReset = async (email: string): Promise<void> => {
 
 /** POST /api/auth/reset-password/ — sets a new password using the token from the reset e-mail link. */
 export const confirmPasswordReset = async (token: string, password: string): Promise<void> => {
-  const res = await fetch(`${API_BASE}/auth/reset-password/`, {
+  const res = await fetch(`${API_BASE}/auth/reset-password-conf/`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ token, password }),
