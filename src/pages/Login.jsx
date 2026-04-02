@@ -1,10 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { login, loginWithGoogle, probeSession } from '../services/auth';
+import { useLanguage } from '../i18n/LanguageContext';
+import { LanguageDropdown } from '../i18n/LanguageDropdown';
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 const Login = () => {
+  const { t } = useLanguage();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -41,7 +44,7 @@ const Login = () => {
         await loginWithGoogle(response.credential);
         navigate('/dashboard');
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Logowanie przez Google nie powiodło się');
+        setError(err instanceof Error ? err.message : t('errors.googleLoginFailed'));
       } finally {
         setIsLoading(false);
       }
@@ -87,7 +90,7 @@ const Login = () => {
         document.head.removeChild(script);
       }
     };
-  }, [checking, navigate]); // re-run when session-check phase ends
+  }, [checking, navigate, t]); // re-run when session-check phase ends
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -98,20 +101,23 @@ const Login = () => {
       await login(email, password);
       navigate('/dashboard');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Nieprawidłowy e-mail lub hasło');
+      setError(err instanceof Error ? err.message : t('errors.invalidCredentials'));
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 relative">
+      <div className="absolute top-4 right-4">
+        <LanguageDropdown />
+      </div>
       {checking ? (
         <div className="flex flex-col items-center gap-3 text-gray-400">
           <svg className="w-8 h-8 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
           </svg>
-          <span className="text-sm">Sprawdzanie sesji…</span>
+          <span className="text-sm">{t('auth.checkingSession')}</span>
         </div>
       ) : (
         <div className="max-w-md w-full space-y-6 p-10 bg-white rounded-2xl shadow-2xl">
@@ -122,7 +128,7 @@ const Login = () => {
             ThreeDocsy
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Zaloguj się na swoje konto
+            {t('auth.loginSubtitle')}
           </p>
 
         {/* Google sign-in */}
@@ -152,7 +158,7 @@ const Login = () => {
                 fill="#EA4335"
               />
             </svg>
-            Zaloguj się przez Google (niedostępne)
+            {t('auth.loginWithGoogle')}
           </button>
         )}
 
@@ -162,7 +168,7 @@ const Login = () => {
             <div className="w-full border-t border-gray-200" />
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="px-3 bg-white text-gray-400">lub przez email</span>
+            <span className="px-3 bg-white text-gray-400">{t('auth.orByEmail')}</span>
           </div>
         </div>
 
@@ -170,7 +176,7 @@ const Login = () => {
           <div className="space-y-4">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                Adres e-mail
+                {t('auth.email')}
               </label>
               <input
                 id="email"
@@ -181,12 +187,12 @@ const Login = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="appearance-none relative block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150"
-                placeholder="Wpisz adres e-mail"
+                placeholder={t('auth.emailPlaceholder')}
               />
             </div>
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                Hasło
+                {t('auth.password')}
               </label>
               <input
                 id="password"
@@ -197,7 +203,7 @@ const Login = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="appearance-none relative block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150"
-                placeholder="Wpisz hasło"
+                placeholder={t('auth.passwordPlaceholder')}
               />
             </div>
           </div>
@@ -217,14 +223,14 @@ const Login = () => {
                 className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
               />
               <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
-                Zapamiętaj mnie
+                {t('auth.rememberMe')}
               </label>
             </div>
 
             <div className="text-sm">
-              <a href="#" className="font-medium text-blue-600 hover:text-blue-500">
-                Nie pamiętasz hasła?
-              </a>
+              <Link to="/forgot-password" className="font-medium text-blue-600 hover:text-blue-500">
+                {t('auth.forgotPassword')}
+              </Link>
             </div>
           </div>
 
@@ -234,7 +240,7 @@ const Login = () => {
               disabled={isLoading}
               className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 shadow-lg disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {isLoading ? 'Logowanie…' : 'Zaloguj się'}
+              {isLoading ? t('auth.loggingIn') : t('auth.login')}
             </button>
           </div>
         </form>
@@ -244,7 +250,7 @@ const Login = () => {
             <div className="w-full border-t border-gray-200" />
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="px-3 bg-white text-gray-400">lub</span>
+            <span className="px-3 bg-white text-gray-400">{t('auth.or')}</span>
           </div>
         </div>
 
@@ -257,14 +263,14 @@ const Login = () => {
             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
             </svg>
-            Wypróbuj bez rejestracji
+            {t('auth.tryWithoutRegistration')}
           </button>
         </div>
 
         <p className="text-center text-sm text-gray-600">
-          Nie masz konta?{' '}
+          {t('auth.noAccount')}{' '}
           <Link to="/register" className="font-medium text-blue-600 hover:text-blue-500">
-            Zarejestruj się
+            {t('auth.register')}
           </Link>
         </p>
       </div>

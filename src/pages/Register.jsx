@@ -1,12 +1,17 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { register } from '../services/auth';
+import { useLanguage } from '../i18n/LanguageContext';
+import { LanguageDropdown } from '../i18n/LanguageDropdown';
 
 const Register = () => {
+  const { t } = useLanguage();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [acceptedPrivacy, setAcceptedPrivacy] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
@@ -18,7 +23,12 @@ const Register = () => {
     setError('');
 
     if (password !== confirmPassword) {
-      setError('Hasła nie są zgodne');
+      setError(t('errors.passwordMismatch'));
+      return;
+    }
+
+    if (!acceptedTerms || !acceptedPrivacy) {
+      setError(t('errors.acceptBoth'));
       return;
     }
 
@@ -27,7 +37,7 @@ const Register = () => {
       await register(email, password, name);
       navigate('/dashboard');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Nie udało się utworzyć konta');
+      setError(err instanceof Error ? err.message : t('errors.createAccountFailed'));
     } finally {
       setIsLoading(false);
     }
@@ -39,7 +49,10 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 relative">
+      <div className="absolute top-4 right-4">
+        <LanguageDropdown />
+      </div>
       <div className="max-w-md w-full space-y-6 p-10 bg-white rounded-2xl shadow-2xl">
         {/* Header */}
         <div>
@@ -50,7 +63,7 @@ const Register = () => {
             ThreeDocsy
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Utwórz nowe konto
+            {t('auth.registerSubtitle')}
           </p>
         </div>
 
@@ -79,12 +92,12 @@ const Register = () => {
               fill="#EA4335"
             />
           </svg>
-          Zarejestruj się przez Google
+          {t('auth.registerWithGoogle')}
         </button>
 
         {googleInfo && (
           <div className="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-lg text-sm text-center">
-            Rejestracja przez Google będzie dostępna wkrótce.
+            {t('auth.googleRegisterComingSoon')}
           </div>
         )}
 
@@ -94,7 +107,7 @@ const Register = () => {
             <div className="w-full border-t border-gray-200" />
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="px-3 bg-white text-gray-400">lub przez email</span>
+            <span className="px-3 bg-white text-gray-400">{t('auth.orByEmail')}</span>
           </div>
         </div>
 
@@ -102,7 +115,7 @@ const Register = () => {
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div>
             <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-              Imię <span className="text-gray-400 font-normal">(opcjonalnie)</span>
+              {t('auth.name')} <span className="text-gray-400 font-normal">{t('auth.nameOptional')}</span>
             </label>
             <input
               id="name"
@@ -118,7 +131,7 @@ const Register = () => {
 
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-              Adres email
+              {t('auth.emailLabel')}
             </label>
             <input
               id="email"
@@ -135,7 +148,7 @@ const Register = () => {
 
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-              Hasło
+              {t('auth.password')}
             </label>
             <input
               id="password"
@@ -146,13 +159,13 @@ const Register = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="appearance-none relative block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150"
-              placeholder="Min. 8 znaków"
+              placeholder={t('auth.minChars')}
             />
           </div>
 
           <div>
             <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700 mb-1">
-              Powtórz hasło
+              {t('auth.confirmPassword')}
             </label>
             <input
               id="confirm-password"
@@ -163,8 +176,52 @@ const Register = () => {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               className="appearance-none relative block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150"
-              placeholder="Powtórz hasło"
+              placeholder={t('auth.confirmPassword')}
             />
+          </div>
+
+          {/* Terms & Privacy checkboxes */}
+          <div className="space-y-3">
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={acceptedTerms}
+                onChange={(e) => setAcceptedTerms(e.target.checked)}
+                className="mt-0.5 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 shrink-0"
+              />
+              <span className="text-sm text-gray-700">
+                {t('auth.acceptTerms')}{' '}
+                <Link
+                  to="/terms"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-medium text-blue-600 hover:text-blue-500"
+                >
+                  {t('auth.terms')}
+                </Link>{' '}
+                {t('auth.termsOfUse')}
+              </span>
+            </label>
+
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={acceptedPrivacy}
+                onChange={(e) => setAcceptedPrivacy(e.target.checked)}
+                className="mt-0.5 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 shrink-0"
+              />
+              <span className="text-sm text-gray-700">
+                {t('auth.acceptTerms')}{' '}
+                <Link
+                  to="/privacy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-medium text-blue-600 hover:text-blue-500"
+                >
+                  {t('auth.privacyPolicy')}
+                </Link>
+              </span>
+            </label>
           </div>
 
           {error && (
@@ -178,15 +235,15 @@ const Register = () => {
             disabled={isLoading}
             className="w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 shadow-lg disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            {isLoading ? 'Tworzenie konta…' : 'Utwórz konto'}
+            {isLoading ? t('auth.creatingAccount') : t('auth.createAccount')}
           </button>
         </form>
 
         {/* Link to Login */}
         <p className="text-center text-sm text-gray-600">
-          Masz już konto?{' '}
+          {t('auth.hasAccount')}{' '}
           <Link to="/login" className="font-medium text-blue-600 hover:text-blue-500">
-            Zaloguj się
+            {t('auth.login')}
           </Link>
         </p>
       </div>

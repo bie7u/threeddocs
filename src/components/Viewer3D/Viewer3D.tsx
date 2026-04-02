@@ -10,6 +10,9 @@ import { EngravedBlock } from './EngravedBlock';
 import { Custom3DShape } from './Custom3DShape';
 import { getCustom3DElementById } from '../../utils/custom3DElements';
 import { getUploadedModelById } from '../../utils/uploadedModels';
+import { useAppStore } from '../../store';
+import DOMPurify from 'dompurify';
+import { isHtmlContent } from '../../utils/html';
 
 // Error Boundary for catching errors in 3D components
 class ModelErrorBoundary extends Component<
@@ -191,16 +194,17 @@ const degToRad = (degrees: number) => degrees * Math.PI / 180;
 const Shape3D = ({ shapeType = 'cube', size = 2, color, emissive = '#000000', emissiveIntensity = 0, customModelUrl, modelScale = 1, engravedBlockParams, custom3dElementId, uploadedModelId, modelPositionY = 0, modelRotationY = 0, shareToken }: Shape3DProps) => {
   const [uploadedModel, setUploadedModel] = useState<UploadedModel3D | null>(null);
   const [customElement, setCustomElement] = useState<Custom3DElement | null>(null);
+  const isGuestMode = useAppStore((s) => s.isGuestMode);
 
   useEffect(() => {
     if (shapeType === 'uploadedModel' && uploadedModelId) {
-      getUploadedModelById(uploadedModelId, shareToken)
+      getUploadedModelById(uploadedModelId, shareToken, isGuestMode)
         .then((m) => setUploadedModel(m ?? null))
         .catch(() => setUploadedModel(null));
     } else {
       setUploadedModel(null);
     }
-  }, [shapeType, uploadedModelId, shareToken]);
+  }, [shapeType, uploadedModelId, shareToken, isGuestMode]);
 
   useEffect(() => {
     if (shapeType === 'custom3dElement' && custom3dElementId) {
@@ -1021,7 +1025,14 @@ export const Viewer3D = ({ project, currentStepId, nodePositions = {}, cameraMod
       {showStepOverlay && currentStep && (
         <div className="absolute top-4 left-4 bg-black bg-opacity-70 text-white p-4 rounded-lg max-w-md">
           <h3 className="text-lg font-bold mb-2">{currentStep.title}</h3>
-          <p className="text-sm">{currentStep.description}</p>
+          {isHtmlContent(currentStep.description) ? (
+            <div
+              className="text-sm rich-text-preview"
+              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(currentStep.description) }}
+            />
+          ) : (
+            <p className="text-sm">{currentStep.description}</p>
+          )}
         </div>
       )}
       
