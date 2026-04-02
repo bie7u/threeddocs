@@ -61,6 +61,32 @@ export const getMe = async (): Promise<AuthUser> => {
   return res.json() as Promise<AuthUser>;
 };
 
+/** POST /api/auth/reset-password/ — sends a password reset email to the given address. */
+export const requestPasswordReset = async (email: string): Promise<void> => {
+  const res = await fetch(`${API_BASE}/auth/reset-password/`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ message: 'Reset failed' }));
+    throw new Error((err as { message?: string }).message ?? 'Reset failed');
+  }
+};
+
+/** POST /api/auth/reset-password/ — sets a new password using the token from the reset e-mail link. */
+export const confirmPasswordReset = async (token: string, password: string): Promise<void> => {
+  const res = await fetch(`${API_BASE}/auth/reset-password/`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token, password }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ message: 'Reset failed' }));
+    throw new Error((err as { message?: string }).message ?? 'Reset failed');
+  }
+};
+
 /** POST /api/auth/change-password — changes the password for the current user. */
 export const changePassword = async (currentPassword: string, newPassword: string): Promise<void> => {
   const res = await apiRequest('/auth/change-password', {
