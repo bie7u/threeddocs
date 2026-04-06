@@ -4,30 +4,23 @@ import { UploadModelDialog } from '../components/UploadModelDialog/UploadModelDi
 import { ModelPreviewModal } from '../components/ModelPreviewModal/ModelPreviewModal';
 import { loadCustom3DElements, deleteCustom3DElement } from '../utils/custom3DElements';
 import { loadUploadedModels, deleteUploadedModel } from '../utils/uploadedModels';
-import { getMe, changePassword } from '../services/auth';
+import { changePassword } from '../services/auth';
 import { Footer } from '../components/Footer/Footer';
 import { useLanguage } from '../i18n/LanguageContext';
 import { LanguageDropdown } from '../i18n/LanguageDropdown';
+import { useAppStore } from '../store';
 
 // ─── Account Modal ────────────────────────────────────────────────────────────
 
 const AccountModal = ({ onClose }) => {
   const { t } = useLanguage();
-  const [user, setUser] = useState(null);
-  const [userError, setUserError] = useState('');
+  const user = useAppStore((s) => s.currentUser);
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
   const [saveSuccess, setSaveSuccess] = useState(false);
-
-  useEffect(() => {
-    getMe()
-      .then(setUser)
-      .catch(() => setUserError(t('settings.account.loadingError')));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const handleChangePassword = async (e) => {
     e.preventDefault();
@@ -83,9 +76,7 @@ const AccountModal = ({ onClose }) => {
           {/* Account info */}
           <div>
             <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">{t('settings.account.accountInfo')}</h3>
-            {userError ? (
-              <p className="text-sm text-red-500">{userError}</p>
-            ) : !user ? (
+            {!user ? (
               <p className="text-sm text-gray-400">{t('settings.account.loading')}</p>
             ) : (
               <div className="bg-gray-50 rounded-xl p-4 space-y-2">
@@ -106,6 +97,14 @@ const AccountModal = ({ onClose }) => {
           {/* Change password */}
           <div>
             <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">{t('settings.account.changePassword')}</h3>
+            {user?.is_google_user ? (
+              <div className="flex items-start gap-3 bg-blue-50 border border-blue-100 rounded-xl p-4">
+                <svg className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p className="text-sm text-blue-700">{t('settings.account.googleUserInfo')}</p>
+              </div>
+            ) : (
             <form onSubmit={handleChangePassword} className="space-y-3">
               <div>
                 <label className="block text-xs font-medium text-gray-600 mb-1">{t('settings.account.currentPassword')}</label>
@@ -156,6 +155,7 @@ const AccountModal = ({ onClose }) => {
                 {saving ? t('settings.account.saving') : t('settings.account.savePassword')}
               </button>
             </form>
+            )}
           </div>
         </div>
       </div>

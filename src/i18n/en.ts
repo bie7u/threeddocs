@@ -232,6 +232,7 @@ export const en = {
       passwordChangeFailed: 'Failed to change password.',
       savePassword: 'Change password',
       saving: 'Saving…',
+      googleUserInfo: 'Your account is linked to Google.',
     },
   },
   create3DElementDialog: {

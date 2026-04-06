@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { Edge } from 'reactflow';
 import type { InstructionStep, ProjectData, ConnectionData, GuideStep } from '../types';
+import type { AuthUser } from '../services/auth';
 import {
   fetchProjectsPage,
   createProject,
@@ -48,6 +49,10 @@ interface AppStore {
   // Guest mode (unauthenticated user)
   isGuestMode: boolean;
   guestShareToken: string | null;
+
+  // Authenticated user (cached from /me on startup)
+  currentUser: AuthUser | null;
+  setCurrentUser: (user: AuthUser | null) => void;
   
   // Actions
   setProject: (project: ProjectData, nodePositions?: Record<string, { x: number; y: number }>, persist?: boolean) => void;
@@ -91,6 +96,9 @@ export const useAppStore = create<AppStore>((set, get) => ({
   nodePositions: {},
   isGuestMode: false,
   guestShareToken: null,
+  currentUser: null,
+
+  setCurrentUser: (user) => set({ currentUser: user }),
 
   setProject: (project, nodePositions, persist = true) => {
     set({ 

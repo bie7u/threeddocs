@@ -232,6 +232,7 @@ export const pl = {
       passwordChangeFailed: 'Zmiana hasła nie powiodła się.',
       savePassword: 'Zmień hasło',
       saving: 'Zapisywanie…',
+      googleUserInfo: 'Twoje konto jest powiązane z Google.',
     },
   },
   create3DElementDialog: {

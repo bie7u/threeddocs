@@ -16,7 +16,7 @@ const Dashboard = () => {
   const MAX_PROJECTS = 30;
 
   const navigate = useNavigate();
-  const { createNewProject, loadProjects, projectsCount } = useAppStore();
+  const { createNewProject, loadProjects, projectsCount, setCurrentUser } = useAppStore();
 
   const [showNewProjectDialog, setShowNewProjectDialog] = useState(false);
   const [showEditor, setShowEditor] = useState(false);
@@ -28,14 +28,15 @@ const Dashboard = () => {
 
   useEffect(() => {
     getMe()
-      .then(() => {
+      .then((user) => {
+        setCurrentUser(user);
         setAuthChecked(true);
         return loadProjects();
       })
       .catch(() => {
         navigate('/login');
       });
-  }, [navigate, loadProjects]);
+  }, [navigate, loadProjects, setCurrentUser]);
 
   const handleLogout = async () => {
     await logout().catch(() => {});
