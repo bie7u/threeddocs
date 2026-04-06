@@ -8,6 +8,10 @@ import type { Custom3DElement } from '../../types';
 import { ShapeTypePicker } from '../ShapeTypePicker/ShapeTypePicker';
 import { useLanguage } from '../../i18n/LanguageContext';
 
+// Fields that control 3D transforms — their store updates are RAF-throttled
+// to prevent slider drag from flooding Zustand and causing preview stutter.
+const TRANSFORM_FIELDS = new Set<keyof InstructionStep>(['modelScale', 'modelPositionY', 'modelRotationY']);
+
 export const StepProperties = () => {
   const { project, selectedStepId, updateStep, deleteStep, addStep, isGuestMode } = useAppStore();
   const { t } = useLanguage();
@@ -16,6 +20,12 @@ export const StepProperties = () => {
   
   const blobUrlRef = useRef<string | null>(null);
   const uploadedFileNameRef = useRef<string | null>(null);
+
+  // Throttle transform updates (scale/rotation/position) to one store write per
+  // animation frame so rapid slider drags don't flood Zustand with updates and
+  // cause visible stutter in the 3D preview.
+  const rafIdRef = useRef<number | null>(null);
+  const pendingTransformRef = useRef<{ id: string; data: Partial<InstructionStep> } | null>(null);
   
   const [custom3DElements, setCustom3DElements] = useState<Custom3DElement[]>([]);
   const [uploadedModels, setUploadedModels] = useState<UploadedModel3D[]>([]);
@@ -56,6 +66,12 @@ export const StepProperties = () => {
         blobUrlRef.current = null;
         uploadedFileNameRef.current = null;
       }
+      // Cancel any in-flight RAF transform update for the previous step.
+      if (rafIdRef.current !== null) {
+        cancelAnimationFrame(rafIdRef.current);
+        rafIdRef.current = null;
+        pendingTransformRef.current = null;
+      }
     };
   }, [selectedStepId]);
 
@@ -87,7 +103,22 @@ export const StepProperties = () => {
     const updated = { ...formData, [field]: value };
     setFormData(updated);
     if (selectedStepId && selectedStep) {
-      updateStep(selectedStepId, updated);
+      if (TRANSFORM_FIELDS.has(field)) {
+        // Throttle to one store update per animation frame to prevent slider
+        // drag from flooding Zustand and causing 3D-preview stutter.
+        pendingTransformRef.current = { id: selectedStepId, data: updated };
+        if (rafIdRef.current === null) {
+          rafIdRef.current = requestAnimationFrame(() => {
+            rafIdRef.current = null;
+            if (pendingTransformRef.current) {
+              updateStep(pendingTransformRef.current.id, pendingTransformRef.current.data);
+              pendingTransformRef.current = null;
+            }
+          });
+        }
+      } else {
+        updateStep(selectedStepId, updated);
+      }
     }
   };
 
