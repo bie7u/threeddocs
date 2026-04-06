@@ -1,33 +1,26 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Create3DElementDialog } from '../components/Create3DElement/Create3DElementDialog';
 import { UploadModelDialog } from '../components/UploadModelDialog/UploadModelDialog';
 import { ModelPreviewModal } from '../components/ModelPreviewModal/ModelPreviewModal';
 import { loadCustom3DElements, deleteCustom3DElement } from '../utils/custom3DElements';
 import { loadUploadedModels, deleteUploadedModel } from '../utils/uploadedModels';
-import { getMe, changePassword } from '../services/auth';
+import { changePassword } from '../services/auth';
 import { Footer } from '../components/Footer/Footer';
 import { useLanguage } from '../i18n/LanguageContext';
 import { LanguageDropdown } from '../i18n/LanguageDropdown';
+import { useAppStore } from '../store';
 
 // ─── Account Modal ────────────────────────────────────────────────────────────
 
 const AccountModal = ({ onClose }) => {
   const { t } = useLanguage();
-  const [user, setUser] = useState(null);
-  const [userError, setUserError] = useState('');
+  const user = useAppStore((s) => s.currentUser);
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
   const [saveSuccess, setSaveSuccess] = useState(false);
-
-  useEffect(() => {
-    getMe()
-      .then(setUser)
-      .catch(() => setUserError(t('settings.account.loadingError')));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const handleChangePassword = async (e) => {
     e.preventDefault();
@@ -83,9 +76,7 @@ const AccountModal = ({ onClose }) => {
           {/* Account info */}
           <div>
             <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">{t('settings.account.accountInfo')}</h3>
-            {userError ? (
-              <p className="text-sm text-red-500">{userError}</p>
-            ) : !user ? (
+            {!user ? (
               <p className="text-sm text-gray-400">{t('settings.account.loading')}</p>
             ) : (
               <div className="bg-gray-50 rounded-xl p-4 space-y-2">
