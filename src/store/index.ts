@@ -10,6 +10,34 @@ import {
 } from '../services/projects';
 
 const GUEST_PROJECT_KEY = '3ddocs_guest_project';
+const SAVE_DEBOUNCE_MS = 800;
+
+let saveDebounceTimer: ReturnType<typeof setTimeout> | null = null;
+
+/** Performs the actual API/localStorage persist for the given saved project snapshot. */
+async function persistSavedProject(
+  savedProject: SavedProject,
+  isGuestMode: boolean,
+  projects: SavedProject[],
+  onSuccess: (updated: SavedProject, existsInCache: boolean) => void,
+): Promise<void> {
+  try {
+    if (isGuestMode) {
+      localStorage.setItem(GUEST_PROJECT_KEY, JSON.stringify(savedProject));
+      return;
+    }
+    const existsInCache = projects.some(p => p.project.id === savedProject.project.id);
+    let updated: SavedProject;
+    if (existsInCache) {
+      updated = await updateProject(savedProject.project.id, savedProject);
+    } else {
+      updated = await createProject(savedProject);
+    }
+    onSuccess(updated, existsInCache);
+  } catch (error) {
+    console.error('Failed to save project to server', error);
+  }
+}
 
 export interface SavedProject {
   project: ProjectData;
@@ -239,41 +267,23 @@ export const useAppStore = create<AppStore>((set, get) => ({
   },
 
   saveToApi: () => {
-    const { project, nodePositions, isGuestMode } = get();
-    if (!project) return;
+    if (saveDebounceTimer !== null) {
+      clearTimeout(saveDebounceTimer);
+    }
+    saveDebounceTimer = setTimeout(() => {
+      saveDebounceTimer = null;
+      const { project, nodePositions, isGuestMode, projects } = get();
+      if (!project) return;
 
-    const savedProject: SavedProject = {
-      project,
-      nodePositions,
-      lastModified: Date.now(),
-    };
-
-    const persist = async () => {
-      try {
-        if (isGuestMode) {
-          // Guest mode: persist to localStorage only, no API calls.
-          localStorage.setItem(GUEST_PROJECT_KEY, JSON.stringify(savedProject));
-          return;
-        }
-
-        const existsInCache = get().projects.some(p => p.project.id === project.id);
-        let updated: SavedProject;
-        if (existsInCache) {
-          updated = await updateProject(project.id, savedProject);
-        } else {
-          updated = await createProject(savedProject);
-        }
+      const savedProject: SavedProject = { project, nodePositions, lastModified: Date.now() };
+      persistSavedProject(savedProject, isGuestMode, projects, (updated, existsInCache) => {
         set(state => ({
           projects: existsInCache
             ? state.projects.map(p => p.project.id === project.id ? updated : p)
             : [...state.projects, updated],
         }));
-      } catch (error) {
-        console.error('Failed to save project to server', error);
-      }
-    };
-
-    persist();
+      });
+    }, SAVE_DEBOUNCE_MS);
   },
 
   loadProjects: async () => {
@@ -363,3 +373,28 @@ export const useAppStore = create<AppStore>((set, get) => ({
     });
   },
 }));
+
+// Flush any pending debounced save immediately when the user leaves the page.
+// Flush any pending debounced save when the user leaves the page.
+// Note: fetch calls started in `beforeunload` are best-effort — the browser may
+// cancel them before they complete. This is still better than the alternative
+// (losing the last ~800 ms of changes entirely). Each browser tab runs in its
+// own JS context, so the module-level timer is always isolated per tab.
+if (typeof window !== 'undefined') {
+  window.addEventListener('beforeunload', () => {
+    if (saveDebounceTimer !== null) {
+      clearTimeout(saveDebounceTimer);
+      saveDebounceTimer = null;
+      const { project, nodePositions, isGuestMode, projects } = useAppStore.getState();
+      if (!project) return;
+      const savedProject: SavedProject = { project, nodePositions, lastModified: Date.now() };
+      persistSavedProject(savedProject, isGuestMode, projects, (updated, existsInCache) => {
+        useAppStore.setState(state => ({
+          projects: existsInCache
+            ? state.projects.map(p => p.project.id === project.id ? updated : p)
+            : [...state.projects, updated],
+        }));
+      });
+    }
+  });
+}
