@@ -106,6 +106,14 @@ const AccountModal = ({ onClose }) => {
           {/* Change password */}
           <div>
             <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">{t('settings.account.changePassword')}</h3>
+            {user?.is_google_user ? (
+              <div className="flex items-start gap-3 bg-blue-50 border border-blue-100 rounded-xl p-4">
+                <svg className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p className="text-sm text-blue-700">{t('settings.account.googleUserInfo')}</p>
+              </div>
+            ) : (
             <form onSubmit={handleChangePassword} className="space-y-3">
               <div>
                 <label className="block text-xs font-medium text-gray-600 mb-1">{t('settings.account.currentPassword')}</label>
@@ -156,6 +164,7 @@ const AccountModal = ({ onClose }) => {
                 {saving ? t('settings.account.saving') : t('settings.account.savePassword')}
               </button>
             </form>
+            )}
           </div>
         </div>
       </div>
