@@ -24,7 +24,7 @@ export const StepProperties = () => {
   // Throttle transform updates (scale/rotation/position) to one store write per
   // animation frame so rapid slider drags don't flood Zustand with updates and
   // cause visible stutter in the 3D preview.
-  const rafIdRef = useRef<number | null>(null);
+  const rafIdRef = useRef<number>(0);
   const pendingTransformRef = useRef<{ id: string; data: Partial<InstructionStep> } | null>(null);
   
   const [custom3DElements, setCustom3DElements] = useState<Custom3DElement[]>([]);
@@ -66,11 +66,15 @@ export const StepProperties = () => {
         blobUrlRef.current = null;
         uploadedFileNameRef.current = null;
       }
-      // Cancel any in-flight RAF transform update for the previous step.
-      if (rafIdRef.current !== null) {
+      // Cancel any in-flight RAF transform update and flush the last value so
+      // the final slider position is not lost when switching steps.
+      if (rafIdRef.current) {
         cancelAnimationFrame(rafIdRef.current);
-        rafIdRef.current = null;
-        pendingTransformRef.current = null;
+        rafIdRef.current = 0;
+        if (pendingTransformRef.current) {
+          updateStep(pendingTransformRef.current.id, pendingTransformRef.current.data);
+          pendingTransformRef.current = null;
+        }
       }
     };
   }, [selectedStepId]);
@@ -107,9 +111,9 @@ export const StepProperties = () => {
         // Throttle to one store update per animation frame to prevent slider
         // drag from flooding Zustand and causing 3D-preview stutter.
         pendingTransformRef.current = { id: selectedStepId, data: updated };
-        if (rafIdRef.current === null) {
+        if (!rafIdRef.current) {
           rafIdRef.current = requestAnimationFrame(() => {
-            rafIdRef.current = null;
+            rafIdRef.current = 0;
             if (pendingTransformRef.current) {
               updateStep(pendingTransformRef.current.id, pendingTransformRef.current.data);
               pendingTransformRef.current = null;
