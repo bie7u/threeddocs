@@ -1,4 +1,4 @@
-export const API_BASE = "http://localhost:8000/api";
+export const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "/api";
 
 let isRefreshing = false;
 let failedQueue: Array<{ resolve: () => void; reject: (reason: unknown) => void }> = [];
@@ -69,9 +69,9 @@ export const apiRequest = async (
       if (!refreshRes.ok) {
         processQueue(new Error('Session expired'));
         isRefreshing = false;
-        // Only redirect to login when not already on a public auth page to
+        // Only redirect to login when not already on a public page to
         // avoid an infinite reload loop (e.g. Login page calling getMe()).
-        const publicPaths = ['/login', '/register', '/guest'];
+        const publicPaths = ['/', '/login', '/register', '/guest'];
         if (!publicPaths.includes(window.location.pathname)) {
           window.location.href = '/login';
         }
