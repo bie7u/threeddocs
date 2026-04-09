@@ -182,7 +182,7 @@ export const PreviewMode = ({ onGoToEditorPanel, isPublic, shareToken }: { onGoT
         </div>
       </div>
 
-      <div className="absolute top-24 left-6 bg-black/40 backdrop-blur-md text-white px-6 py-4 rounded-xl shadow-2xl border border-white/10 max-w-md z-10 flex flex-col max-h-[calc(100vh-14rem)]">
+      <div className="absolute top-24 left-6 bg-black/40 backdrop-blur-md text-white px-6 py-4 rounded-xl shadow-2xl border border-white/10 w-1/3 min-w-72 z-10 flex flex-col max-h-[calc(100vh-14rem)]">
         <div className="flex items-start gap-3 flex-shrink-0">
           <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center flex-shrink-0 shadow-lg">
             <span className="text-lg font-bold">{currentPreviewStepIndex + 1}</span>
