@@ -1,9 +1,7 @@
 import type { SavedProject } from '../store';
 import type { InstructionStep, ConnectionData } from '../types';
 import type { Edge } from 'reactflow';
-import { apiRequest } from './api';
-
-const API_BASE = "http://localhost:8000/api";
+import { apiRequest, API_BASE } from './api';
 
 // ─── Server-side flat project shape ──────────────────────────────────────────
 

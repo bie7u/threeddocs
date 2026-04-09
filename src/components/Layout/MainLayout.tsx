@@ -160,18 +160,18 @@ export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, onGoToLogin
             <button
               onClick={() => setEditorMode('model')}
               className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${editorMode === 'model' ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg' : 'text-slate-300 hover:text-white'}`}
-            >🧱 {t('mainLayout.modelBuilder')}</button>
+            >{t('mainLayout.modelBuilder')}</button>
             <button
               onClick={() => setEditorMode('guide')}
               className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${editorMode === 'guide' ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-lg' : 'text-slate-300 hover:text-white'}`}
-            >📋 {t('mainLayout.guideBuilder')}</button>
+            >{t('mainLayout.guideBuilder')}</button>
           </div>
 
           <button
             onClick={handleToggleCameraMode}
             className={`px-4 py-2 rounded-lg transition-all duration-200 text-sm font-medium shadow-lg ${cameraMode === 'free' ? 'bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 shadow-emerald-500/30' : 'bg-slate-700/50 backdrop-blur-sm hover:bg-slate-600/50 border border-slate-600/30'}`}
           >
-            {cameraMode === 'free' ? `📷 ${t('mainLayout.freeCamera')}` : `📷 ${t('mainLayout.autoCamera')}`}
+            {cameraMode === 'free' ? t('mainLayout.freeCamera') : t('mainLayout.autoCamera')}
           </button>
           <button onClick={handleLoadSample} className="px-4 py-2 bg-slate-700/50 backdrop-blur-sm rounded-lg hover:bg-slate-600/50 transition-all duration-200 text-sm font-medium border border-slate-600/30 shadow-lg">
             {t('mainLayout.loadSample')}
