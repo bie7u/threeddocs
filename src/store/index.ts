@@ -218,9 +218,10 @@ export const useAppStore = create<AppStore>((set, get) => ({
   },
 
   setPreviewMode: (isPreview) => {
-    set({ isPreviewMode: isPreview });
     if (isPreview) {
-      set({ currentPreviewStepIndex: 0 });
+      set({ isPreviewMode: true, currentPreviewStepIndex: 0 });
+    } else {
+      set({ isPreviewMode: false });
     }
   },
 
