@@ -1,74 +1,11 @@
 import type { ProjectData } from '../types';
-import { sampleNodePositions } from './sampleData';
+// import { sampleNodePositions } from './sampleData';
 
 export const sampleProjectPl: ProjectData = {
   id: 'sample-project-1',
-  name: 'Przykładowe instrukcje montażu',
-  steps: [
-    {
-      id: 'step-1',
-      title: 'Wprowadzenie',
-      description: 'Witamy w tym samouczku montażu 3D. Przeprowadzimy Cię przez każdy krok.',
-      modelPath: 'box',
-      cameraPosition: { x: 5, y: 5, z: 5, targetX: 0, targetY: 0, targetZ: 0 },
-      highlightColor: '#4299e1',
-      shapeType: 'cube',
-    },
-    {
-      id: 'step-2a',
-      title: 'Identyfikacja elementów A',
-      description: 'Zidentyfikuj główne elementy ramy.',
-      modelPath: 'box',
-      cameraPosition: { x: 3, y: 4, z: 6, targetX: 0, targetY: 0, targetZ: 0 },
-      highlightColor: '#48bb78',
-      shapeType: 'sphere',
-    },
-    {
-      id: 'step-2b',
-      title: 'Identyfikacja elementów B',
-      description: 'Zidentyfikuj złączki i łączniki.',
-      modelPath: 'box',
-      cameraPosition: { x: -3, y: 4, z: 6, targetX: 0, targetY: 0, targetZ: 0 },
-      highlightColor: '#f6ad55',
-      shapeType: 'cylinder',
-    },
-    {
-      id: 'step-3',
-      title: 'Montaż',
-      description: 'Rozpocznij proces montażu, łącząc główne elementy.',
-      modelPath: 'box',
-      cameraPosition: { x: -4, y: 3, z: 5, targetX: 0, targetY: 0, targetZ: 0 },
-      highlightColor: '#ed8936',
-      shapeType: 'cone',
-    },
-    {
-      id: 'step-4',
-      title: 'Przykładowy model niestandardowy',
-      description: 'W tym kroku pokazano ładowanie niestandardowego modelu 3D. Możesz zastąpić URL dowolnym modelem GLTF lub GLB.',
-      modelPath: 'box',
-      cameraPosition: { x: 2, y: 6, z: 4, targetX: 0, targetY: 0, targetZ: 0 },
-      highlightColor: '#9f7aea',
-      shapeType: 'custom',
-      customModelUrl: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb',
-    },
-    {
-      id: 'step-5',
-      title: 'Kontrola końcowa',
-      description: 'Sprawdź zmontowany produkt i upewnij się, że wszystkie elementy są zamocowane.',
-      modelPath: 'box',
-      cameraPosition: { x: 2, y: 6, z: 4, targetX: 0, targetY: 0, targetZ: 0 },
-      highlightColor: '#e53e3e',
-      shapeType: 'cube',
-    },
-  ],
-  connections: [
-    { id: 'e1-2a', source: 'step-1', target: 'step-2a', data: { style: 'glass', description: 'Podążaj tą ścieżką, aby zidentyfikować elementy ramy' } },
-    { id: 'e1-2b', source: 'step-1', target: 'step-2b', data: { style: 'glow', description: 'Ta ścieżka prowadzi do identyfikacji złączek i łączników', shapeType: 'sphere' } },
-    { id: 'e2a-3', source: 'step-2a', target: 'step-3', data: { style: 'neon', description: 'Połącz elementy ramy z montażem', shapeType: 'cube' } },
-    { id: 'e2b-3', source: 'step-2b', target: 'step-3', data: { style: 'standard', description: 'Dodaj złączki, aby zabezpieczyć montaż' } },
-    { id: 'e3-4', source: 'step-3', target: 'step-4', data: { style: 'glass', description: 'Wyświetl przykładowy model 3D', shapeType: 'cylinder' } },
-    { id: 'e4-5', source: 'step-4', target: 'step-5', data: { style: 'glow', description: 'Przejdź do końcowej kontroli jakości' } },
-  ],
+  name: 'ThreeDocsy - Przykładowa Dokumentacja',
+  steps: [{"id": "step-1775847472526-m5bktk06u", "title": "Krok Pierwszy - Zacznij!", "modelPath": "box", "shapeType": "cube", "modelScale": 1, "description": "<p>Naszą motywacją do stworzenia <strong>Threedocsy </strong>było poczucie, że na rynku brakuje rozwiązania, które pomogłoby w zrozumieniu trudnych zagadnień technicznych. Oczywiście mamy standardowe dokumentacje jak choćby te pisane przy użyciu <strong>markdown</strong>, ale w naszym przekonaniu <strong>to za mało</strong>.</p><p></p><h1>Czym różnimy się od standardowej dokumentacji?</h1><ul><li><p>Za pomocą wizualizacji 3D oferujemy interaktywną naukę</p></li><li><p>Nasze rozwiązanie pozwala krok po kroku uporządkować wiedzę.</p></li><li><p>Rezygnujemy z jednego długiego tekstu na rzecz, krótkich wpisów dotyczących konkretnych elementów systemu.</p></li><li><p>Trudne zagadnienia biznesowe możemy opisać w sposób przejrzysty, korzystny dla osób mniej technicznych.</p></li></ul><p></p><p><em>Przejdź do kolejnego kroku klikając </em><strong><em>Następny</em></strong></p><p></p>", "cameraPosition": {"x": 5, "y": 5, "z": 5, "targetX": 0, "targetY": 0, "targetZ": 0}, "customModelUrl": "", "highlightColor": "#4299e1", "modelPositionY": 0, "modelRotationY": 0, "engravedBlockParams": {"face": "front", "font": "helvetiker", "text": "DB", "depth": 0.08, "padding": 0.1}}, {"id": "step-1775847519434-54yj18w30", "title": "Drugi Krok - O co chodzi? ", "modelPath": "box", "shapeType": "cylinder", "modelScale": 1, "description": "<p>Wierzymy, że większość zagadnień można podzielić na sekcje/kroki. <strong>Threedocsy </strong>oferuje tworzenie dokumentacji, która w prosty sposób potrafi to zrealizować. Dzięki naszemu edytorowi w kilka chwil możesz stworzyć dokumentacje, która nie tylko przekaże kluczowe informacje, ale także będzie atrakcyjnie wizualnie co zachęci odbiorcę do <strong>aktywnego czytania i zapoznania się z jej treścią</strong>.</p><p></p><p><em>Przejdź do kolejnego kroku klikając </em><strong><em>Następny</em></strong></p>", "cameraPosition": {"x": 5, "y": 5, "z": 5, "targetX": 0, "targetY": 0, "targetZ": 0}, "customModelUrl": "", "highlightColor": "#fff700", "modelPositionY": 0, "modelRotationY": 0, "engravedBlockParams": {"face": "front", "font": "helvetiker", "text": "DB", "depth": 0.08, "padding": 0.1}}, {"id": "step-1775848984436-03w7gzmog", "title": "Trzeci Krok - Style połączeń", "modelPath": "box", "shapeType": "cone", "modelScale": 1.5, "description": "<p>Węzły łączysz liniami w 4 stylach wizualnych. Możesz używać rur lub strzałek, ustawiać kierunek przepływu i dodawać opis do każdego połączenia.</p><p><em>Przejdź do kolejnego kroku klikając </em><strong><em>Następny</em></strong></p>", "cameraPosition": {"x": 5, "y": 5, "z": 5, "targetX": 0, "targetY": 0, "targetZ": 0}, "customModelUrl": "", "highlightColor": "#ff0000", "modelPositionY": 0, "modelRotationY": 0, "engravedBlockParams": {"face": "front", "font": "helvetiker", "text": "DB", "depth": 0.08, "padding": 0.1}}, {"id": "step-1775849184950-zxro0timy", "title": "Czwarty Krok - Kliknij na strzałkę", "modelPath": "box", "shapeType": "cube", "modelScale": 1, "description": "<p>Po kliknięciu na strzałkę w prawym dolnym rogu zobaczysz opis dodany w edytorze.</p><p><em>Przejdź do kolejnego kroku klikając </em><strong><em>Następny</em></strong></p>", "cameraPosition": {"x": 5, "y": 5, "z": 5, "targetX": 0, "targetY": 0, "targetZ": 0}, "customModelUrl": "", "highlightColor": "#ffffff", "modelPositionY": 0, "modelRotationY": 0, "engravedBlockParams": {"face": "front", "font": "helvetiker", "text": "DB", "depth": 0.08, "padding": 0.1}}, {"id": "step-1775849298314-ev0jciiin", "title": "Piąty Krok - Model nad strzałką", "modelPath": "box", "shapeType": "cube", "modelScale": 1, "description": "<p>W celu urozmaicenia wizualizacji użytkownik może dodać również model nad <strong><em>połączenie</em></strong>.</p><p><em>Przejdź do kolejnego kroku klikając </em><strong><em>Następny</em></strong></p>", "cameraPosition": {"x": 5, "y": 5, "z": 5, "targetX": 0, "targetY": 0, "targetZ": 0}, "customModelUrl": "", "highlightColor": "#553f02", "modelPositionY": 0, "modelRotationY": 0, "engravedBlockParams": {"face": "front", "font": "helvetiker", "text": "DB", "depth": 0.08, "padding": 0.1}}, {"id": "step-1775849609635-sikwtagsw", "title": "Szósty Krok - Tytuł nad klockiem", "modelPath": "box", "shapeType": "engravedBlock", "modelScale": 1, "description": "<p>W aktualnym kroku widzimy tekst nad klockiem. Jest to jedna z funkcjonalności, która urozmaica całą wizualizacje i pozwala na bardziej szczegółowe tłumaczenie.</p><p><em>Przejdź do kolejnego kroku klikając </em><strong><em>Następny</em></strong></p>", "cameraPosition": {"x": 5, "y": 5, "z": 5, "targetX": 0, "targetY": 0, "targetZ": 0}, "customModelUrl": "", "highlightColor": "#4299e1", "modelPositionY": 0, "modelRotationY": 0, "engravedBlockParams": {"face": "front", "font": "helvetiker", "text": "Twoj tekst", "depth": 0.08, "padding": 0.1}}, {"id": "step-1775849879978-jgnwlzc7g", "title": "Siódmy Krok - Systemowe modele 3D", "modelPath": "box", "shapeType": "uploadedModel", "modelScale": 1, "description": "<p><strong>ThreeDocsy </strong>posiada bazę wgranych modeli 3D, które pozwalają na lepszą wizualizację informacji, którą chcesz opisać. Baza modeli jest cały czas rozwijana. Zachęcamy do zgłaszania własnych sugestii.</p><p><em>Przejdź do kolejnego kroku klikając </em><strong><em>Następny</em></strong></p>", "cameraPosition": {"x": 5, "y": 5, "z": 5, "targetX": 0, "targetY": 0, "targetZ": 0}, "customModelUrl": "", "highlightColor": "#4299e1", "modelPositionY": 0, "modelRotationY": 78, "uploadedModelId": 1, "engravedBlockParams": {"face": "front", "font": "helvetiker", "text": "DB", "depth": 0.08, "padding": 0.1}}, {"id": "step-1775850090029-kfsdt5k3d", "title": "Ósmy krok - Udostępnianie wizualizacji innym użytkownikom", "modelPath": "box", "shapeType": "uploadedModel", "modelScale": 1, "description": "<p>Po stworzeniu wizualizacji możesz w łatwy sposób ją udostępnić. Wystarczy kliknąć w przycisk <strong>Udostępnij Link </strong>w podglądzie wizualizacji.</p><p><em>Przejdź do kolejnego kroku klikając </em><strong><em>Następny</em></strong></p>", "cameraPosition": {"x": 5, "y": 5, "z": 5, "targetX": 0, "targetY": 0, "targetZ": 0}, "customModelUrl": "", "highlightColor": "#4299e1", "modelPositionY": 0, "modelRotationY": 0, "uploadedModelId": 2, "engravedBlockParams": {"face": "front", "font": "helvetiker", "text": "DB", "depth": 0.08, "padding": 0.1}}, {"id": "step-1775850390329-3fdmnv8op", "title": "Dziesiąty Krok - Zarejestruj Się!", "modelPath": "box", "shapeType": "uploadedModel", "modelScale": 1.9, "description": "<p>Aby w pełni korzystać z naszego systemu wymagana jest rejestracja. Po rejestracji otrzymasz dostęp do panelu, w którym będziesz<strong> mógł stworzyć aż 30 własnych dokumentacji,</strong> które bez problemu udostępnisz innym użytkownikom. Oprócz tego zyskasz możliwość wgrania swoich modeli 3D, a to wszystko za darmo!</p>", "cameraPosition": {"x": 5, "y": 5, "z": 5, "targetX": 0, "targetY": 0, "targetZ": 0}, "customModelUrl": "", "highlightColor": "#4299e1", "modelPositionY": -0.6, "modelRotationY": 219, "uploadedModelId": 4, "engravedBlockParams": {"face": "front", "font": "helvetiker", "text": "DB", "depth": 0.08, "padding": 0.1}}, {"id": "step-1775850532887-bszhkjw38", "title": "Dziewiąty Krok - Własny scenariusz kroków.", "modelPath": "box", "shapeType": "uploadedModel", "modelScale": 1.2, "description": "<p>Domyślnie kroki przechodzą zgodnie z kolejnością, w której je dodałeś. Jednak w <strong>Kreatorze przewodnika </strong>możesz stworzyć swoją własną unikalną drogę!</p>", "cameraPosition": {"x": 5, "y": 5, "z": 5, "targetX": 0, "targetY": 0, "targetZ": 0}, "customModelUrl": "", "highlightColor": "#4299e1", "modelPositionY": 0, "modelRotationY": 99, "uploadedModelId": 3, "engravedBlockParams": {"face": "front", "font": "helvetiker", "text": "DB", "depth": 0.08, "padding": 0.1}}],
+  connections: [{"id": "e1775847522683-s1li9r9nv", "data": {"style": "glow", "title": "", "description": "", "arrowDirection": "none", "connectionType": "tube", "shapeModelScale": 1, "shapeModelPositionY": 0, "shapeModelRotationY": 0}, "source": "step-1775847472526-m5bktk06u", "target": "step-1775847519434-54yj18w30", "sourceHandle": null, "targetHandle": null}, {"id": "e1775849021036-i9dff7exs", "data": {"style": "glow", "title": "", "description": "", "arrowDirection": "none", "connectionType": "tube", "shapeModelScale": 1, "shapeModelPositionY": 0, "shapeModelRotationY": 0}, "source": "step-1775847519434-54yj18w30", "target": "step-1775848984436-03w7gzmog", "sourceHandle": null, "targetHandle": null}, {"id": "e1775849196012-bm3fm8anx", "data": {"style": "glass", "title": "Strzałka dwukierunkowa", "description": "Tutaj możesz dodać opis.\n\nStrzałki mogą być jedno i dwukierunkowe. \nPełna dowolność!", "arrowDirection": "bidirectional", "connectionType": "arrow", "shapeModelScale": 1, "shapeModelPositionY": 0, "shapeModelRotationY": 0}, "source": "step-1775848984436-03w7gzmog", "target": "step-1775849184950-zxro0timy", "sourceHandle": null, "targetHandle": null}, {"id": "e1775849306196-72zifawse", "data": {"style": "standard", "title": "Dodatkowy model nad strzałką", "shapeType": "sphere", "description": "Nad strzałką można umieścić model 3D. Oprócz standardowych modeli takich jak sześcian czy kula można wybrać model systemowy lub wgrany przez siebie. O czym szerzej w dalszej części opisu.", "arrowDirection": "forward", "connectionType": "arrow", "shapeModelScale": 1, "shapeModelPositionY": 0, "shapeModelRotationY": 0}, "source": "step-1775848984436-03w7gzmog", "target": "step-1775849298314-ev0jciiin", "sourceHandle": null, "targetHandle": null}, {"id": "e1775849620695-q7vf4wrxv", "data": {"style": "standard"}, "source": "step-1775849298314-ev0jciiin", "target": "step-1775849609635-sikwtagsw", "sourceHandle": null, "targetHandle": null}, {"id": "e1775849893716-e7pcjcach", "data": {"style": "glow", "title": "", "description": "", "arrowDirection": "none", "connectionType": "arrow", "shapeModelScale": 1, "shapeModelPositionY": 0, "shapeModelRotationY": 0}, "source": "step-1775849609635-sikwtagsw", "target": "step-1775849879978-jgnwlzc7g", "sourceHandle": null, "targetHandle": null}, {"id": "e1775850101986-phbavztsi", "data": {"style": "glass", "title": "", "description": "", "arrowDirection": "none", "connectionType": "arrow", "shapeModelScale": 1, "shapeModelPositionY": 0, "shapeModelRotationY": 0}, "source": "step-1775849879978-jgnwlzc7g", "target": "step-1775850090029-kfsdt5k3d", "selected": false, "sourceHandle": null, "targetHandle": null}, {"id": "e1775850540565-sde8pvj91", "data": {"style": "neon", "title": "", "description": "", "arrowDirection": "backward", "connectionType": "arrow", "shapeModelScale": 1, "shapeModelPositionY": 0, "shapeModelRotationY": 0}, "source": "step-1775850532887-bszhkjw38", "target": "step-1775850090029-kfsdt5k3d", "selected": true, "sourceHandle": null, "targetHandle": null}, {"id": "e1775850766253-fb9zovjfi", "data": {"style": "glow", "title": "", "description": "", "arrowDirection": "bidirectional", "connectionType": "arrow", "shapeModelScale": 1, "shapeModelPositionY": 0, "shapeModelRotationY": 0}, "source": "step-1775850532887-bszhkjw38", "target": "step-1775850390329-3fdmnv8op", "sourceHandle": null, "targetHandle": null}],
   guide: [
     { id: 'guide-1', stepId: 'step-1' },
     { id: 'guide-2', stepId: 'step-2a' },
@@ -80,4 +17,5 @@ export const sampleProjectPl: ProjectData = {
 };
 
 // Node positions are identical for both languages
-export { sampleNodePositions as sampleNodePositionsPl };
+// export { sampleNodePositions as sampleNodePositionsPl };
+export const sampleNodePositionsPl: Record<string, { x: number; y: number }> ={"step-1775847472526-m5bktk06u": {"x": -30.5, "y": 70}, "step-1775847519434-54yj18w30": {"x": -29.150802131485534, "y": 578.8583624095576}, "step-1775848984436-03w7gzmog": {"x": -30.869760005871285, "y": 925.311082312662}, "step-1775849184950-zxro0timy": {"x": -306, "y": 1184}, "step-1775849298314-ev0jciiin": {"x": 62, "y": 1235.6842834334889}, "step-1775849609635-sikwtagsw": {"x": 88, "y": 1524.4}, "step-1775849879978-jgnwlzc7g": {"x": -24, "y": 1817.9999999999998}, "step-1775850090029-kfsdt5k3d": {"x": 348, "y": 1830.0000000000002}, "step-1775850390329-3fdmnv8op": {"x": 517.0266388012017, "y": 1544.1350558795048}, "step-1775850532887-bszhkjw38": {"x": 913.4762913271308, "y": 1738.2631855774973}};
