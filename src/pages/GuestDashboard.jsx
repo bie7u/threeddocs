@@ -3,6 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { MainLayout } from '../components/Layout/MainLayout';
 import { useAppStore } from '../store';
 import { useLanguage } from '../i18n/LanguageContext';
+import { getStoredLocale } from '../i18n';
+import { sampleProject, sampleNodePositions } from '../utils/sampleData';
+import { sampleProjectPl, sampleNodePositionsPl } from '../utils/sampleDataPl';
 
 const GuestDashboard = () => {
   const { t } = useLanguage();
@@ -12,10 +15,19 @@ const GuestDashboard = () => {
   const [showEditor, setShowEditor] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
 
-  // On mount, clear any previous guest/auth state and auto-create a builder project
+  // On mount, clear any previous guest/auth state and create a project pre-filled
+  // with the locale-appropriate sample so the editor is never empty.
   useEffect(() => {
     clearGuestMode();
-    createNewGuestProject(t('newProject.defaultNameBuilder'), 'builder')
+    const locale = getStoredLocale();
+    const sample = locale === 'pl' ? sampleProjectPl : sampleProject;
+    const positions = locale === 'pl' ? sampleNodePositionsPl : sampleNodePositions;
+    createNewGuestProject(t('newProject.defaultNameBuilder'), 'builder', undefined, {
+      steps: sample.steps,
+      connections: sample.connections,
+      guide: sample.guide,
+      nodePositions: positions,
+    })
       .then(() => {
         setShowEditor(true);
       })

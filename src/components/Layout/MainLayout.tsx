@@ -7,6 +7,7 @@ import { PreviewMode } from '../PreviewMode/PreviewMode';
 import { GuideBuilder } from '../GuideBuilder/GuideBuilder';
 import { UploadModelEditor, UploadPreviewMode } from '../UploadModelEditor';
 import { sampleProject, sampleNodePositions } from '../../utils/sampleData';
+import { sampleProjectPl, sampleNodePositionsPl } from '../../utils/sampleDataPl';
 import { useLanguage } from '../../i18n/LanguageContext';
 import { LanguageDropdown } from '../../i18n/LanguageDropdown';
 
@@ -18,7 +19,7 @@ interface MainLayoutProps {
 }
 
 export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, onGoToLogin, useSampleProjectFallback = true }: MainLayoutProps) => {
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   const { 
     project, 
     selectedStepId, 
@@ -34,11 +35,14 @@ export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, onGoToLogin
     isGuestMode,
   } = useAppStore();
 
+  const localeSample = locale === 'pl' ? sampleProjectPl : sampleProject;
+  const localeSamplePositions = locale === 'pl' ? sampleNodePositionsPl : sampleNodePositions;
+
   useEffect(() => {
     if (!project && useSampleProjectFallback) {
-      setProject(sampleProject, sampleNodePositions);
+      setProject(localeSample, localeSamplePositions);
     }
-  }, [project, setProject, useSampleProjectFallback]);
+  }, [project, setProject, useSampleProjectFallback, localeSample, localeSamplePositions]);
 
   const [panelWidth, setPanelWidth] = useState(320);
   const [isResizing, setIsResizing] = useState(false);
@@ -79,7 +83,7 @@ export const MainLayout = ({ onBackToProjectList, onGoToEditorPanel, onGoToLogin
   const handleToggleCameraMode = () => { setCameraMode(cameraMode === 'auto' ? 'free' : 'auto'); };
   const handleLoadSample = () => {
     if (window.confirm(t('mainLayout.loadSampleConfirm'))) {
-      setProject(sampleProject, sampleNodePositions);
+      setProject(localeSample, localeSamplePositions);
     }
   };
 

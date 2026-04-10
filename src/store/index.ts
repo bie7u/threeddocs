@@ -105,8 +105,18 @@ interface AppStore {
   getAllProjects: () => SavedProject[];
   deleteProject: (projectId: string) => Promise<void>;
   createNewProject: (projectName: string, projectType?: 'builder' | 'upload', projectModelUrl?: string) => Promise<ProjectData>;
-  /** Creates a guest project (no auth required) and stores the share token. */
-  createNewGuestProject: (projectName: string, projectType?: 'builder' | 'upload', projectModelUrl?: string) => Promise<ProjectData>;
+  /** Creates a guest project (no auth required) with optional pre-populated data. */
+  createNewGuestProject: (
+    projectName: string,
+    projectType?: 'builder' | 'upload',
+    projectModelUrl?: string,
+    initialData?: {
+      steps?: InstructionStep[];
+      connections?: Edge<ConnectionData>[];
+      guide?: GuideStep[];
+      nodePositions?: Record<string, { x: number; y: number }>;
+    },
+  ) => Promise<ProjectData>;
   /** Clears guest mode state (e.g., on logout or navigation to login). */
   clearGuestMode: () => void;
 }
@@ -335,7 +345,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
     return created.project;
   },
 
-  createNewGuestProject: async (projectName: string, projectType?: 'builder' | 'upload', projectModelUrl?: string) => {
+  createNewGuestProject: async (projectName, projectType, projectModelUrl, initialData) => {
     const projectId = `guest-${crypto.randomUUID()}`;
     const newSavedProject: SavedProject = {
       project: {
@@ -343,11 +353,11 @@ export const useAppStore = create<AppStore>((set, get) => ({
         name: projectName,
         projectType: projectType ?? 'builder',
         projectModelUrl: projectModelUrl,
-        steps: [],
-        connections: [],
-        guide: [],
+        steps: initialData?.steps ?? [],
+        connections: initialData?.connections ?? [],
+        guide: initialData?.guide ?? [],
       },
-      nodePositions: {},
+      nodePositions: initialData?.nodePositions ?? {},
       lastModified: Date.now(),
     };
     localStorage.setItem(GUEST_PROJECT_KEY, JSON.stringify(newSavedProject));

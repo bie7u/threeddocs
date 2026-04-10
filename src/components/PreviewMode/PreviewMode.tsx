@@ -35,14 +35,20 @@ export const PreviewMode = ({ onGoToEditorPanel, isPublic, shareToken }: { onGoT
     );
   }
 
-  const guideSteps =
+  const rawGuideSteps =
     project.guide && project.guide.length > 0
       ? project.guide
           .map((gs) => project.steps.find((s) => s.id === gs.stepId))
           .filter((s): s is NonNullable<typeof s> => s !== undefined)
       : project.steps;
 
-  const safeIndex = Math.min(currentPreviewStepIndex, Math.max(0, guideSteps.length - 1));
+  // Fallback to all steps when every guide entry is orphaned (IDs don't match
+  // any step), which would otherwise show "no steps" while the editor has steps.
+  const guideSteps = rawGuideSteps.length > 0 ? rawGuideSteps : project.steps;
+
+  const safeIndex = guideSteps.length === 0
+    ? 0
+    : Math.min(currentPreviewStepIndex, guideSteps.length - 1);
   const currentStep = guideSteps[safeIndex];
 
   if (!currentStep) {
