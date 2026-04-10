@@ -3,27 +3,30 @@ import { useNavigate } from 'react-router-dom';
 import { MainLayout } from '../components/Layout/MainLayout';
 import { useAppStore } from '../store';
 import { useLanguage } from '../i18n/LanguageContext';
+import { sampleProject, sampleNodePositions } from '../utils/sampleData';
 
 const GuestDashboard = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
-  const { createNewGuestProject, clearGuestMode } = useAppStore();
+  const { createNewGuestProject, clearGuestMode, setProject } = useAppStore();
 
   const [showEditor, setShowEditor] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
 
-  // On mount, clear any previous guest/auth state and auto-create a builder project
+  // On mount, clear any previous guest/auth state and load the demo scenario
   useEffect(() => {
     clearGuestMode();
     createNewGuestProject(t('newProject.defaultNameBuilder'), 'builder')
       .then(() => {
+        // Load the demo scenario so guests see the full feature walkthrough
+        setProject(sampleProject, sampleNodePositions);
         setShowEditor(true);
       })
       .finally(() => {
         setIsInitializing(false);
       });
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [clearGuestMode, createNewGuestProject]);
+  }, [clearGuestMode, createNewGuestProject, setProject]);
 
   const handleBackFromEditor = () => {
     clearGuestMode();
