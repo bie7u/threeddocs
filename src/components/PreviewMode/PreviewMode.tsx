@@ -35,16 +35,37 @@ export const PreviewMode = ({ onGoToEditorPanel, isPublic, shareToken }: { onGoT
     );
   }
 
-  const guideSteps =
+  const rawGuideSteps =
     project.guide && project.guide.length > 0
       ? project.guide
           .map((gs) => project.steps.find((s) => s.id === gs.stepId))
           .filter((s): s is NonNullable<typeof s> => s !== undefined)
       : project.steps;
 
-  const currentStep = guideSteps[currentPreviewStepIndex];
-  const canGoPrevious = currentPreviewStepIndex > 0;
-  const canGoNext = currentPreviewStepIndex < guideSteps.length - 1;
+  // Fallback to all steps when every guide entry is orphaned (IDs don't match
+  // any step), which would otherwise show "no steps" while the editor has steps.
+  const guideSteps = rawGuideSteps.length > 0 ? rawGuideSteps : project.steps;
+
+  const safeIndex = guideSteps.length === 0
+    ? 0
+    : Math.min(currentPreviewStepIndex, guideSteps.length - 1);
+  const currentStep = guideSteps[safeIndex];
+
+  if (!currentStep) {
+    return (
+      <div className="w-full h-full flex items-center justify-center bg-gray-100">
+        <div className="text-center">
+          <p className="text-gray-500 mb-4">{t('previewMode.noSteps')}</p>
+          <button onClick={() => setPreviewMode(false)} className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+            {t('previewMode.exitPreview')}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const canGoPrevious = safeIndex > 0;
+  const canGoNext = safeIndex < guideSteps.length - 1;
 
   const handleShareLink = async () => {
     if (!project) return;
@@ -185,7 +206,7 @@ export const PreviewMode = ({ onGoToEditorPanel, isPublic, shareToken }: { onGoT
       <div className="absolute top-24 left-6 bg-black/40 backdrop-blur-md text-white px-6 py-4 rounded-xl shadow-2xl border border-white/10 w-1/3 min-w-72 z-10 flex flex-col max-h-[calc(100vh-14rem)]">
         <div className="flex items-start gap-3 flex-shrink-0">
           <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center flex-shrink-0 shadow-lg">
-            <span className="text-lg font-bold">{currentPreviewStepIndex + 1}</span>
+            <span className="text-lg font-bold">{safeIndex + 1}</span>
           </div>
           <div className="flex-1 min-w-0">
             <h3 className="text-lg font-bold mb-1">{currentStep.title}</h3>
@@ -209,7 +230,7 @@ export const PreviewMode = ({ onGoToEditorPanel, isPublic, shareToken }: { onGoT
         <div className="bg-black/40 backdrop-blur-md text-white px-8 py-5 rounded-2xl shadow-2xl border border-white/10">
           <div className="flex items-center gap-6">
             <button
-              onClick={() => canGoPrevious && setCurrentPreviewStepIndex(currentPreviewStepIndex - 1)}
+              onClick={() => canGoPrevious && setCurrentPreviewStepIndex(safeIndex - 1)}
               disabled={!canGoPrevious}
               className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium transition-all duration-200 ${canGoPrevious ? 'bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 shadow-lg shadow-blue-500/30' : 'bg-white/10 cursor-not-allowed opacity-50'}`}
             >
@@ -221,13 +242,13 @@ export const PreviewMode = ({ onGoToEditorPanel, isPublic, shareToken }: { onGoT
 
             <div className="text-center min-w-[140px] px-4">
               <div className="text-xs text-slate-400 uppercase tracking-wider mb-1">{t('previewMode.step')}</div>
-              <div className="text-2xl font-bold text-blue-300" aria-label={`Step ${currentPreviewStepIndex + 1} of ${guideSteps.length}`}>
-                {currentPreviewStepIndex + 1} / {guideSteps.length}
+              <div className="text-2xl font-bold text-blue-300" aria-label={`Step ${safeIndex + 1} of ${guideSteps.length}`}>
+                {safeIndex + 1} / {guideSteps.length}
               </div>
             </div>
 
             <button
-              onClick={() => canGoNext && setCurrentPreviewStepIndex(currentPreviewStepIndex + 1)}
+              onClick={() => canGoNext && setCurrentPreviewStepIndex(safeIndex + 1)}
               disabled={!canGoNext}
               className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium transition-all duration-200 ${canGoNext ? 'bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 shadow-lg shadow-blue-500/30' : 'bg-white/10 cursor-not-allowed opacity-50'}`}
             >
@@ -243,7 +264,7 @@ export const PreviewMode = ({ onGoToEditorPanel, isPublic, shareToken }: { onGoT
               <button
                 key={step.id}
                 onClick={() => setCurrentPreviewStepIndex(index)}
-                className={`rounded-full transition-all duration-200 ${index === currentPreviewStepIndex ? 'w-8 h-3 bg-gradient-to-r from-blue-400 to-indigo-500 shadow-lg shadow-blue-400/50' : 'w-3 h-3 bg-white/30 hover:bg-white/50 hover:scale-110'}`}
+                className={`rounded-full transition-all duration-200 ${index === safeIndex ? 'w-8 h-3 bg-gradient-to-r from-blue-400 to-indigo-500 shadow-lg shadow-blue-400/50' : 'w-3 h-3 bg-white/30 hover:bg-white/50 hover:scale-110'}`}
                 title={step.title}
               />
             ))}
