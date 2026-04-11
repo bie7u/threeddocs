@@ -20,8 +20,9 @@ RUN apk add --no-cache gettext
 COPY --from=build /app/dist /usr/share/nginx/html
 
 # nginx config templates.  The custom entrypoint processes these at run-time.
-COPY nginx/http.conf.template /etc/nginx/http.conf.template
-COPY nginx/ssl.conf.template  /etc/nginx/ssl.conf.template
+COPY nginx/http.conf.template     /etc/nginx/http.conf.template
+COPY nginx/redirect.conf.template /etc/nginx/redirect.conf.template
+COPY nginx/ssl.conf.template      /etc/nginx/ssl.conf.template
 
 # Remove the default site so our generated config is the only one loaded.
 RUN rm /etc/nginx/conf.d/default.conf

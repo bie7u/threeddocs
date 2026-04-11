@@ -55,17 +55,15 @@ npm run dev
 
 The repository ships a multi-stage `Dockerfile` that builds the React app and serves it with **nginx**. API requests to `/api/*` are reverse-proxied to a configurable backend URL.
 
-### Quick start
+### Quick start (HTTP)
 
 ```bash
 # 1. Create your local environment file
 cp .env.example .env
 
-# 2. Edit .env and set BACKEND_URL to the address of your API backend
-#    e.g. BACKEND_URL=http://backend:8000  (if running in the same Compose project)
-#         BACKEND_URL=https://api.example.com  (external backend)
-#    Optionally change FRONTEND_PORT (default 80):
-#         FRONTEND_PORT=5555
+# 2. Edit .env — set BACKEND_URL to the address of your API backend:
+#      BACKEND_URL=http://backend:8000   (same Compose project)
+#      BACKEND_URL=https://api.example.com  (external backend)
 
 # 3. Build and start the frontend container
 docker compose up --build -d
@@ -73,21 +71,57 @@ docker compose up --build -d
 
 The frontend will be available at **http://localhost** (or `http://localhost:FRONTEND_PORT` if you changed the port).
 
+### HTTPS / SSL
+
+1. Place your certificate chain and private key in the `ssl/` directory next to `docker-compose.yml`:
+   ```
+   ssl/
+   ├── cert.pem   # full certificate chain
+   └── key.pem    # private key
+   ```
+2. Uncomment the `volumes` section in `docker-compose.yml`:
+   ```yaml
+   volumes:
+     - ./ssl/cert.pem:/etc/nginx/ssl/cert.pem:ro
+     - ./ssl/key.pem:/etc/nginx/ssl/key.pem:ro
+   ```
+3. Start the container:
+   ```bash
+   docker compose up --build -d
+   ```
+
+When the certificate files are present the container automatically:
+- Serves the app over **HTTPS on port 443** (HTTP/2 enabled, HSTS, security headers)
+- **Redirects all HTTP traffic** on port 80 to HTTPS
+
+Without the certificate files the container falls back to plain HTTP on port 80 only.
+
+> **Tip:** A free certificate can be obtained with [Certbot / Let's Encrypt](https://certbot.eff.org/).  
+> Point Certbot at your domain, then copy `fullchain.pem` → `ssl/cert.pem` and `privkey.pem` → `ssl/key.pem`.
+
 ### Environment variables
 
 | Variable | Default | Description |
 |---|---|---|
 | `BACKEND_URL` | `http://backend:8000` | Backend API base URL (no trailing slash). Nginx proxies all `/api/*` requests here. |
-| `FRONTEND_PORT` | `80` | Host port the frontend is exposed on. Set to e.g. `5555` to serve on `http://localhost:5555`. |
+| `FRONTEND_PORT` | `80` | Host port mapped to HTTP (port 80 inside the container). |
+| `FRONTEND_HTTPS_PORT` | `443` | Host port mapped to HTTPS (port 443 inside the container). |
 
 ### Build only (without Compose)
 
 ```bash
 docker build -t threeddocs-frontend .
-# Default port 80:
+
+# HTTP only:
 docker run -d -p 80:80 -e BACKEND_URL=http://backend:8000 threeddocs-frontend
-# Or on a custom port, e.g. 5555:
-docker run -d -p 5555:80 -e BACKEND_URL=http://backend:8000 threeddocs-frontend
+
+# HTTPS with your own certificate:
+docker run -d \
+  -p 80:80 -p 443:443 \
+  -e BACKEND_URL=http://backend:8000 \
+  -v /path/to/cert.pem:/etc/nginx/ssl/cert.pem:ro \
+  -v /path/to/key.pem:/etc/nginx/ssl/key.pem:ro \
+  threeddocs-frontend
 ```
 
 ### Connecting to a backend
