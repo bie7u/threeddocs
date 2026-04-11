@@ -346,7 +346,17 @@ export const useAppStore = create<AppStore>((set, get) => ({
   },
 
   createNewGuestProject: async (projectName, projectType, projectModelUrl, initialData) => {
-    const projectId = `guest-${crypto.randomUUID()}`;
+    const uuid =
+      typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+        ? crypto.randomUUID()
+        : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+            const r =
+              typeof crypto !== 'undefined' && crypto.getRandomValues
+                ? (crypto.getRandomValues(new Uint8Array(1))[0] & 15) >> (c === 'x' ? 0 : 1)
+                : (Math.random() * 16) | 0;
+            return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16);
+          });
+    const projectId = `guest-${uuid}`;
     const newSavedProject: SavedProject = {
       project: {
         id: projectId,
