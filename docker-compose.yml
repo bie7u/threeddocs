@@ -3,6 +3,4 @@ services:
     build: .
     ports:
         - "5177:80"
-    environment:
-      BACKEND_URL: ${BACKEND_URL:-http://backend:8000}
     restart: unless-stopped
