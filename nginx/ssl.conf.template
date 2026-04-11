@@ -48,12 +48,6 @@ server {
 
         # The Secure attribute is preserved on HTTPS — the browser requires it
         # for Secure-flagged cookies to be stored and sent back on HTTPS.
-
-        add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
-        add_header X-Frame-Options           "SAMEORIGIN"                                   always;
-        add_header X-Content-Type-Options    "nosniff"                                      always;
-        add_header Referrer-Policy           "strict-origin-when-cross-origin"              always;
-        add_header X-XSS-Protection          "1; mode=block"                                always;
     }
 
     # ── SPA fallback ────────────────────────────────────────────────────────────
