@@ -10,6 +10,7 @@ import GuestDashboard from './pages/GuestDashboard';
 import SharedView from './pages/SharedView';
 import TermsOfService from './pages/TermsOfService';
 import PrivacyPolicy from './pages/PrivacyPage';
+import RecruiterLandingPage from './pages/RecruiterLandingPage';
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
       <Router>
         <Routes>
         <Route path="/" element={<LandingPage />} />
+        <Route path="/recruiter" element={<RecruiterLandingPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
