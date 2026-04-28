@@ -36,16 +36,11 @@ const FEATURE_DATA = [
 
 const USE_CASE_EMOJIS = ['🖥️', '🚀', '👥', '🚨', '🔐', '⚙️', '🏗️', '📊'];
 
-const BenefitCard = ({ value, label, desc, color, gradientFrom }) => (
-  <div className="relative bg-white/5 border border-white/10 rounded-2xl p-8 hover:bg-white/10 transition-colors overflow-hidden">
-    <div className={`absolute inset-0 bg-gradient-to-br ${gradientFrom}/10 to-transparent rounded-2xl pointer-events-none`} />
-    <div className="relative">
-      <div className="text-5xl font-black text-white mb-1">{value}</div>
-      <div className={`${color} font-semibold text-lg mb-2`}>{label}</div>
-      <div className="text-gray-400 text-sm leading-relaxed">{desc}</div>
-    </div>
-  </div>
-);
+const WHY_CARD_STYLES = [
+  { gradient: 'from-teal-500 to-emerald-600', textColor: 'text-teal-300' },
+  { gradient: 'from-blue-500 to-indigo-600', textColor: 'text-blue-300' },
+  { gradient: 'from-purple-500 to-violet-600', textColor: 'text-purple-300' },
+];
 
 const RecruiterLandingPage = () => {
   const navigate = useNavigate();
@@ -274,10 +269,10 @@ const RecruiterLandingPage = () => {
             </p>
           </div>
 
-          {/* Demo iframe */}
+          {/* Demo iframe — preview mode only, no editor panels */}
           <div className="rounded-3xl overflow-hidden shadow-2xl border border-gray-200 bg-gray-50" style={{ height: '700px' }}>
             <iframe
-              src="/guest"
+              src="/demo-preview"
               title="ThreeDocsy interactive demo"
               className="w-full h-full border-0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope"
@@ -286,7 +281,7 @@ const RecruiterLandingPage = () => {
         </div>
       </section>
 
-      {/* ── Benefits ─────────────────────────────────────────────────────── */}
+      {/* ── Why it works ─────────────────────────────────────────────────── */}
       <section className="py-24 bg-gradient-to-br from-slate-900 via-teal-950 to-emerald-950">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <span className="inline-block mb-3 px-4 py-1.5 bg-teal-400/15 text-teal-300 text-sm font-semibold rounded-full">
@@ -297,27 +292,15 @@ const RecruiterLandingPage = () => {
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-12">
-            <BenefitCard
-              value={t('recruiter.benefit1Value')}
-              label={t('recruiter.benefit1Label')}
-              desc={t('recruiter.benefit1Desc')}
-              color="text-teal-300"
-              gradientFrom="from-teal-600"
-            />
-            <BenefitCard
-              value={t('recruiter.benefit2Value')}
-              label={t('recruiter.benefit2Label')}
-              desc={t('recruiter.benefit2Desc')}
-              color="text-emerald-300"
-              gradientFrom="from-emerald-600"
-            />
-            <BenefitCard
-              value={t('recruiter.benefit3Value')}
-              label={t('recruiter.benefit3Label')}
-              desc={t('recruiter.benefit3Desc')}
-              color="text-green-300"
-              gradientFrom="from-green-600"
-            />
+            {WHY_CARD_STYLES.map((style, i) => (
+              <div key={i} className="relative bg-white/5 border border-white/10 rounded-2xl p-8 hover:bg-white/10 transition-colors overflow-hidden text-left">
+                <div className={`w-12 h-12 bg-gradient-to-br ${style.gradient} rounded-xl flex items-center justify-center text-2xl mb-5 shadow-lg`}>
+                  {['🧠', '📌', '🔗'][i]}
+                </div>
+                <h3 className={`${style.textColor} font-bold text-lg mb-3`}>{t(`recruiter.why${i + 1}Title`)}</h3>
+                <p className="text-gray-400 text-sm leading-relaxed">{t(`recruiter.why${i + 1}Desc`)}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>

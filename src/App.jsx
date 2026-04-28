@@ -11,6 +11,7 @@ import SharedView from './pages/SharedView';
 import TermsOfService from './pages/TermsOfService';
 import PrivacyPolicy from './pages/PrivacyPage';
 import RecruiterLandingPage from './pages/RecruiterLandingPage';
+import DemoPreview from './pages/DemoPreview';
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
         <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/recruiter" element={<RecruiterLandingPage />} />
+        <Route path="/demo-preview" element={<DemoPreview />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
