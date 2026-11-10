@@ -1,9 +1,19 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import { resolve } from 'node:path'
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  // embed.html - sama scena 3D do osadzenia w ramce (src/embed.tsx)
+  build: {
+    rollupOptions: {
+      input: {
+        main: resolve(__dirname, 'index.html'),
+        embed: resolve(__dirname, 'embed.html'),
+      },
+    },
+  },
   server: {
     proxy: {
       '/api': {
